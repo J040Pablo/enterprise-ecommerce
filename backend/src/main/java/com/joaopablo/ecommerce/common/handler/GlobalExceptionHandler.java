@@ -1,7 +1,9 @@
 package com.joaopablo.ecommerce.common.handler;
 
+import com.joaopablo.ecommerce.common.exception.ApiErrorResponse;
 import com.joaopablo.ecommerce.common.exception.ResourceAlreadyExistsException;
 import com.joaopablo.ecommerce.common.exception.ResourceNotFoundException;
+import com.joaopablo.ecommerce.common.exception.ValidationError;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,4 +1,4 @@
-package com.joaopablo.ecommerce.common.handler;
+package com.joaopablo.ecommerce.common.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
