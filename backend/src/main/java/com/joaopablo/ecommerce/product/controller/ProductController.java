@@ -1,6 +1,7 @@
 package com.joaopablo.ecommerce.product.controller;
 
 import com.joaopablo.ecommerce.product.dto.request.CreateProductRequest;
+import com.joaopablo.ecommerce.product.dto.request.ProductFilterRequest;
 import com.joaopablo.ecommerce.product.dto.request.UpdateProductRequest;
 import com.joaopablo.ecommerce.product.dto.response.ProductResponse;
 import com.joaopablo.ecommerce.product.service.ProductService;
@@ -32,9 +33,14 @@ public class ProductController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<ProductResponse>> findAll(Pageable pageable) {
+    public ResponseEntity<Page<ProductResponse>> findAll(
+            ProductFilterRequest filter,
+            Pageable pageable) {
 
-        return ResponseEntity.ok(service.findAll(pageable));
+        return ResponseEntity.ok(
+                service.findAll(filter, pageable)
+        );
+
     }
 
     @GetMapping("/{id}")

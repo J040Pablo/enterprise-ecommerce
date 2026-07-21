@@ -7,7 +7,11 @@ import com.joaopablo.ecommerce.product.entity.Product;
 import com.joaopablo.ecommerce.product.exception.ProductNotFoundException;
 import com.joaopablo.ecommerce.product.mapper.ProductMapper;
 import com.joaopablo.ecommerce.product.repository.ProductRepository;
+import com.joaopablo.ecommerce.product.specification.ProductSpecification;
+import com.joaopablo.ecommerce.product.dto.request.ProductFilterRequest;
+
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import org.springframework.data.domain.Page;
@@ -31,11 +35,36 @@ public class ProductService {
         return mapper.toResponse(savedProduct);
     }
 
-    public Page<ProductResponse> findAll(Pageable pageable) {
+    public Page<ProductResponse> findAll(ProductFilterRequest filter, Pageable pageable) {
 
-        return repository.findAll(pageable)
+        Specification<Product> specification = Specification.unrestricted();
+
+        if (filter.getName() != null && !filter.getName().isBlank()) {
+            specification = specification.and(
+                    ProductSpecification.hasName(filter.getName())
+            );
+        }
+
+        if (filter.getMinPrice() != null) {
+            specification = specification.and(
+                    ProductSpecification.minPrice(filter.getMinPrice())
+            );
+        }
+
+        if (filter.getMaxPrice() != null) {
+            specification = specification.and(
+                    ProductSpecification.maxPrice(filter.getMaxPrice())
+            );
+        }
+
+        if (filter.getActive() != null) {
+            specification = specification.and(
+                    ProductSpecification.isActive(filter.getActive())
+            );
+        }
+
+        return repository.findAll(specification, pageable)
                 .map(mapper::toResponse);
-
     }
 
     public ProductResponse findById(UUID id) {
