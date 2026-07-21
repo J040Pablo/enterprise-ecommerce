@@ -1,24 +1,28 @@
 package com.joaopablo.ecommerce.product.dto.response;
 
 import lombok.Builder;
-import lombok.Getter;
 
 import java.math.BigDecimal;
 import java.util.UUID;
 
 @Builder
-@Getter
-public class ProductResponse {
+public record ProductResponse(
 
-    private UUID id;
+        UUID id,
 
-    private String name;
+        String name,
 
-    private String description;
+        String description,
 
-    private BigDecimal price;
+        BigDecimal price,
 
-    private Integer stock;
+        Integer stock,
 
-    private Boolean active;
+        Boolean active,
+
+        UUID categoryId,
+
+        String categoryName
+
+) {
 }

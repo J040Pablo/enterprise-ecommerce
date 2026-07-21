@@ -10,15 +10,18 @@ import org.springframework.stereotype.Component;
 public class ProductMapper {
 
     public Product toEntity(CreateProductRequest request) {
+
         return Product.builder()
                 .name(request.getName())
                 .description(request.getDescription())
                 .price(request.getPrice())
                 .stock(request.getStock())
                 .build();
+
     }
 
     public ProductResponse toResponse(Product product) {
+
         return ProductResponse.builder()
                 .id(product.getId())
                 .name(product.getName())
@@ -26,10 +29,22 @@ public class ProductMapper {
                 .price(product.getPrice())
                 .stock(product.getStock())
                 .active(product.getActive())
+                .categoryId(
+                        product.getCategory() != null
+                                ? product.getCategory().getId()
+                                : null
+                )
+                .categoryName(
+                        product.getCategory() != null
+                                ? product.getCategory().getName()
+                                : null
+                )
                 .build();
+
     }
 
     public void updateEntity(UpdateProductRequest request, Product product) {
+
         if (request.getName() != null) {
             product.setName(request.getName());
         }
@@ -49,5 +64,7 @@ public class ProductMapper {
         if (request.getActive() != null) {
             product.setActive(request.getActive());
         }
+
     }
+
 }

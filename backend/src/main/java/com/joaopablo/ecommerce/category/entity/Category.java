@@ -1,8 +1,11 @@
 package com.joaopablo.ecommerce.category.entity;
 
+import com.joaopablo.ecommerce.product.entity.Product;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -27,4 +30,9 @@ public class Category {
     @Builder.Default
     @Column(nullable = false)
     private Boolean active = true;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "category")
+    private List<Product> products = new ArrayList<>();
+
 }

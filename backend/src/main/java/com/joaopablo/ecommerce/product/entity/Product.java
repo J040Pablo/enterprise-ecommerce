@@ -1,5 +1,6 @@
 package com.joaopablo.ecommerce.product.entity;
 
+import com.joaopablo.ecommerce.category.entity.Category;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -31,7 +32,12 @@ public class Product {
     @Column(nullable = false)
     private Integer stock;
 
-    @Column(nullable = false)
     @Builder.Default
+    @Column(nullable = false)
     private Boolean active = true;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id", nullable = false)
+    private Category category;
+
 }
