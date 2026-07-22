@@ -9,6 +9,8 @@ import com.joaopablo.ecommerce.category.exception.CategoryNotFoundException;
 import com.joaopablo.ecommerce.category.mapper.CategoryMapper;
 import com.joaopablo.ecommerce.category.repository.CategoryRepository;
 import com.joaopablo.ecommerce.category.specification.CategorySpecification;
+import com.joaopablo.ecommerce.common.exception.ResourceAlreadyExistsException;
+import com.joaopablo.ecommerce.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,10 +23,17 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class CategoryService {
 
+    private final ProductRepository productRepository;
     private final CategoryRepository repository;
     private final CategoryMapper mapper;
 
     public CategoryResponse create(CreateCategoryRequest request) {
+
+        if (repository.existsByNameIgnoreCase(request.getName())) {
+            throw new ResourceAlreadyExistsException(
+                    "Category already exists."
+            );
+        }
 
         Category category = mapper.toEntity(request);
 
@@ -61,6 +70,14 @@ public class CategoryService {
 
         Category category = findEntityById(id);
 
+        if (!category.getName().equalsIgnoreCase(request.getName())
+                && repository.existsByNameIgnoreCase(request.getName())) {
+
+            throw new ResourceAlreadyExistsException(
+                    "Category already exists."
+            );
+        }
+
         mapper.updateEntity(request, category);
 
         Category savedCategory = repository.save(category);
@@ -71,6 +88,12 @@ public class CategoryService {
     public void delete(UUID id) {
 
         Category category = findEntityById(id);
+
+        if (productRepository.existsByCategoryId(id)) {
+            throw new ResourceAlreadyExistsException(
+                    "Cannot delete category because it contains products."
+            );
+        }
 
         repository.delete(category);
     }

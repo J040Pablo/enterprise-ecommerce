@@ -11,4 +11,7 @@ import java.util.UUID;
 public interface CategoryRepository extends
         JpaRepository<Category, UUID>,
         JpaSpecificationExecutor<Category> {
+
+    boolean existsByNameIgnoreCase(String name);
+
 }

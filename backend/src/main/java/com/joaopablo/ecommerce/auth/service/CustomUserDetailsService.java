@@ -1,4 +1,4 @@
-package com.joaopablo.ecommerce.auth.security;
+package com.joaopablo.ecommerce.auth.service;
 
 import com.joaopablo.ecommerce.auth.entity.User;
 import com.joaopablo.ecommerce.auth.repository.UserRepository;

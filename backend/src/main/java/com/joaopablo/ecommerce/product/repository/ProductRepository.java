@@ -24,4 +24,7 @@ public interface ProductRepository extends
             Boolean active,
             Pageable pageable
     );
+
+    boolean existsByCategoryId(UUID categoryId);
+
 }

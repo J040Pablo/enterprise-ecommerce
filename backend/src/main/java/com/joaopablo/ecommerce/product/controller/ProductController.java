@@ -7,14 +7,13 @@ import com.joaopablo.ecommerce.product.dto.response.ProductResponse;
 import com.joaopablo.ecommerce.product.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -25,6 +24,7 @@ public class ProductController {
     private final ProductService service;
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ProductResponse> create(
             @Valid @RequestBody CreateProductRequest request) {
 
@@ -40,23 +40,30 @@ public class ProductController {
         return ResponseEntity.ok(
                 service.findAll(filter, pageable)
         );
-
     }
 
     @GetMapping("/{id}")
-    public ProductResponse findById(@PathVariable UUID id) {
-        return service.findById(id);
+    public ResponseEntity<ProductResponse> findById(
+            @PathVariable UUID id) {
+
+        return ResponseEntity.ok(
+                service.findById(id)
+        );
     }
 
     @PutMapping("/{id}")
-    public ProductResponse update(
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ProductResponse> update(
             @PathVariable UUID id,
             @Valid @RequestBody UpdateProductRequest request) {
 
-        return service.update(id, request);
+        return ResponseEntity.ok(
+                service.update(id, request)
+        );
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable UUID id) {
         service.delete(id);
