@@ -26,9 +26,9 @@ public class CreateProductRequest {
     @DecimalMin(value = "0.0", inclusive = false)
     private BigDecimal price;
 
-    @NotNull(message = "Stock is required.")
+    @NotNull(message = "Initial quantity is required.")
     @PositiveOrZero
-    private Integer stock;
+    private Integer initialQuantity;
 
     @NotNull(message = "Category is required.")
     private UUID categoryId;

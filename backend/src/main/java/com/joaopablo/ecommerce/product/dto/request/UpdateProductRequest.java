@@ -22,9 +22,6 @@ public class UpdateProductRequest {
     @DecimalMin(value = "0.0", inclusive = false)
     private BigDecimal price;
 
-    @PositiveOrZero
-    private Integer stock;
-
     private Boolean active;
 
     private UUID categoryId;

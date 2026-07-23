@@ -3,6 +3,7 @@ package com.joaopablo.ecommerce.product.service;
 import com.joaopablo.ecommerce.category.entity.Category;
 import com.joaopablo.ecommerce.category.exception.CategoryNotFoundException;
 import com.joaopablo.ecommerce.category.repository.CategoryRepository;
+import com.joaopablo.ecommerce.inventory.service.InventoryService;
 import com.joaopablo.ecommerce.product.dto.request.CreateProductRequest;
 import com.joaopablo.ecommerce.product.dto.request.ProductFilterRequest;
 import com.joaopablo.ecommerce.product.dto.request.UpdateProductRequest;
@@ -27,6 +28,8 @@ public class ProductService {
     private final ProductRepository repository;
     private final ProductMapper mapper;
     private final CategoryRepository categoryRepository;
+    private final InventoryService inventoryService;
+
 
     public ProductResponse create(CreateProductRequest request) {
 
@@ -39,43 +42,68 @@ public class ProductService {
 
         Product savedProduct = repository.save(product);
 
+
+        inventoryService.createInventory(
+                savedProduct,
+                request.getInitialQuantity()
+        );
+
+
         return mapper.toResponse(savedProduct);
 
     }
 
+
     public Page<ProductResponse> findAll(ProductFilterRequest filter, Pageable pageable) {
 
-        Specification<Product> specification = Specification.where(null);
+        Specification<Product> specification =
+                (root, query, criteriaBuilder) -> null;
+
 
         if (filter.getName() != null && !filter.getName().isBlank()) {
+
             specification = specification.and(
                     ProductSpecification.hasName(filter.getName())
             );
+
         }
 
+
         if (filter.getMinPrice() != null) {
+
             specification = specification.and(
                     ProductSpecification.minPrice(filter.getMinPrice())
             );
+
         }
 
+
         if (filter.getMaxPrice() != null) {
+
             specification = specification.and(
                     ProductSpecification.maxPrice(filter.getMaxPrice())
             );
+
         }
 
+
         if (filter.getActive() != null) {
+
             specification = specification.and(
                     ProductSpecification.isActive(filter.getActive())
             );
+
         }
 
+
         if (filter.getCategoryId() != null) {
+
             specification = specification.and(
                     ProductSpecification.hasCategory(filter.getCategoryId())
             );
+
         }
+
 
         return repository.findAll(specification, pageable)
                 .map(mapper::toResponse);
@@ -83,14 +111,24 @@ public class ProductService {
     }
 
     public ProductResponse findById(UUID id) {
-        return mapper.toResponse(findEntityById(id));
+
+        return mapper.toResponse(
+                findEntityById(id)
+        );
+
     }
+
 
     public ProductResponse update(UUID id, UpdateProductRequest request) {
 
         Product product = findEntityById(id);
 
-        mapper.updateEntity(request, product);
+
+        mapper.updateEntity(
+                request,
+                product
+        );
+
 
         if (request.getCategoryId() != null) {
 
@@ -101,11 +139,14 @@ public class ProductService {
 
         }
 
+
         Product savedProduct = repository.save(product);
+
 
         return mapper.toResponse(savedProduct);
 
     }
+
 
     public void delete(UUID id) {
 
@@ -114,6 +155,7 @@ public class ProductService {
         repository.delete(product);
 
     }
+
 
     private Product findEntityById(UUID id) {
 

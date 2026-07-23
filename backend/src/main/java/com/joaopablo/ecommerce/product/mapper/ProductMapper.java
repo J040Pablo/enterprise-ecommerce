@@ -15,10 +15,10 @@ public class ProductMapper {
                 .name(request.getName())
                 .description(request.getDescription())
                 .price(request.getPrice())
-                .stock(request.getStock())
                 .build();
 
     }
+
 
     public ProductResponse toResponse(Product product) {
 
@@ -27,7 +27,6 @@ public class ProductMapper {
                 .name(product.getName())
                 .description(product.getDescription())
                 .price(product.getPrice())
-                .stock(product.getStock())
                 .active(product.getActive())
                 .categoryId(
                         product.getCategory() != null
@@ -43,6 +42,7 @@ public class ProductMapper {
 
     }
 
+
     public void updateEntity(UpdateProductRequest request, Product product) {
 
         if (request.getName() != null) {
@@ -57,12 +57,12 @@ public class ProductMapper {
             product.setPrice(request.getPrice());
         }
 
-        if (request.getStock() != null) {
-            product.setStock(request.getStock());
-        }
-
         if (request.getActive() != null) {
             product.setActive(request.getActive());
+        }
+
+        if (request.getCategoryId() != null) {
+            // categoria será tratada no service
         }
 
     }

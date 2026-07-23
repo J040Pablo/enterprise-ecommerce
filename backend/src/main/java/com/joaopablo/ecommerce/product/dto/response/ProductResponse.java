@@ -16,8 +16,6 @@ public record ProductResponse(
 
         BigDecimal price,
 
-        Integer stock,
-
         Boolean active,
 
         UUID categoryId,
