@@ -5,17 +5,20 @@ import com.joaopablo.ecommerce.order.dto.request.CreateOrderRequest;
 import com.joaopablo.ecommerce.order.dto.request.OrderItemRequest;
 import com.joaopablo.ecommerce.order.dto.request.UpdateOrderStatusRequest;
 import com.joaopablo.ecommerce.order.dto.response.OrderResponse;
+import com.joaopablo.ecommerce.order.dto.response.PaymentSummaryResponse;
 import com.joaopablo.ecommerce.order.entity.Order;
 import com.joaopablo.ecommerce.order.entity.OrderItem;
 import com.joaopablo.ecommerce.order.entity.OrderStatus;
 import com.joaopablo.ecommerce.order.exception.OrderNotFoundException;
 import com.joaopablo.ecommerce.order.mapper.OrderMapper;
 import com.joaopablo.ecommerce.order.repository.OrderRepository;
+import com.joaopablo.ecommerce.payment.service.PaymentService;
 import com.joaopablo.ecommerce.product.dto.response.ProductResponse;
 import com.joaopablo.ecommerce.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.joaopablo.ecommerce.payment.dto.response.PaymentResponse;
 
 import java.util.List;
 import java.util.UUID;
@@ -29,33 +32,46 @@ public class OrderService {
     private final OrderMapper mapper;
     private final ProductService productService;
     private final InventoryService inventoryService;
+    private final PaymentService paymentService;
 
     @Transactional
     public OrderResponse createOrder(CreateOrderRequest request) {
-        Order order = new Order();
-        order.setUserId(request.getUserId());
-        order.setStatus(OrderStatus.PENDING);
 
-        for (OrderItemRequest itemRequest : request.getItems()) {
-            ProductResponse product = productService.findById(itemRequest.getProductId());
+    Order order = new Order();
+    order.setUserId(request.getUserId());
+    order.setStatus(OrderStatus.PENDING);
 
-            // Decrease stock
-            inventoryService.decreaseStock(itemRequest.getProductId(), itemRequest.getQuantity());
+    for (OrderItemRequest itemRequest : request.getItems()) {
 
-            OrderItem orderItem = new OrderItem();
-            orderItem.setProductId(product.id());
-            orderItem.setProductName(product.name());
-            orderItem.setUnitPrice(product.price());
-            orderItem.setQuantity(itemRequest.getQuantity());
-            orderItem.calculateSubtotal();
+        ProductResponse product = productService.findById(itemRequest.getProductId());
 
-            order.addItem(orderItem);
-        }
+        inventoryService.decreaseStock(
+                itemRequest.getProductId(),
+                itemRequest.getQuantity());
 
-        order.calculateTotal();
+        OrderItem orderItem = new OrderItem();
+        orderItem.setProductId(product.id());
+        orderItem.setProductName(product.name());
+        orderItem.setUnitPrice(product.price());
+        orderItem.setQuantity(itemRequest.getQuantity());
+        orderItem.calculateSubtotal();
 
-        Order savedOrder = repository.save(order);
-        return mapper.toResponse(savedOrder);
+        order.addItem(orderItem);
+    }
+
+    order.calculateTotal();
+
+    Order savedOrder = repository.save(order);
+
+    PaymentResponse payment = paymentService.createPayment(savedOrder);
+
+    PaymentSummaryResponse paymentSummary =
+            PaymentSummaryResponse.builder()
+                    .id(payment.getId())
+                    .status(payment.getStatus())
+                    .build();
+    
+    return mapper.toResponse(savedOrder, paymentSummary);
     }
 
     @Transactional(readOnly = true)

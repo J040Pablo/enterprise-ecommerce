@@ -1,6 +1,8 @@
 package com.joaopablo.ecommerce.order.dto.response;
 
+
 import com.joaopablo.ecommerce.order.entity.OrderStatus;
+import com.joaopablo.ecommerce.order.dto.response.PaymentSummaryResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,5 +23,7 @@ public class OrderResponse {
     private OrderStatus status;
     private List<OrderItemResponse> items;
     private BigDecimal totalAmount;
+
+    private PaymentSummaryResponse payment;
 
 }

@@ -11,6 +11,9 @@ import com.joaopablo.ecommerce.order.entity.OrderStatus;
 import com.joaopablo.ecommerce.order.exception.InvalidOrderStatusException;
 import com.joaopablo.ecommerce.order.mapper.OrderMapper;
 import com.joaopablo.ecommerce.order.repository.OrderRepository;
+import com.joaopablo.ecommerce.payment.dto.response.PaymentResponse;
+import com.joaopablo.ecommerce.payment.entity.PaymentStatus;
+import com.joaopablo.ecommerce.payment.service.PaymentService;
 import com.joaopablo.ecommerce.product.dto.response.ProductResponse;
 import com.joaopablo.ecommerce.product.service.ProductService;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,6 +46,9 @@ class OrderServiceTest {
 
     @Mock
     private InventoryService inventoryService;
+
+    @Mock
+    private PaymentService paymentService;
 
     @InjectMocks
     private OrderService service;
@@ -82,6 +88,14 @@ class OrderServiceTest {
 
         when(repository.save(any(Order.class))).thenReturn(savedOrder);
         when(mapper.toResponse(savedOrder)).thenReturn(mappedResponse);
+        when(paymentService.createPayment(savedOrder)).thenReturn(
+                PaymentResponse.builder()
+                        .id(UUID.randomUUID())
+                        .orderId(savedOrder.getId())
+                        .amount(BigDecimal.valueOf(200.0))
+                        .status(PaymentStatus.PENDING)
+                        .build()
+        );
 
         // Act
         OrderResponse response = service.createOrder(request);
@@ -92,6 +106,7 @@ class OrderServiceTest {
         
         verify(inventoryService).decreaseStock(productId, 2);
         verify(repository).save(any(Order.class));
+        verify(paymentService).createPayment(savedOrder);
     }
 
     @Test
