@@ -3,6 +3,9 @@ package com.joaopablo.ecommerce.common.handler;
 import com.joaopablo.ecommerce.common.exception.ApiErrorResponse;
 import com.joaopablo.ecommerce.common.exception.ResourceAlreadyExistsException;
 import com.joaopablo.ecommerce.common.exception.ValidationError;
+import com.joaopablo.ecommerce.common.exception.BusinessException;
+import com.joaopablo.ecommerce.common.exception.ConflictException;
+import com.joaopablo.ecommerce.common.exception.ResourceNotFoundException;
 
 import com.joaopablo.ecommerce.inventory.exception.InsufficientStockException;
 import com.joaopablo.ecommerce.product.exception.ProductNotFoundException;
@@ -187,6 +190,54 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InsufficientStockException.class)
     public ResponseEntity<ApiErrorResponse> handleInsufficientStock(
             InsufficientStockException ex,
+            HttpServletRequest request) {
+
+        ApiErrorResponse body = ApiErrorResponse.builder()
+                .timestamp(Instant.now())
+                .status(HttpStatus.CONFLICT.value())
+                .error(HttpStatus.CONFLICT.getReasonPhrase())
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+    }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleResourceNotFound(
+            ResourceNotFoundException ex,
+            HttpServletRequest request) {
+
+        ApiErrorResponse body = ApiErrorResponse.builder()
+                .timestamp(Instant.now())
+                .status(HttpStatus.NOT_FOUND.value())
+                .error(HttpStatus.NOT_FOUND.getReasonPhrase())
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+    }
+
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<ApiErrorResponse> handleBusiness(
+            BusinessException ex,
+            HttpServletRequest request) {
+
+        ApiErrorResponse body = ApiErrorResponse.builder()
+                .timestamp(Instant.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.badRequest().body(body);
+    }
+
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<ApiErrorResponse> handleConflictException(
+            ConflictException ex,
             HttpServletRequest request) {
 
         ApiErrorResponse body = ApiErrorResponse.builder()
