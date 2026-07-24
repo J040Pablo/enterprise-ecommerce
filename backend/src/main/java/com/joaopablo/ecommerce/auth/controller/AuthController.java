@@ -56,7 +56,7 @@ public class AuthController {
                         schema = @Schema(implementation = LoginResponseDTO.class),
                         examples = @ExampleObject(
                             name = "Login response",
-                            value = "{\n  \"token\": \"jwt_token\",\n  \"type\": \"Bearer\",\n  \"expiresIn\": 86400000,\n  \"user\": {\n    \"id\": 1,\n    \"firstName\": \"Joao\",\n    \"lastName\": \"Pablo\",\n    \"email\": \"joao.pablo@email.com\",\n    \"roles\": [\"CUSTOMER\"]\n  }\n}"
+                            value = "{\n  \"token\": \"jwt_token\",\n  \"type\": \"Bearer\",\n  \"expiresIn\": 86400000,\n  \"user\": {\n    \"id\": \"a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11\",\n    \"firstName\": \"Joao\",\n    \"lastName\": \"Pablo\",\n    \"email\": \"joao.pablo@email.com\",\n    \"roles\": [\"CUSTOMER\"]\n  }\n}"
                         )
                     )
                 ),

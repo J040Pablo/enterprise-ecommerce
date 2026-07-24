@@ -7,9 +7,6 @@ import com.joaopablo.ecommerce.cart.entity.CartItem;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-import java.math.BigDecimal;
-import java.util.Set;
-
 @Mapper(componentModel = "spring")
 public interface CartMapper {
 

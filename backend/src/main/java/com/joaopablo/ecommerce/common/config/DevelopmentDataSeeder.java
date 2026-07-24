@@ -30,17 +30,30 @@ public class DevelopmentDataSeeder {
     @Bean
     public CommandLineRunner seedDatabase() {
         return args -> {
-            final String adminEmail = "admin@ecommerce.com";
 
-            if (userRepository.existsByEmail(adminEmail)) {
-                log.info("Administrator already exists. Skipping seed.");
-                return;
-            }
+            Role adminRole = roleRepository.findByName("ADMIN")
+                    .orElseGet(() -> {
+                        Role role = Role.builder()
+                                .name("ADMIN")
+                                .description("Administrator role")
+                                .build();
 
-            Optional<Role> adminRoleOpt = roleRepository.findByName("ADMIN");
-            
-            if (adminRoleOpt.isPresent()) {
-                Role adminRole = adminRoleOpt.get();
+                        return roleRepository.save(role);
+                    });
+
+            Role customerRole = roleRepository.findByName("CUSTOMER")
+                    .orElseGet(() -> {
+                        Role role = Role.builder()
+                                .name("CUSTOMER")
+                                .description("Customer role")
+                                .build();
+
+                        return roleRepository.save(role);
+                    });
+
+            String adminEmail = "admin@ecommerce.com";
+
+            if (!userRepository.existsByEmail(adminEmail)) {
 
                 User adminUser = User.builder()
                         .email(adminEmail)
@@ -60,9 +73,7 @@ public class DevelopmentDataSeeder {
 
                 userRepository.save(adminUser);
 
-                log.info("Created default administrator user: {}", adminEmail);
-            } else {
-                log.warn("ADMIN role not found. Could not seed default administrator.");
+                log.info("Created admin user");
             }
         };
     }

@@ -9,8 +9,8 @@ import java.util.UUID;
 @Builder
 @Schema(description = "Response schema representing an individual shopping cart item")
 public record CartItemResponse(
-        @Schema(description = "Unique database ID of the cart item", example = "1")
-        Long id,
+        @Schema(description = "Unique database ID of the cart item", example = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11")
+        UUID id,
 
         @Schema(description = "UUID of the product in the cart", example = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11")
         UUID productId,
