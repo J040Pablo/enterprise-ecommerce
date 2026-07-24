@@ -38,7 +38,7 @@ public class OrderService {
 
         for (OrderItemRequest itemRequest : request.getItems()) {
             ProductResponse product = productService.findById(itemRequest.getProductId());
-            
+
             // Decrease stock
             inventoryService.decreaseStock(itemRequest.getProductId(), itemRequest.getQuantity());
 
@@ -53,7 +53,7 @@ public class OrderService {
         }
 
         order.calculateTotal();
-        
+
         Order savedOrder = repository.save(order);
         return mapper.toResponse(savedOrder);
     }
@@ -81,20 +81,28 @@ public class OrderService {
     public OrderResponse updateStatus(UUID id, UpdateOrderStatusRequest request) {
         Order order = findEntityById(id);
         order.changeStatus(request.getStatus());
-        
+
         return mapper.toResponse(repository.save(order));
     }
 
     @Transactional
-    public void cancelOrder(UUID id) {
+    public OrderResponse cancelOrder(UUID id) {
+
         Order order = findEntityById(id);
+
         order.changeStatus(OrderStatus.CANCELLED);
-        
-        // Em um sistema real, nós devolveríamos o estoque e geraríamos o pagamento reverso
-        // Para este momento apenas mudamos o status
-        // order.getItems().forEach(item -> inventoryService.increaseStock(item.getProductId(), item.getQuantity()));
-        
-        repository.save(order);
+
+        order.getItems().forEach(item -> {
+
+            inventoryService.increaseStock(
+                    item.getProductId(),
+                    item.getQuantity());
+
+        });
+
+        Order savedOrder = repository.save(order);
+
+        return mapper.toResponse(savedOrder);
     }
 
     private Order findEntityById(UUID id) {
