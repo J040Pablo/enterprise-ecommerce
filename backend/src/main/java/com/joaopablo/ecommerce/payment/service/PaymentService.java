@@ -14,10 +14,12 @@ import com.joaopablo.ecommerce.payment.exception.PaymentAlreadyExistsException;
 import com.joaopablo.ecommerce.payment.exception.PaymentNotFoundException;
 import com.joaopablo.ecommerce.payment.mapper.PaymentMapper;
 import com.joaopablo.ecommerce.payment.repository.PaymentRepository;
+import com.joaopablo.ecommerce.shipping.service.ShippingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -28,6 +30,7 @@ public class PaymentService {
     private final PaymentMapper mapper;
     private final OrderRepository orderRepository;
     private final InventoryService inventoryService;
+    private final ShippingService shippingService;
 
     @Transactional
     public PaymentResponse createPayment(CreatePaymentRequest request) {
@@ -59,6 +62,11 @@ public class PaymentService {
         return mapper.toResponse(findPaymentById(id));
     }
 
+    @Transactional(readOnly = true)
+    public Optional<PaymentResponse> findByOrderId(UUID orderId) {
+        return paymentRepository.findByOrderId(orderId).map(mapper::toResponse);
+    }
+
     @Transactional
     public PaymentResponse approvePayment(UUID paymentId) {
         Payment payment = findPaymentById(paymentId);
@@ -70,7 +78,10 @@ public class PaymentService {
         order.changeStatus(OrderStatus.CONFIRMED);
         orderRepository.save(order);
 
-        return mapper.toResponse(paymentRepository.save(payment));
+        Payment saved = paymentRepository.save(payment);
+        shippingService.createShippingForApprovedOrder(order.getId());
+
+        return mapper.toResponse(saved);
     }
 
     @Transactional
@@ -99,6 +110,8 @@ public class PaymentService {
         order.changeStatus(OrderStatus.CANCELLED);
         restoreInventory(order);
         orderRepository.save(order);
+
+        shippingService.cancelByOrderId(payment.getOrderId());
 
         return mapper.toResponse(paymentRepository.save(payment));
     }

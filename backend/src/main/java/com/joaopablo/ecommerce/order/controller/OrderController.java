@@ -57,8 +57,7 @@ public class OrderController {
 
     @PatchMapping("/{id}/cancel")
     @Operation(summary = "Cancel an order", description = "Cancels an order if it's in a valid status to do so")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void cancelOrder(@PathVariable UUID id) {
-        service.cancelOrder(id);
+    public ResponseEntity<OrderResponse> cancelOrder(@PathVariable UUID id) {
+        return ResponseEntity.ok(service.cancelOrder(id));
     }
 }

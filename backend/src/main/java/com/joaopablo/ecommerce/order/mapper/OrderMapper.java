@@ -3,9 +3,10 @@ package com.joaopablo.ecommerce.order.mapper;
 
 import com.joaopablo.ecommerce.order.dto.response.OrderItemResponse;
 import com.joaopablo.ecommerce.order.dto.response.OrderResponse;
+import com.joaopablo.ecommerce.order.dto.response.PaymentSummaryResponse;
+import com.joaopablo.ecommerce.order.dto.response.ShippingSummaryResponse;
 import com.joaopablo.ecommerce.order.entity.Order;
 import com.joaopablo.ecommerce.order.entity.OrderItem;
-import com.joaopablo.ecommerce.order.dto.response.PaymentSummaryResponse;
 import org.springframework.stereotype.Component;
 
 import java.util.stream.Collectors;
@@ -14,10 +15,17 @@ import java.util.stream.Collectors;
 public class OrderMapper {
 
     public OrderResponse toResponse(Order order) {
-        return toResponse(order, null);
+        return toResponse(order, null, null);
     }
 
     public OrderResponse toResponse(Order order, PaymentSummaryResponse payment) {
+        return toResponse(order, payment, null);
+    }
+
+    public OrderResponse toResponse(
+            Order order,
+            PaymentSummaryResponse payment,
+            ShippingSummaryResponse shipping) {
 
         if (order == null) {
             return null;
@@ -29,6 +37,7 @@ public class OrderMapper {
                 .status(order.getStatus())
                 .totalAmount(order.getTotalAmount())
                 .payment(payment)
+                .shipping(shipping)
                 .items(order.getItems() != null
                         ? order.getItems().stream()
                         .map(this::toOrderItemResponse)

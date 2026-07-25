@@ -15,6 +15,9 @@ import com.joaopablo.ecommerce.payment.exception.PaymentAlreadyExistsException;
 import com.joaopablo.ecommerce.payment.exception.PaymentNotFoundException;
 import com.joaopablo.ecommerce.payment.mapper.PaymentMapper;
 import com.joaopablo.ecommerce.payment.repository.PaymentRepository;
+import com.joaopablo.ecommerce.shipping.dto.response.ShippingResponse;
+import com.joaopablo.ecommerce.shipping.entity.ShippingStatus;
+import com.joaopablo.ecommerce.shipping.service.ShippingService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,6 +48,9 @@ class PaymentServiceTest {
 
     @Mock
     private InventoryService inventoryService;
+
+    @Mock
+    private ShippingService shippingService;
 
     @InjectMocks
     private PaymentService service;
@@ -158,6 +164,9 @@ class PaymentServiceTest {
         when(paymentRepository.findById(paymentId)).thenReturn(Optional.of(payment));
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
         when(paymentRepository.save(payment)).thenReturn(payment);
+        when(shippingService.createShippingForApprovedOrder(orderId)).thenReturn(
+                ShippingResponse.builder().orderId(orderId).status(ShippingStatus.PROCESSING).build()
+        );
         when(mapper.toResponse(payment)).thenReturn(
                 PaymentResponse.builder().id(paymentId).status(PaymentStatus.APPROVED).build()
         );
@@ -168,6 +177,7 @@ class PaymentServiceTest {
         assertEquals(PaymentStatus.APPROVED, payment.getStatus());
         assertEquals(OrderStatus.CONFIRMED, order.getStatus());
         verify(orderRepository).save(order);
+        verify(shippingService).createShippingForApprovedOrder(orderId);
     }
 
     @Test
@@ -204,6 +214,7 @@ class PaymentServiceTest {
         assertEquals(PaymentStatus.REFUNDED, response.getStatus());
         assertEquals(OrderStatus.CANCELLED, order.getStatus());
         verify(inventoryService).increaseStock(productId, 2);
+        verify(shippingService).cancelByOrderId(orderId);
     }
 
     @Test

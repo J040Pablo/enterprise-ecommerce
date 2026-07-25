@@ -6,6 +6,7 @@ import com.joaopablo.ecommerce.order.dto.request.OrderItemRequest;
 import com.joaopablo.ecommerce.order.dto.request.UpdateOrderStatusRequest;
 import com.joaopablo.ecommerce.order.dto.response.OrderResponse;
 import com.joaopablo.ecommerce.order.dto.response.PaymentSummaryResponse;
+import com.joaopablo.ecommerce.order.dto.response.ShippingSummaryResponse;
 import com.joaopablo.ecommerce.order.entity.Order;
 import com.joaopablo.ecommerce.order.entity.OrderItem;
 import com.joaopablo.ecommerce.order.entity.OrderStatus;
@@ -15,10 +16,10 @@ import com.joaopablo.ecommerce.order.repository.OrderRepository;
 import com.joaopablo.ecommerce.payment.service.PaymentService;
 import com.joaopablo.ecommerce.product.dto.response.ProductResponse;
 import com.joaopablo.ecommerce.product.service.ProductService;
+import com.joaopablo.ecommerce.shipping.service.ShippingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.joaopablo.ecommerce.payment.dto.response.PaymentResponse;
 
 import java.util.List;
 import java.util.UUID;
@@ -33,63 +34,58 @@ public class OrderService {
     private final ProductService productService;
     private final InventoryService inventoryService;
     private final PaymentService paymentService;
+    private final ShippingService shippingService;
 
     @Transactional
     public OrderResponse createOrder(CreateOrderRequest request) {
 
-    Order order = new Order();
-    order.setUserId(request.getUserId());
-    order.setStatus(OrderStatus.PENDING);
+        Order order = new Order();
+        order.setUserId(request.getUserId());
+        order.setStatus(OrderStatus.PENDING);
 
-    for (OrderItemRequest itemRequest : request.getItems()) {
+        for (OrderItemRequest itemRequest : request.getItems()) {
 
-        ProductResponse product = productService.findById(itemRequest.getProductId());
+            ProductResponse product = productService.findById(itemRequest.getProductId());
 
-        inventoryService.decreaseStock(
-                itemRequest.getProductId(),
-                itemRequest.getQuantity());
+            inventoryService.decreaseStock(
+                    itemRequest.getProductId(),
+                    itemRequest.getQuantity());
 
-        OrderItem orderItem = new OrderItem();
-        orderItem.setProductId(product.id());
-        orderItem.setProductName(product.name());
-        orderItem.setUnitPrice(product.price());
-        orderItem.setQuantity(itemRequest.getQuantity());
-        orderItem.calculateSubtotal();
+            OrderItem orderItem = new OrderItem();
+            orderItem.setProductId(product.id());
+            orderItem.setProductName(product.name());
+            orderItem.setUnitPrice(product.price());
+            orderItem.setQuantity(itemRequest.getQuantity());
+            orderItem.calculateSubtotal();
 
-        order.addItem(orderItem);
-    }
+            order.addItem(orderItem);
+        }
 
-    order.calculateTotal();
+        order.calculateTotal();
 
-    Order savedOrder = repository.save(order);
+        Order savedOrder = repository.save(order);
 
-    PaymentResponse payment = paymentService.createPayment(savedOrder);
+        paymentService.createPayment(savedOrder);
 
-    PaymentSummaryResponse paymentSummary =
-            PaymentSummaryResponse.builder()
-                    .id(payment.getId())
-                    .status(payment.getStatus())
-                    .build();
-    
-    return mapper.toResponse(savedOrder, paymentSummary);
+        return toOrderResponse(savedOrder);
     }
 
     @Transactional(readOnly = true)
     public OrderResponse findById(UUID id) {
-        return mapper.toResponse(findEntityById(id));
+        return toOrderResponse(findEntityById(id));
     }
 
     @Transactional(readOnly = true)
     public List<OrderResponse> findAll() {
         return repository.findAll().stream()
-                .map(mapper::toResponse)
+                .map(this::toOrderResponse)
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     public List<OrderResponse> findByUser(UUID userId) {
         return repository.findByUserId(userId).stream()
-                .map(mapper::toResponse)
+                .map(this::toOrderResponse)
                 .collect(Collectors.toList());
     }
 
@@ -98,7 +94,7 @@ public class OrderService {
         Order order = findEntityById(id);
         order.changeStatus(request.getStatus());
 
-        return mapper.toResponse(repository.save(order));
+        return toOrderResponse(repository.save(order));
     }
 
     @Transactional
@@ -118,7 +114,34 @@ public class OrderService {
 
         Order savedOrder = repository.save(order);
 
-        return mapper.toResponse(savedOrder);
+        return toOrderResponse(savedOrder);
+    }
+
+    private OrderResponse toOrderResponse(Order order) {
+        return mapper.toResponse(
+                order,
+                toPaymentSummary(order.getId()),
+                toShippingSummary(order.getId())
+        );
+    }
+
+    private PaymentSummaryResponse toPaymentSummary(UUID orderId) {
+        return paymentService.findByOrderId(orderId)
+                .map(payment -> PaymentSummaryResponse.builder()
+                        .id(payment.getId())
+                        .status(payment.getStatus())
+                        .build())
+                .orElse(null);
+    }
+
+    private ShippingSummaryResponse toShippingSummary(UUID orderId) {
+        return shippingService.findByOrderId(orderId)
+                .map(shipping -> ShippingSummaryResponse.builder()
+                        .id(shipping.getId())
+                        .trackingCode(shipping.getTrackingCode())
+                        .status(shipping.getStatus())
+                        .build())
+                .orElse(null);
     }
 
     private Order findEntityById(UUID id) {

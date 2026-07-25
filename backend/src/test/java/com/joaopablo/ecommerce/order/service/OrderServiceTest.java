@@ -16,6 +16,7 @@ import com.joaopablo.ecommerce.payment.entity.PaymentStatus;
 import com.joaopablo.ecommerce.payment.service.PaymentService;
 import com.joaopablo.ecommerce.product.dto.response.ProductResponse;
 import com.joaopablo.ecommerce.product.service.ProductService;
+import com.joaopablo.ecommerce.shipping.service.ShippingService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,6 +31,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -50,12 +52,15 @@ class OrderServiceTest {
     @Mock
     private PaymentService paymentService;
 
+    @Mock
+    private ShippingService shippingService;
+
     @InjectMocks
     private OrderService service;
 
     private UUID userId;
     private UUID productId;
-    
+
     @BeforeEach
     void setUp() {
         userId = UUID.randomUUID();
@@ -76,7 +81,7 @@ class OrderServiceTest {
             .build();
 
         when(productService.findById(productId)).thenReturn(product);
-        
+
         Order savedOrder = new Order();
         savedOrder.setId(UUID.randomUUID());
         savedOrder.setStatus(OrderStatus.PENDING);
@@ -86,16 +91,26 @@ class OrderServiceTest {
         mappedResponse.setId(savedOrder.getId());
         mappedResponse.setTotalAmount(BigDecimal.valueOf(200.0));
 
+        UUID paymentId = UUID.randomUUID();
+
         when(repository.save(any(Order.class))).thenReturn(savedOrder);
-        when(mapper.toResponse(savedOrder)).thenReturn(mappedResponse);
         when(paymentService.createPayment(savedOrder)).thenReturn(
                 PaymentResponse.builder()
-                        .id(UUID.randomUUID())
+                        .id(paymentId)
                         .orderId(savedOrder.getId())
                         .amount(BigDecimal.valueOf(200.0))
                         .status(PaymentStatus.PENDING)
                         .build()
         );
+        when(paymentService.findByOrderId(savedOrder.getId())).thenReturn(
+                Optional.of(PaymentResponse.builder()
+                        .id(paymentId)
+                        .orderId(savedOrder.getId())
+                        .status(PaymentStatus.PENDING)
+                        .build())
+        );
+        when(shippingService.findByOrderId(savedOrder.getId())).thenReturn(Optional.empty());
+        when(mapper.toResponse(eq(savedOrder), any(), any())).thenReturn(mappedResponse);
 
         // Act
         OrderResponse response = service.createOrder(request);
@@ -103,7 +118,7 @@ class OrderServiceTest {
         // Assert
         assertNotNull(response);
         assertEquals(BigDecimal.valueOf(200.0), response.getTotalAmount());
-        
+
         verify(inventoryService).decreaseStock(productId, 2);
         verify(repository).save(any(Order.class));
         verify(paymentService).createPayment(savedOrder);
@@ -127,7 +142,7 @@ class OrderServiceTest {
 
         // Act & Assert
         assertThrows(InsufficientStockException.class, () -> service.createOrder(request));
-        
+
         verify(repository, never()).save(any(Order.class));
     }
 
@@ -140,17 +155,19 @@ class OrderServiceTest {
         order.setStatus(OrderStatus.PENDING);
 
         when(repository.findById(orderId)).thenReturn(Optional.of(order));
-        
+
         Order updatedOrder = new Order();
         updatedOrder.setId(orderId);
         updatedOrder.setStatus(OrderStatus.CONFIRMED);
-        
+
         when(repository.save(order)).thenReturn(updatedOrder);
-        
+
         OrderResponse mappedResponse = new OrderResponse();
         mappedResponse.setStatus(OrderStatus.CONFIRMED);
-        
-        when(mapper.toResponse(updatedOrder)).thenReturn(mappedResponse);
+
+        when(paymentService.findByOrderId(orderId)).thenReturn(Optional.empty());
+        when(shippingService.findByOrderId(orderId)).thenReturn(Optional.empty());
+        when(mapper.toResponse(eq(updatedOrder), any(), any())).thenReturn(mappedResponse);
 
         // Act
         OrderResponse response = service.updateStatus(orderId, new UpdateOrderStatusRequest(OrderStatus.CONFIRMED));
