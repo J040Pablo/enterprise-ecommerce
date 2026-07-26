@@ -5,6 +5,18 @@ spring:
   profiles:
     active: dev
 
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope:
+              - openid
+              - profile
+              - email
+
   datasource:
     url: jdbc:postgresql://localhost:5432/ecommerce
     username: postgres
@@ -27,5 +39,6 @@ server:
   port: 8080
 
 jwt:
-  secret: 4M7pQ2kL9xV1nB8sT6wY3eR5uI0oP4aD7fG2hJ9kL1mN8qR6
+  secret: ${JWT_SECRET}
   expiration-ms: 86400000
+  refresh-expiration-ms: 604800000

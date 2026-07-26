@@ -35,6 +35,17 @@ public class User extends BaseEntity {
     private String phone;
 
     @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private AuthProvider provider = AuthProvider.LOCAL;
+
+    @Column(name = "google_id", length = 255)
+    private String googleId;
+
+    @Column(name = "profile_image_url", length = 512)
+    private String profileImageUrl;
+
+    @Builder.Default
     @Column(nullable = false)
     private Boolean enabled = true;
 

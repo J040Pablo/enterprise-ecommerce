@@ -2,6 +2,7 @@ package com.joaopablo.ecommerce.auth.mapper;
 
 import com.joaopablo.ecommerce.auth.dto.request.CreateUserRequest;
 import com.joaopablo.ecommerce.auth.dto.response.UserResponse;
+import com.joaopablo.ecommerce.auth.entity.AuthProvider;
 import com.joaopablo.ecommerce.auth.entity.User;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +17,7 @@ public class UserMapper {
                 .password(encodedPassword)
                 .cpf(request.getCpf())
                 .phone(request.getPhone())
+                .provider(AuthProvider.LOCAL)
                 .enabled(true)
                 .emailVerified(false)
                 .build();

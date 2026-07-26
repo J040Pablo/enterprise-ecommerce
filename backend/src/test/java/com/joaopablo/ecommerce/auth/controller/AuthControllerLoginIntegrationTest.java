@@ -3,6 +3,7 @@ package com.joaopablo.ecommerce.auth.controller;
 import com.joaopablo.ecommerce.auth.entity.Role;
 import com.joaopablo.ecommerce.auth.entity.User;
 import com.joaopablo.ecommerce.auth.entity.UserRole;
+import com.joaopablo.ecommerce.auth.repository.RefreshTokenRepository;
 import com.joaopablo.ecommerce.auth.repository.RoleRepository;
 import com.joaopablo.ecommerce.auth.repository.UserRepository;
 import com.joaopablo.ecommerce.auth.repository.UserRoleRepository;
@@ -36,10 +37,14 @@ class AuthControllerLoginIntegrationTest {
     private UserRoleRepository userRoleRepository;
 
     @Autowired
+    private RefreshTokenRepository refreshTokenRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @BeforeEach
     void setup() {
+        refreshTokenRepository.deleteAll();
         userRoleRepository.deleteAll();
         userRepository.deleteAll();
         roleRepository.deleteAll();

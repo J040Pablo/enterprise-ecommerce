@@ -1,5 +1,6 @@
 package com.joaopablo.ecommerce.common.config;
 
+import com.joaopablo.ecommerce.auth.entity.AuthProvider;
 import com.joaopablo.ecommerce.auth.entity.Role;
 import com.joaopablo.ecommerce.auth.entity.User;
 import com.joaopablo.ecommerce.auth.entity.UserRole;
@@ -60,6 +61,7 @@ public class DevelopmentDataSeeder {
                         .password(passwordEncoder.encode("Admin@123"))
                         .firstName("Admin")
                         .lastName("System")
+                        .provider(AuthProvider.LOCAL)
                         .enabled(true)
                         .emailVerified(true)
                         .build();

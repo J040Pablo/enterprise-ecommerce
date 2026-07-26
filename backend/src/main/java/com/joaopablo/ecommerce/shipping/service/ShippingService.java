@@ -77,6 +77,7 @@ public class ShippingService {
                 .carrier(DEFAULT_CARRIER)
                 .estimatedDelivery(LocalDate.now().plusDays(DEFAULT_DELIVERY_DAYS))
                 .build();
+
         return createShipping(request);
     }
 
@@ -87,12 +88,14 @@ public class ShippingService {
 
     @Transactional(readOnly = true)
     public Optional<ShippingResponse> findByOrderId(UUID orderId) {
-        return shippingRepository.findByOrderId(orderId).map(mapper::toResponse);
+        return shippingRepository.findByOrderId(orderId)
+                .map(mapper::toResponse);
     }
 
     @Transactional(readOnly = true)
     public List<ShippingResponse> findAll() {
-        return shippingRepository.findAll().stream()
+        return shippingRepository.findAll()
+                .stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
     }
@@ -136,6 +139,7 @@ public class ShippingService {
         if (target == ShippingStatus.SHIPPED) {
             shipping.setShippedAt(LocalDateTime.now());
         }
+
         if (target == ShippingStatus.DELIVERED) {
             shipping.setDeliveredAt(LocalDateTime.now());
         }
@@ -146,8 +150,10 @@ public class ShippingService {
     private void cancel(Shipping shipping) {
         if (shipping.getStatus() != ShippingStatus.PROCESSING) {
             throw new InvalidShippingStatusException(
-                    "Only PROCESSING shippings can be cancelled. Current status: " + shipping.getStatus());
+                    "Only PROCESSING shippings can be cancelled. Current status: " + shipping.getStatus()
+            );
         }
+
         shipping.setStatus(ShippingStatus.CANCELLED);
     }
 
@@ -156,7 +162,8 @@ public class ShippingService {
 
         if (current == ShippingStatus.CANCELLED || current == ShippingStatus.DELIVERED) {
             throw new InvalidShippingStatusException(
-                    "Cannot change status from " + current + " to " + target);
+                    "Cannot change status from " + current + " to " + target
+            );
         }
 
         int currentIndex = FORWARD_FLOW.indexOf(current);
@@ -164,37 +171,49 @@ public class ShippingService {
 
         if (currentIndex < 0 || targetIndex < 0 || targetIndex != currentIndex + 1) {
             throw new InvalidShippingStatusException(
-                    "Invalid shipping status transition from " + current + " to " + target);
+                    "Invalid shipping status transition from " + current + " to " + target
+            );
         }
     }
 
     private void validateOrderForShipping(Order order) {
         if (order.getStatus() == OrderStatus.CANCELLED) {
             throw new ShippingCreationException(
-                    "Cannot create shipping for a CANCELLED order");
+                    "Cannot create shipping for a CANCELLED order"
+            );
         }
+
         if (order.getStatus() != OrderStatus.CONFIRMED) {
             throw new ShippingCreationException(
-                    "Shipping can only be created for CONFIRMED orders. Current status: " + order.getStatus());
+                    "Shipping can only be created for CONFIRMED orders. Current status: "
+                            + order.getStatus()
+            );
         }
     }
 
     private void validatePaymentForShipping(UUID orderId) {
         Payment payment = paymentRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new ShippingCreationException(
-                        "Cannot create shipping: payment not found for order id: " + orderId));
+                        "Cannot create shipping: payment not found for order id: " + orderId
+                ));
 
         if (payment.getStatus() == PaymentStatus.REJECTED) {
             throw new ShippingCreationException(
-                    "Cannot create shipping for an order with REJECTED payment");
+                    "Cannot create shipping for an order with REJECTED payment"
+            );
         }
+
         if (payment.getStatus() == PaymentStatus.REFUNDED) {
             throw new ShippingCreationException(
-                    "Cannot create shipping for an order with REFUNDED payment");
+                    "Cannot create shipping for an order with REFUNDED payment"
+            );
         }
+
         if (payment.getStatus() != PaymentStatus.APPROVED) {
             throw new ShippingCreationException(
-                    "Cannot create shipping: payment must be APPROVED. Current status: " + payment.getStatus());
+                    "Cannot create shipping: payment must be APPROVED. Current status: "
+                            + payment.getStatus()
+            );
         }
     }
 
@@ -206,17 +225,21 @@ public class ShippingService {
 
     private String generateUniqueTrackingCode() {
         String code;
+
         do {
             code = generateTrackingCode();
         } while (shippingRepository.existsByTrackingCode(code));
+
         return code;
     }
 
     private String generateTrackingCode() {
         StringBuilder suffix = new StringBuilder(7);
+
         for (int i = 0; i < 7; i++) {
             suffix.append(TRACKING_ALPHABET.charAt(RANDOM.nextInt(TRACKING_ALPHABET.length())));
         }
+
         return "BR" + Year.now().getValue() + suffix;
     }
 

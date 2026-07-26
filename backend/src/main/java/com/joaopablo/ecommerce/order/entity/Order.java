@@ -1,10 +1,10 @@
 package com.joaopablo.ecommerce.order.entity;
 
+import com.joaopablo.ecommerce.order.exception.InvalidOrderStatusException;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import com.joaopablo.ecommerce.order.exception.InvalidOrderStatusException;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -58,20 +58,23 @@ public class Order {
     }
 
     public boolean canCancel() {
-        return status == OrderStatus.PENDING ||
-               status == OrderStatus.CONFIRMED ||
-               status == OrderStatus.PROCESSING;
+        return status == OrderStatus.PENDING
+                || status == OrderStatus.CONFIRMED
+                || status == OrderStatus.PROCESSING;
     }
 
     public void changeStatus(OrderStatus newStatus) {
-        if (this.status == OrderStatus.DELIVERED || this.status == OrderStatus.CANCELLED) {
-            throw new InvalidOrderStatusException("Cannot change status from " + this.status);
+        if (this.status == OrderStatus.DELIVERED
+                || this.status == OrderStatus.CANCELLED) {
+            throw new InvalidOrderStatusException(
+                    "Cannot change status from " + this.status);
         }
-        
+
         if (newStatus == OrderStatus.CANCELLED && !canCancel()) {
-            throw new InvalidOrderStatusException("Order cannot be cancelled in current status: " + this.status);
+            throw new InvalidOrderStatusException(
+                    "Order cannot be cancelled in current status: " + this.status);
         }
-        
+
         this.status = newStatus;
     }
 
