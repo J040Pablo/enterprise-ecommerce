@@ -1,8 +1,8 @@
 package com.joaopablo.ecommerce.auth.controller;
 
-import com.joaopablo.ecommerce.auth.security.JwtService;
 import com.joaopablo.ecommerce.auth.security.OAuth2SuccessHandler;
 import com.joaopablo.ecommerce.auth.service.AuthService;
+import com.joaopablo.ecommerce.auth.service.JwtService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -28,14 +28,14 @@ class AuthControllerEndpointsTest {
     @MockBean
     private AuthService authService;
 
-    @MockBean
     private JwtService jwtService;
+
+    @MockBean
+    private OAuth2SuccessHandler oAuth2SuccessHandler;
 
     @MockBean
     private UserDetailsService userDetailsService;
 
-    @MockBean
-    private OAuth2SuccessHandler oAuth2SuccessHandler;
 
     @Test
     void googleEndpointShouldRedirectToOAuthAuthorization() throws Exception {
@@ -44,16 +44,20 @@ class AuthControllerEndpointsTest {
                 .andExpect(redirectedUrl("/oauth2/authorization/google"));
     }
 
+
     @Test
     void refreshEndpointShouldReturnRotatedTokens() throws Exception {
-        when(authService.refresh(any())).thenReturn(
-                com.joaopablo.ecommerce.auth.dto.response.TokenRefreshResponseDTO.builder()
-                        .accessToken("access")
-                        .refreshToken("refresh")
-                        .type("Bearer")
-                        .expiresIn(86400000)
-                        .build()
-        );
+
+        when(authService.refresh(any()))
+                .thenReturn(
+                        com.joaopablo.ecommerce.auth.dto.response.TokenRefreshResponseDTO.builder()
+                                .accessToken("access")
+                                .refreshToken("refresh")
+                                .type("Bearer")
+                                .expiresIn(86400000)
+                                .build()
+                );
+
 
         mockMvc.perform(post("/api/v1/auth/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -69,8 +73,10 @@ class AuthControllerEndpointsTest {
                 .andExpect(jsonPath("$.expiresIn").value(86400000));
     }
 
+
     @Test
     void logoutEndpointShouldReturnNoContent() throws Exception {
+
         mockMvc.perform(post("/api/v1/auth/logout")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""

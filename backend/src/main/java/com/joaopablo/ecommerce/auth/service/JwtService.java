@@ -1,4 +1,4 @@
-package com.joaopablo.ecommerce.auth.security;
+package com.joaopablo.ecommerce.auth.service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

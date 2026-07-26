@@ -2,19 +2,15 @@ package com.joaopablo.ecommerce.auth.service;
 
 import com.joaopablo.ecommerce.auth.dto.request.CreateUserRequest;
 import com.joaopablo.ecommerce.auth.dto.request.LoginRequestDTO;
+import com.joaopablo.ecommerce.auth.dto.request.LogoutRequestDTO;
 import com.joaopablo.ecommerce.auth.dto.request.RefreshTokenRequestDTO;
 import com.joaopablo.ecommerce.auth.dto.response.LoginResponseDTO;
 import com.joaopablo.ecommerce.auth.dto.response.TokenRefreshResponseDTO;
 import com.joaopablo.ecommerce.auth.dto.response.UserResponse;
-import com.joaopablo.ecommerce.auth.entity.AuthProvider;
-import com.joaopablo.ecommerce.auth.entity.RefreshToken;
-import com.joaopablo.ecommerce.auth.entity.Role;
-import com.joaopablo.ecommerce.auth.entity.User;
-import com.joaopablo.ecommerce.auth.entity.UserRole;
+import com.joaopablo.ecommerce.auth.entity.*;
 import com.joaopablo.ecommerce.auth.mapper.UserMapper;
 import com.joaopablo.ecommerce.auth.repository.RoleRepository;
 import com.joaopablo.ecommerce.auth.repository.UserRepository;
-import com.joaopablo.ecommerce.auth.security.JwtService;
 import com.joaopablo.ecommerce.common.exception.ResourceAlreadyExistsException;
 import com.joaopablo.ecommerce.common.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -71,11 +67,16 @@ public class AuthServiceImpl implements AuthService {
         return userMapper.toResponse(saved);
     }
 
+
     @Override
     @Transactional
     public LoginResponseDTO login(LoginRequestDTO request) {
+
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
+                new UsernamePasswordAuthenticationToken(
+                        request.getEmail(),
+                        request.getPassword()
+                )
         );
 
         User user = userRepository.findByEmail(request.getEmail())
@@ -84,23 +85,30 @@ public class AuthServiceImpl implements AuthService {
         return issueTokens(user);
     }
 
+
     @Override
     @Transactional
     public LoginResponseDTO issueTokens(User user) {
+
         String accessToken = jwtService.generateToken(user.getEmail());
+
         RefreshToken refreshToken = refreshTokenService.create(user);
 
-        List<String> roles = user.getUserRoles().stream()
+        List<String> roles = user.getUserRoles()
+                .stream()
                 .map(userRole -> userRole.getRole().getName())
                 .toList();
 
-        LoginResponseDTO.UserLoginResponse userResponse = LoginResponseDTO.UserLoginResponse.builder()
-                .id(user.getId())
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
-                .email(user.getEmail())
-                .roles(roles)
-                .build();
+
+        LoginResponseDTO.UserLoginResponse userResponse =
+                LoginResponseDTO.UserLoginResponse.builder()
+                        .id(user.getId())
+                        .firstName(user.getFirstName())
+                        .lastName(user.getLastName())
+                        .email(user.getEmail())
+                        .roles(roles)
+                        .build();
+
 
         return LoginResponseDTO.builder()
                 .token(accessToken)
@@ -111,13 +119,19 @@ public class AuthServiceImpl implements AuthService {
                 .build();
     }
 
+
     @Override
     @Transactional
     public TokenRefreshResponseDTO refresh(RefreshTokenRequestDTO request) {
-        RefreshToken rotated = refreshTokenService.rotate(request.getRefreshToken());
+
+        RefreshToken rotated =
+                refreshTokenService.rotate(request.getRefreshToken());
+
         User user = rotated.getUser();
 
-        String accessToken = jwtService.generateToken(user.getEmail());
+        String accessToken =
+                jwtService.generateToken(user.getEmail());
+
 
         return TokenRefreshResponseDTO.builder()
                 .accessToken(accessToken)
@@ -127,9 +141,10 @@ public class AuthServiceImpl implements AuthService {
                 .build();
     }
 
+
     @Override
     @Transactional
-    public void logout(com.joaopablo.ecommerce.auth.dto.request.LogoutRequestDTO request) {
+    public void logout(LogoutRequestDTO request) {
         refreshTokenService.logout(request.getRefreshToken());
     }
 }
