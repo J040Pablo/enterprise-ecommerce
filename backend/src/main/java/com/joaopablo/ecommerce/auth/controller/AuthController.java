@@ -2,16 +2,20 @@ package com.joaopablo.ecommerce.auth.controller;
 
 import com.joaopablo.ecommerce.auth.dto.request.CreateUserRequest;
 import com.joaopablo.ecommerce.auth.dto.request.LoginRequestDTO;
+import com.joaopablo.ecommerce.auth.dto.request.LogoutRequestDTO;
 import com.joaopablo.ecommerce.auth.dto.request.RefreshTokenRequestDTO;
 import com.joaopablo.ecommerce.auth.dto.response.LoginResponseDTO;
 import com.joaopablo.ecommerce.auth.dto.response.TokenRefreshResponseDTO;
 import com.joaopablo.ecommerce.auth.dto.response.UserResponse;
 import com.joaopablo.ecommerce.auth.service.AuthService;
+import com.joaopablo.ecommerce.common.exception.ApiErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,11 +32,55 @@ import java.io.IOException;
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
+@Tag(
+        name = "Authentication",
+        description = "User registration, login, token lifecycle management and Google OAuth2 integration"
+)
 public class AuthController {
 
     private final AuthService authService;
 
     @PostMapping("/register")
+    @Operation(
+            summary = "Register a new user",
+            description = "Creates a new customer account. Email and CPF must be unique."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "201",
+                    description = "User registered successfully",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = UserResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Registered user",
+                                    value = """
+                                            {
+                                              "id": "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
+                                              "firstName": "João",
+                                              "lastName": "Pablo",
+                                              "email": "joao.pablo@email.com",
+                                              "cpf": "123.456.789-00",
+                                              "phone": "+55 11 99999-9999",
+                                              "enabled": true,
+                                              "emailVerified": false
+                                            }"""
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Validation error — invalid or missing fields",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ApiErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "Conflict — email or CPF already registered",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ApiErrorResponse.class))
+            )
+    })
     public ResponseEntity<UserResponse> register(@Valid @RequestBody CreateUserRequest request) {
         UserResponse response = authService.register(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -40,8 +88,8 @@ public class AuthController {
 
     @PostMapping("/login")
     @Operation(
-            summary = "Login de usuário",
-            description = "Autentica usuário por email e senha e retorna Access Token e Refresh Token.",
+            summary = "Authenticate user",
+            description = "Authenticates a user with email and password. Returns a JWT access token and a refresh token.",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                 required = true,
                 content = @Content(
@@ -49,26 +97,54 @@ public class AuthController {
                     schema = @Schema(implementation = LoginRequestDTO.class),
                     examples = @ExampleObject(
                         name = "Login request",
-                        value = "{\n  \"email\": \"joao.pablo@email.com\",\n  \"password\": \"Senha@123\"\n}"
+                        value = """
+                                {
+                                  "email": "joao.pablo@email.com",
+                                  "password": "Senha@123"
+                                }"""
                     )
                 )
-            ),
-            responses = {
-                @ApiResponse(
-                    responseCode = "200",
-                    description = "Login realizado com sucesso",
-                    content = @Content(
-                        mediaType = "application/json",
-                        schema = @Schema(implementation = LoginResponseDTO.class),
-                        examples = @ExampleObject(
-                            name = "Login response",
-                            value = "{\n  \"token\": \"jwt_token\",\n  \"refreshToken\": \"refresh_token\",\n  \"type\": \"Bearer\",\n  \"expiresIn\": 86400000,\n  \"user\": {\n    \"id\": \"a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11\",\n    \"firstName\": \"Joao\",\n    \"lastName\": \"Pablo\",\n    \"email\": \"joao.pablo@email.com\",\n    \"roles\": [\"CUSTOMER\"]\n  }\n}"
-                        )
-                    )
-                ),
-                @ApiResponse(responseCode = "401", description = "Credenciais inválidas")
-            }
+            )
     )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Login successful — JWT tokens returned",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = LoginResponseDTO.class),
+                            examples = @ExampleObject(
+                                    name = "Login response",
+                                    value = """
+                                            {
+                                              "token": "eyJhbGciOiJIUzI1NiJ9...",
+                                              "refreshToken": "550e8400-e29b-41d4-a716-446655440000",
+                                              "type": "Bearer",
+                                              "expiresIn": 86400000,
+                                              "user": {
+                                                "id": "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
+                                                "firstName": "João",
+                                                "lastName": "Pablo",
+                                                "email": "joao.pablo@email.com",
+                                                "roles": ["CUSTOMER"]
+                                              }
+                                            }"""
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Validation error — invalid or missing fields",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ApiErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized — invalid email or password",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ApiErrorResponse.class))
+            )
+    })
     public ResponseEntity<LoginResponseDTO> login(@Valid @RequestBody LoginRequestDTO request) {
         LoginResponseDTO response = authService.login(request);
         return ResponseEntity.ok(response);
@@ -76,9 +152,29 @@ public class AuthController {
 
     @PostMapping("/refresh")
     @Operation(
-            summary = "Renovar tokens",
-            description = "Recebe um refresh token válido, revoga o anterior e emite novos access e refresh tokens (rotação)."
+            summary = "Refresh JWT tokens",
+            description = "Accepts a valid refresh token, revokes it and issues a new pair of access and refresh tokens (token rotation)."
     )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Tokens refreshed successfully",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = TokenRefreshResponseDTO.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Validation error — refresh token is blank or missing",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ApiErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized — refresh token is invalid or expired",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ApiErrorResponse.class))
+            )
+    })
     public ResponseEntity<TokenRefreshResponseDTO> refresh(
             @Valid @RequestBody RefreshTokenRequestDTO request
     ) {
@@ -87,11 +183,28 @@ public class AuthController {
 
     @PostMapping("/logout")
     @Operation(
-            summary = "Logout de usuário",
-            description = "Revoga o Refresh Token do usuário impedindo renovação de Access Tokens (RFC 7009)."
+            summary = "Logout user",
+            description = """
+                    Revokes the user's refresh token, preventing further access token renewals (RFC 7009).
+
+                    **Note:** This endpoint requires a valid `refreshToken` in the request body.
+                    It does **not** use the `Authorization: Bearer` header.
+                    """
     )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "Logout successful — refresh token revoked"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Validation error — refresh token is blank or missing",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ApiErrorResponse.class))
+            )
+    })
     public ResponseEntity<Void> logout(
-            @Valid @RequestBody com.joaopablo.ecommerce.auth.dto.request.LogoutRequestDTO request
+            @Valid @RequestBody LogoutRequestDTO request
     ) {
         authService.logout(request);
         return ResponseEntity.noContent().build();
@@ -99,9 +212,28 @@ public class AuthController {
 
     @GetMapping("/google")
     @Operation(
-            summary = "Login com Google",
-            description = "Redireciona para o fluxo OAuth2 do Google."
+            summary = "Initiate Google OAuth2 Login",
+            description = """
+                    Initiates the OAuth2 authorization flow with Google.
+
+                    **Flow:**
+                    1. Client accesses this endpoint
+                    2. Server redirects to Google's OAuth2 authorization page (HTTP 302)
+                    3. User authenticates with Google
+                    4. Google redirects back to the backend callback
+                    5. Backend processes the callback: creates or retrieves the user account
+                    6. JWT access and refresh tokens are generated and returned
+
+                    **Note:** This endpoint performs an HTTP 302 redirect and cannot be tested
+                    directly in Swagger UI. Use a browser to initiate the OAuth2 flow.
+                    """
     )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "302",
+                    description = "Redirect to Google OAuth2 authorization page"
+            )
+    })
     public void googleLogin(HttpServletResponse response) throws IOException {
         response.sendRedirect("/oauth2/authorization/google");
     }
