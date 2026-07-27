@@ -12,6 +12,7 @@ import com.joaopablo.ecommerce.order.entity.OrderItem;
 import com.joaopablo.ecommerce.order.entity.OrderStatus;
 import com.joaopablo.ecommerce.order.exception.OrderNotFoundException;
 import com.joaopablo.ecommerce.order.mapper.OrderMapper;
+import com.joaopablo.ecommerce.order.messaging.OrderEventPublisher;
 import com.joaopablo.ecommerce.order.repository.OrderRepository;
 import com.joaopablo.ecommerce.payment.service.PaymentService;
 import com.joaopablo.ecommerce.product.dto.response.ProductResponse;
@@ -35,6 +36,7 @@ public class OrderService {
     private final InventoryService inventoryService;
     private final PaymentService paymentService;
     private final ShippingService shippingService;
+    private final OrderEventPublisher orderEventPublisher;
 
     @Transactional
     public OrderResponse createOrder(CreateOrderRequest request) {
@@ -64,6 +66,7 @@ public class OrderService {
         order.calculateTotal();
 
         Order savedOrder = repository.save(order);
+        orderEventPublisher.publishOrderCreated(savedOrder);
 
         paymentService.createPayment(savedOrder);
 
@@ -113,6 +116,7 @@ public class OrderService {
         });
 
         Order savedOrder = repository.save(order);
+        orderEventPublisher.publishOrderCancelled(savedOrder);
 
         return toOrderResponse(savedOrder);
     }

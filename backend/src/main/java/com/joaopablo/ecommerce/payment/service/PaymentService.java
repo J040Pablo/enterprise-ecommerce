@@ -13,6 +13,7 @@ import com.joaopablo.ecommerce.payment.exception.InvalidPaymentStatusException;
 import com.joaopablo.ecommerce.payment.exception.PaymentAlreadyExistsException;
 import com.joaopablo.ecommerce.payment.exception.PaymentNotFoundException;
 import com.joaopablo.ecommerce.payment.mapper.PaymentMapper;
+import com.joaopablo.ecommerce.payment.messaging.PaymentEventPublisher;
 import com.joaopablo.ecommerce.payment.repository.PaymentRepository;
 import com.joaopablo.ecommerce.shipping.service.ShippingService;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +32,7 @@ public class PaymentService {
     private final OrderRepository orderRepository;
     private final InventoryService inventoryService;
     private final ShippingService shippingService;
+    private final PaymentEventPublisher paymentEventPublisher;
 
     @Transactional
     public PaymentResponse createPayment(CreatePaymentRequest request) {
@@ -80,6 +82,7 @@ public class PaymentService {
 
         Payment saved = paymentRepository.save(payment);
         shippingService.createShippingForApprovedOrder(order.getId());
+        paymentEventPublisher.publishPaymentApproved(saved);
 
         return mapper.toResponse(saved);
     }
@@ -96,7 +99,10 @@ public class PaymentService {
         restoreInventory(order);
         orderRepository.save(order);
 
-        return mapper.toResponse(paymentRepository.save(payment));
+        Payment saved = paymentRepository.save(payment);
+        paymentEventPublisher.publishPaymentRejected(saved);
+
+        return mapper.toResponse(saved);
     }
 
     @Transactional
