@@ -48,14 +48,6 @@ public class RefreshTokenService {
     @Transactional(readOnly = true)
     public RefreshToken validate(String token) {
 
-        UUID storedUserId = refreshTokenRedisRepository.findUserIdByToken(token);
-
-        if(storedUserId == null){
-            throw new InvalidRefreshTokenException(
-                    "Refresh token not found."
-            );
-        }
-
         RefreshToken refreshToken =
                 refreshTokenRepository.findByTokenWithUser(token)
                         .orElseThrow(() ->
@@ -76,6 +68,14 @@ public class RefreshTokenService {
 
             throw new InvalidRefreshTokenException(
                     "Refresh token has expired."
+            );
+        }
+
+        UUID storedUserId = refreshTokenRedisRepository.findUserIdByToken(token);
+
+        if(storedUserId == null){
+            throw new InvalidRefreshTokenException(
+                    "Refresh token not found in cache."
             );
         }
 
@@ -111,6 +111,10 @@ public class RefreshTokenService {
 
         refreshTokenRepository.findByToken(token)
                 .ifPresent(refreshToken -> {
+
+                    if (Boolean.TRUE.equals(refreshToken.getRevoked())) {
+                        return;
+                    }
 
                     refreshToken.setRevoked(true);
 

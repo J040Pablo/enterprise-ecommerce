@@ -1,5 +1,6 @@
 package com.joaopablo.ecommerce.auth.controller;
 
+import com.joaopablo.ecommerce.auth.config.SecurityConfig;
 import com.joaopablo.ecommerce.auth.security.OAuth2SuccessHandler;
 import com.joaopablo.ecommerce.auth.service.AuthService;
 import com.joaopablo.ecommerce.auth.service.JwtService;
@@ -7,9 +8,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -20,22 +24,24 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(controllers = AuthController.class)
 @AutoConfigureMockMvc(addFilters = false)
+@Import(SecurityConfig.class)
+@ActiveProfiles("test")
 class AuthControllerEndpointsTest {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private AuthService authService;
 
+    @MockitoBean
     private JwtService jwtService;
 
-    @MockBean
+    @MockitoBean
     private OAuth2SuccessHandler oAuth2SuccessHandler;
 
-    @MockBean
+    @MockitoBean
     private UserDetailsService userDetailsService;
-
 
     @Test
     void googleEndpointShouldRedirectToOAuthAuthorization() throws Exception {

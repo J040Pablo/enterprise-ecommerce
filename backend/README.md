@@ -695,7 +695,34 @@ Os endpoints abaixo refletem os controllers existentes e podem ser explorados co
 
 ## Testes
 
-| Comando | Quando usar |
+A aplicação possui uma suíte completa de testes automatizados que validam todos os aspectos críticos do sistema.
+
+### Tecnologias de teste
+
+A suíte de testes utiliza as seguintes tecnologias:
+
+- **JUnit 5** - Framework de testes
+- **Spring Boot Test** - Suporte a testes no Spring
+- **MockMvc** - Teste de endpoints REST sem servidor
+- **Mockito** - Mock de dependências
+- **Testes unitários** - Testes de unidades individuais (serviços, repositórios)
+- **Testes de integração** - Testes de fluxos completos com múltiplos componentes
+
+### Cobertura de funcionalidades
+
+Os testes cobrem:
+
+- Autenticação e autorização com JWT
+- Fluxo de refresh token
+- Logout com revogação de tokens
+- Endpoints REST de todos os módulos
+- Regras de negócio críticas (estoque, pagamento, pedidos)
+- Fluxos de integração entre módulos
+- Tratamento de exceções e validações
+
+### Executar testes
+
+| Comando | Descrição |
 | --- | --- |
 | `./mvnw test` | Executa a suíte de testes sem empacotar a aplicação |
 | `./mvnw clean install` | Limpa, compila, testa e instala o artefato no repositório local Maven |
@@ -713,7 +740,24 @@ Os endpoints abaixo refletem os controllers existentes e podem ser explorados co
 ./mvnw -DskipTests package
 ```
 
-> Alguns testes de integração dependem de serviços locais, como PostgreSQL e Redis, conforme configuração do ambiente.
+> Alguns testes de integração dependem de serviços locais, como PostgreSQL, Redis e RabbitMQ, conforme configuração do ambiente.
+
+### Cobertura de testes com JaCoCo
+
+O projeto utiliza **JaCoCo** (Java Code Coverage) para medir a cobertura de código. JaCoCo é uma ferramenta que analisa quais linhas de código foram executadas durante os testes, fornecendo métricas detalhadas de cobertura por instruções, branches, classes e métodos.
+
+**Métricas atuais de cobertura:**
+
+| Métrica | Cobertura |
+| --- | --- |
+| Instructions | 67% |
+| Branches | 44% |
+| Classes | 74% |
+| Methods | 66% |
+
+**Relatório de cobertura:**
+
+![JaCoCo Coverage Report](../docs/images/jacoco-report.png)
 
 ---
 

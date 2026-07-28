@@ -14,6 +14,7 @@ import com.joaopablo.ecommerce.payment.exception.InvalidPaymentStatusException;
 import com.joaopablo.ecommerce.payment.exception.PaymentAlreadyExistsException;
 import com.joaopablo.ecommerce.payment.exception.PaymentNotFoundException;
 import com.joaopablo.ecommerce.payment.mapper.PaymentMapper;
+import com.joaopablo.ecommerce.payment.messaging.PaymentEventPublisher;
 import com.joaopablo.ecommerce.payment.repository.PaymentRepository;
 import com.joaopablo.ecommerce.shipping.dto.response.ShippingResponse;
 import com.joaopablo.ecommerce.shipping.entity.ShippingStatus;
@@ -51,6 +52,9 @@ class PaymentServiceTest {
 
     @Mock
     private ShippingService shippingService;
+
+    @Mock
+    private PaymentEventPublisher paymentEventPublisher;
 
     @InjectMocks
     private PaymentService service;
@@ -178,6 +182,7 @@ class PaymentServiceTest {
         assertEquals(OrderStatus.CONFIRMED, order.getStatus());
         verify(orderRepository).save(order);
         verify(shippingService).createShippingForApprovedOrder(orderId);
+        verify(paymentEventPublisher).publishPaymentApproved(payment);
     }
 
     @Test
@@ -195,6 +200,7 @@ class PaymentServiceTest {
         assertEquals(OrderStatus.CANCELLED, order.getStatus());
         verify(inventoryService).increaseStock(productId, 2);
         verify(orderRepository).save(order);
+        verify(paymentEventPublisher).publishPaymentRejected(payment);
     }
 
     @Test

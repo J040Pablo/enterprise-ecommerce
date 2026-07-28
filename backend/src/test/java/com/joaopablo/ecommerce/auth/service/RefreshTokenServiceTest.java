@@ -3,6 +3,7 @@ package com.joaopablo.ecommerce.auth.service;
 import com.joaopablo.ecommerce.auth.entity.RefreshToken;
 import com.joaopablo.ecommerce.auth.entity.User;
 import com.joaopablo.ecommerce.auth.exception.InvalidRefreshTokenException;
+import com.joaopablo.ecommerce.auth.repository.RefreshTokenRedisRepository;
 import com.joaopablo.ecommerce.auth.repository.RefreshTokenRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,6 +28,9 @@ class RefreshTokenServiceTest {
 
     @Mock
     private RefreshTokenRepository refreshTokenRepository;
+
+    @Mock
+    private RefreshTokenRedisRepository refreshTokenRedisRepository;
 
     @InjectMocks
     private RefreshTokenService refreshTokenService;
@@ -58,6 +62,7 @@ class RefreshTokenServiceTest {
         ArgumentCaptor<RefreshToken> captor = ArgumentCaptor.forClass(RefreshToken.class);
         verify(refreshTokenRepository).save(captor.capture());
         assertEquals(created.getToken(), captor.getValue().getToken());
+        verify(refreshTokenRedisRepository).save(eq(created.getToken()), eq(user.getId()), any(Duration.class));
     }
 
     @Test
@@ -105,6 +110,28 @@ class RefreshTokenServiceTest {
                 () -> refreshTokenService.validate("expired-token")
         );
         assertTrue(ex.getMessage().contains("expired"));
+        verify(refreshTokenRedisRepository).delete("expired-token");
+    }
+
+    @Test
+    void validateShouldRejectValidTokenMissingFromCache() {
+        RefreshToken token = RefreshToken.builder()
+                .token("cached-token")
+                .user(user)
+                .expiresAt(Instant.now().plus(Duration.ofDays(1)))
+                .revoked(false)
+                .build();
+
+        when(refreshTokenRepository.findByTokenWithUser("cached-token"))
+                .thenReturn(Optional.of(token));
+        when(refreshTokenRedisRepository.findUserIdByToken("cached-token"))
+                .thenReturn(null);
+
+        InvalidRefreshTokenException ex = assertThrows(
+                InvalidRefreshTokenException.class,
+                () -> refreshTokenService.validate("cached-token")
+        );
+        assertTrue(ex.getMessage().contains("cache"));
     }
 
     @Test
@@ -118,6 +145,8 @@ class RefreshTokenServiceTest {
 
         when(refreshTokenRepository.findByTokenWithUser("old-token"))
                 .thenReturn(Optional.of(existing));
+        when(refreshTokenRedisRepository.findUserIdByToken("old-token"))
+                .thenReturn(user.getId());
         when(refreshTokenRepository.save(any(RefreshToken.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -127,6 +156,8 @@ class RefreshTokenServiceTest {
         assertNotEquals("old-token", rotated.getToken());
         assertEquals(user, rotated.getUser());
         verify(refreshTokenRepository, times(2)).save(any(RefreshToken.class));
+        verify(refreshTokenRedisRepository).delete("old-token");
+        verify(refreshTokenRedisRepository).save(eq(rotated.getToken()), eq(user.getId()), any(Duration.class));
     }
 
     @Test
@@ -144,6 +175,7 @@ class RefreshTokenServiceTest {
         refreshTokenService.logout("active-token");
 
         assertTrue(token.getRevoked());
+        verify(refreshTokenRedisRepository).delete("active-token");
         verify(refreshTokenRepository).save(token);
     }
 
@@ -162,6 +194,7 @@ class RefreshTokenServiceTest {
         refreshTokenService.logout("revoked-token");
 
         assertTrue(token.getRevoked());
+        verify(refreshTokenRedisRepository).delete("revoked-token");
         verify(refreshTokenRepository, never()).save(any());
     }
 
@@ -171,6 +204,7 @@ class RefreshTokenServiceTest {
                 .thenReturn(Optional.empty());
 
         assertDoesNotThrow(() -> refreshTokenService.logout("unknown-token"));
+        verify(refreshTokenRedisRepository).delete("unknown-token");
         verify(refreshTokenRepository, never()).save(any());
     }
 }

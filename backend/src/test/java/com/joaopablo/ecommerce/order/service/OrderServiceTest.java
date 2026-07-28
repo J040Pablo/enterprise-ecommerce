@@ -10,6 +10,7 @@ import com.joaopablo.ecommerce.order.entity.Order;
 import com.joaopablo.ecommerce.order.entity.OrderStatus;
 import com.joaopablo.ecommerce.order.exception.InvalidOrderStatusException;
 import com.joaopablo.ecommerce.order.mapper.OrderMapper;
+import com.joaopablo.ecommerce.order.messaging.OrderEventPublisher;
 import com.joaopablo.ecommerce.order.repository.OrderRepository;
 import com.joaopablo.ecommerce.payment.dto.response.PaymentResponse;
 import com.joaopablo.ecommerce.payment.entity.PaymentStatus;
@@ -54,6 +55,9 @@ class OrderServiceTest {
 
     @Mock
     private ShippingService shippingService;
+
+    @Mock
+    private OrderEventPublisher orderEventPublisher;
 
     @InjectMocks
     private OrderService service;
@@ -121,6 +125,7 @@ class OrderServiceTest {
 
         verify(inventoryService).decreaseStock(productId, 2);
         verify(repository).save(any(Order.class));
+        verify(orderEventPublisher).publishOrderCreated(savedOrder);
         verify(paymentService).createPayment(savedOrder);
     }
 

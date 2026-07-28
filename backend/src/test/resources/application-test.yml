@@ -1,14 +1,14 @@
 spring:
   application:
-    name: backend
+    name: backend-test
 
   security:
     oauth2:
       client:
         registration:
           google:
-            client-id: ${GOOGLE_CLIENT_ID}
-            client-secret: ${GOOGLE_CLIENT_SECRET}
+            client-id: test-client-id
+            client-secret: test-client-secret
             scope:
               - openid
               - profile
@@ -28,10 +28,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
+    show-sql: false
 
   flyway:
     enabled: true
@@ -42,14 +39,8 @@ spring:
     port: ${RABBITMQ_PORT:5672}
     username: ${RABBITMQ_USERNAME:guest}
     password: ${RABBITMQ_PASSWORD:guest}
-    virtual-host: /
-    publisher-confirm-type: correlated
-    publisher-returns: true
-
-server:
-  port: 8080
 
 jwt:
-  secret: ${JWT_SECRET}
+  secret: test-secret-key-for-tests-only-12345678901234567890
   expiration-ms: 86400000
   refresh-expiration-ms: 604800000
