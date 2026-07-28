@@ -1,4 +1,5 @@
 services:
+
   postgres:
     image: postgres:17
     container_name: ecommerce-postgres
@@ -14,6 +15,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+
   pgadmin:
     image: dpage/pgadmin4
     container_name: ecommerce-pgadmin
@@ -27,6 +29,18 @@ services:
 
     depends_on:
       - postgres
+
+
+  redis:
+    image: redis:7
+    container_name: ecommerce-redis
+
+    ports:
+      - "6379:6379"
+
+    volumes:
+      - redis_data:/data
+
 
   rabbitmq:
     image: rabbitmq:3.13-management
@@ -43,6 +57,44 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
 
+
+  backend:
+    image: ecommerce-backend:latest
+    container_name: ecommerce-backend
+
+    depends_on:
+      - postgres
+      - redis
+      - rabbitmq
+
+    ports:
+      - "8080:8080"
+
+    environment:
+
+      SPRING_PROFILE: docker
+
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ecommerce
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USERNAME: guest
+      RABBITMQ_PASSWORD: guest
+
+      JWT_SECRET: ${JWT_SECRET}
+
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+
+
 volumes:
   postgres_data:
   rabbitmq_data:
+  redis_data:

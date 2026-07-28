@@ -16,128 +16,146 @@
   <img alt="Architecture" src="https://img.shields.io/badge/Architecture-Modular%20Monolith-5A45FF?style=for-the-badge">
   <img alt="Maven" src="https://img.shields.io/badge/Maven-Build-blue?style=for-the-badge&logo=apachemaven">
   <img alt="Docker" src="https://img.shields.io/badge/Docker-Compose-2496ED?style=for-the-badge&logo=docker">
+  <img alt="AWS EC2" src="https://img.shields.io/badge/AWS-EC2-orange?style=for-the-badge&logo=amazon-aws">
+  <img alt="Amazon RDS" src="https://img.shields.io/badge/AWS-RDS-blue?style=for-the-badge&logo=amazon-aws">
+  <img alt="License" src="https://img.shields.io/badge/License-Apache%202.0-blue?style=for-the-badge">
+  <img alt="Build" src="https://img.shields.io/github/actions/workflow/status/J040Pablo/enterprise-ecommerce/ci.yml?branch=main&style=for-the-badge">
+  <img alt="Coverage" src="https://img.shields.io/badge/Coverage-67%25-yellow?style=for-the-badge">
 </p>
 
 ---
 
-## Visão geral
+## Quickstart
 
-**Enterprise E-commerce API** é um projeto backend desenvolvido para representar uma base sólida de e-commerce corporativo. A aplicação cobre autenticação, catálogo, estoque, carrinho, pedidos, pagamentos e envios, mantendo uma organização modular clara e preparada para evolução.
+Suba a infraestrutura e execute a aplicação em uma linha (desenvolvimento):
 
-O projeto utiliza **Spring Boot 3.5** com **Java 21**, persistência com **PostgreSQL**, versionamento de schema com **Flyway**, autenticação com **JWT** e **Google OAuth2**, suporte a **Redis** para tokens/cache e **RabbitMQ** para iniciar uma arquitetura orientada a eventos.
+```bash
+docker compose up -d && ./mvnw -DskipTests spring-boot:run
+```
 
-O principal diferencial arquitetural é o uso de **Monólito Modular**: a aplicação permanece simples de executar e manter, mas o domínio é separado por módulos bem definidos. A mensageria foi adicionada de forma incremental, sem substituir fluxos síncronos existentes, reduzindo risco e preparando o sistema para futuras integrações assíncronas.
+Exemplos rápidos (login e listar produtos):
+
+```bash
+# Login (retorna access token)
+curl -s -X POST http://localhost:8080/api/v1/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"joao.pablo@email.com","password":"Senha@123"}'
+
+# Listar produtos (use Authorization: Bearer <token> quando necessário)
+curl -s http://localhost:8080/api/v1/products
+```
 
 ---
 
-## Sumário
-
-- [Features](#features)
-- [Tecnologias](#tecnologias)
-- [Arquitetura](#arquitetura)
-- [Fluxo REST](#fluxo-rest)
-- [Fluxo RabbitMQ](#fluxo-rabbitmq)
-- [Estrutura do projeto](#estrutura-do-projeto)
-- [Configuração](#configuração)
-- [Docker](#docker)
-- [Como executar](#como-executar)
-- [Screenshots](#screenshots)
-- [Swagger](#swagger)
-- [RabbitMQ Management](#rabbitmq-management)
-- [Exemplos de autenticação](#exemplos-de-autenticação)
-- [Exemplos de endpoints](#exemplos-de-endpoints)
-- [Testes](#testes)
-- [Roadmap](#roadmap)
-- [Autor](#autor)
 
 ---
 
 ## Features
 
+
+
 - [x] Cadastro de usuários
+
 - [x] Login com JWT
+
 - [x] Login com Google OAuth2
+
 - [x] Refresh token com rotação
+
 - [x] Logout com revogação de refresh token
-- [x] CRUD de categorias
-- [x] CRUD de produtos
+
+- [x] CRUD completo de Produtos, Categorias, Pedidos e Pagamentos
+
 - [x] Controle de estoque
+
 - [x] Carrinho de compras
+
 - [x] Criação e consulta de pedidos
+
 - [x] Aprovação, rejeição e estorno de pagamentos
+
 - [x] Criação e acompanhamento de envios
+
 - [x] Documentação Swagger/OpenAPI
+
 - [x] Migrações versionadas com Flyway
+
 - [x] Redis para cache/token store
+
 - [x] RabbitMQ com exchange topic e eventos de domínio
-- [x] Docker Compose para infraestrutura local
+
+- [x] Docker Compose
+
+- [x] Deploy AWS
 
 ---
 
-## Tecnologias
+##   Destaques
 
-| Categoria | Tecnologia | Uso no projeto |
+- **Java 21** + **Spring Boot 3.5** com arquitetura modular
+- **Spring Security** com JWT e Google OAuth2
+- **PostgreSQL 17** com migrações versionadas (Flyway)
+- **Redis** para cache e gerenciamento de tokens
+- **RabbitMQ** para arquitetura orientada a eventos
+- **Docker Compose** para infraestrutura local completa
+- **AWS** (EC2 + RDS) em produção
+- **OpenAPI/Swagger** com documentação interativa
+- **Testes automatizados** com cobertura 67%
+
+---
+
+##   Sumário
+
+- [Destaques](#-destaques)
+- [Stack](#stack)
+- [Arquitetura](#-arquitetura)
+- [Módulos](#-módulos)
+- [Estrutura](#-estrutura)
+- [Fluxo de Dados](#-fluxo-de-dados)
+- [Como Executar](#-como-executar)
+- [API Documentation](#-api-documentation)
+- [Configuração](#-configuração)
+- [Docker](#-docker)
+- [Screenshots](#-screenshots)
+- [Deploy AWS](#-deploy-aws)
+- [Testes](#-testes)
+- [Links](#-links)
+- [Autor](#-autor)
+
+---
+
+## 🛠️ Stack
+
+| Categoria | Tecnologia | Uso |
 | --- | --- | --- |
-| Linguagem | Java 21 | Plataforma principal da aplicação |
-| Framework | Spring Boot 3.5 | Bootstrap, configuração e runtime da API |
-| Web | Spring Web | Construção dos endpoints REST |
-| Segurança | Spring Security | Autenticação, autorização e filtros de segurança |
-| Autenticação | JWT | Access token no padrão Bearer |
-| OAuth2 | Google OAuth2 Login | Login social com provedor externo |
-| Persistência | Spring Data JPA | Repositories e abstração de acesso a dados |
-| Banco de dados | PostgreSQL | Persistência relacional principal |
-| Migrações | Flyway | Versionamento e evolução do schema |
-| Cache/Tokens | Redis | Suporte a tokens e dados temporários |
-| Mensageria | RabbitMQ + Spring AMQP | Publicação e consumo de eventos |
-| Documentação | Springdoc OpenAPI | Swagger UI e contrato OpenAPI |
-| Build | Maven | Build, testes e empacotamento |
-| Infra local | Docker Compose | PostgreSQL, PgAdmin e RabbitMQ |
+| Linguagem | Java 21 | Plataforma principal |
+| Framework | Spring Boot 3.5 | API REST, runtime |
+| Segurança | Spring Security | Autenticação, JWT, OAuth2 |
+| Persistência | Spring Data JPA + PostgreSQL 17 | Banco relacional principal |
+| Migrações | Flyway | Versionamento de schema |
+| Cache | Redis | Token store, cache de dados |
+| Mensageria | RabbitMQ + Spring AMQP | Eventos de domínio |
+| Documentação | Springdoc OpenAPI | Swagger UI interativo |
+| Build | Maven 3.x | Compilação e testes |
+| Containerização | Docker Compose | Infraestrutura local |
 
 ---
 
-## Arquitetura
+## 🏗️ Arquitetura
 
-O projeto segue o estilo **Modular Monolith**. Isso significa que a aplicação é entregue como um único deploy, mas seu código é dividido por capacidades de negócio, com módulos internos coesos e responsabilidades explícitas.
-
-Essa arquitetura foi escolhida porque oferece um equilíbrio pragmático para um sistema de e-commerce em evolução: menor complexidade operacional do que microsserviços, menor acoplamento do que um monólito tradicional e uma base mais limpa para crescimento progressivo.
-
-Vantagens práticas:
-
-- Desenvolvimento local mais simples.
-- Menos infraestrutura obrigatória para executar o sistema.
-- Transações síncronas mais diretas para regras críticas.
-- Separação clara por domínio.
-- Menor custo cognitivo para evoluir features.
-- Caminho mais seguro para futura extração de módulos.
-
-Uma migração para microsserviços faria sentido quando houver necessidade concreta de escalar módulos de forma independente, times com ownership separado, deploys autônomos, limites transacionais mais maduros e observabilidade suficiente para operar um ambiente distribuído.
-
-| Módulo | Responsabilidade |
-| --- | --- |
-| `auth` | Cadastro, login, JWT, OAuth2, refresh token e logout |
-| `category` | Gestão de categorias de produtos |
-| `product` | Catálogo de produtos |
-| `inventory` | Controle de estoque |
-| `cart` | Carrinho de compras |
-| `order` | Criação, consulta, status e cancelamento de pedidos |
-| `payment` | Criação, aprovação, rejeição e estorno de pagamentos |
-| `shipping` | Criação e evolução do status de envio |
-| `common` | Configurações, exceções, entidades base, utilitários e mensageria compartilhada |
+**Padrão: Modular Monolith** - deploy único com código dividido por domínios bem definidos.
 
 ```mermaid
 flowchart TB
-    Client[Cliente / Frontend / API Consumer]
+    Client[Cliente / Frontend]
 
-    subgraph App[Enterprise E-commerce API - Modular Monolith]
+    subgraph API[Enterprise E-commerce - Modular Monolith]
         Auth[Auth Module]
-        Category[Category Module]
         Product[Product Module]
-        Inventory[Inventory Module]
         Cart[Cart Module]
         Order[Order Module]
         Payment[Payment Module]
         Shipping[Shipping Module]
-        Common[Common Module]
     end
 
     PostgreSQL[(PostgreSQL)]
@@ -145,18 +163,14 @@ flowchart TB
     RabbitMQ[(RabbitMQ)]
 
     Client --> Auth
-    Client --> Category
     Client --> Product
-    Client --> Inventory
     Client --> Cart
     Client --> Order
     Client --> Payment
     Client --> Shipping
 
     Auth --> PostgreSQL
-    Category --> PostgreSQL
     Product --> PostgreSQL
-    Inventory --> PostgreSQL
     Cart --> PostgreSQL
     Order --> PostgreSQL
     Payment --> PostgreSQL
@@ -165,30 +179,50 @@ flowchart TB
     Auth --> Redis
     Order --> RabbitMQ
     Payment --> RabbitMQ
-    RabbitMQ --> Payment
     RabbitMQ --> Shipping
     RabbitMQ --> Inventory
+```
 
-    Common -. Configurações e contratos compartilhados .-> Auth
-    Common -. Configurações e contratos compartilhados .-> Order
-    Common -. Configurações e contratos compartilhados .-> Payment
+> O projeto segue o padrão **Modular Monolith**, organizando o domínio em módulos independentes dentro de uma única aplicação. Essa abordagem reduz o acoplamento, facilita a manutenção e permite evoluções futuras sem a complexidade inicial de uma arquitetura de microsserviços.
+
+---
+
+## 📦 Módulos
+
+| Módulo | Responsabilidade |
+| --- | --- |
+| **auth** | Cadastro, login, JWT, OAuth2, logout |
+| **product** | Catálogo de produtos |
+| **category** | Categorias de produtos |
+| **inventory** | Controle de estoque |
+| **cart** | Carrinho de compras |
+| **order** | Pedidos e status |
+| **payment** | Pagamentos (criar, aprovar, rejeitar, estornar) |
+| **shipping** | Envios e rastreamento |
+| **common** | Configurações, exceções, mensageria |
+
+---
+
+## 📂 Estrutura
+
+```
+src/main/java/com/joaopablo/ecommerce
+├── auth
+├── cart
+├── category
+└── common
+├── inventory
+├── order
+├── payment
+├── product
+├── shipping
 ```
 
 ---
 
-## Fluxo REST
+## 🔄 Fluxo de Dados
 
-O fluxo principal da aplicação é REST e síncrono. Ele continua sendo a fonte de execução das regras de negócio e não foi substituído pela mensageria.
-
-Responsabilidades por camada:
-
-| Camada | Responsabilidade |
-| --- | --- |
-| `Controller` | Recebe requisições HTTP, valida entrada e retorna respostas REST |
-| `DTO` | Define contratos de entrada e saída da API |
-| `Service` | Orquestra casos de uso e aplica regras de negócio |
-| `Repository` | Encapsula acesso a dados com Spring Data JPA |
-| `Banco` | Armazena o estado persistente da aplicação |
+### REST (Síncrono)
 
 ```mermaid
 sequenceDiagram
@@ -200,7 +234,7 @@ sequenceDiagram
 
     Client->>Controller: HTTP Request
     Controller->>Service: DTO validado
-    Service->>Service: Regras de negócio
+    Service->>Service: Aplicar regras de negócio
     Service->>Repository: Operação de persistência
     Repository->>DB: SQL/JPA
     DB-->>Repository: Resultado
@@ -209,56 +243,11 @@ sequenceDiagram
     Controller-->>Client: HTTP Response
 ```
 
-> A mensageria complementa esse fluxo com eventos, mas não altera os contratos REST nem muda a execução principal dos casos de uso.
+- Camadas: Controller → DTO → Service → Repository → DB
+- Responsável por regras de negócio críticas
+- Transações ACID garantidas
 
----
-
-## Fluxo RabbitMQ
-
-RabbitMQ foi incorporado como uma base inicial de **Event-Driven Architecture**. O objetivo é permitir que módulos reajam a eventos de domínio sem acoplar diretamente novas responsabilidades ao fluxo síncrono.
-
-No estado atual, os consumers são observacionais: eles recebem eventos e registram logs. Isso evita duplicidade de processamento e mantém a previsibilidade do comportamento existente.
-
-Conceitos utilizados:
-
-| Conceito | Papel no projeto |
-| --- | --- |
-| Publisher | Componente que publica eventos após uma ação de negócio relevante |
-| Exchange | Ponto central de roteamento das mensagens |
-| Topic Exchange | Exchange que roteia mensagens por routing key |
-| Routing Key | Chave que identifica o tipo do evento publicado |
-| Binding | Regra que liga uma fila a uma exchange por routing key |
-| Queue | Fila que armazena mensagens para um consumidor |
-| Consumer/Listener | Componente que consome mensagens com `@RabbitListener` |
-| Spring AMQP | Integração Spring usada para `RabbitTemplate`, conversores JSON e listeners |
-
-RabbitMQ **não substitui chamadas REST** neste momento porque o fluxo síncrono ainda concentra regras importantes como criação de pedido, criação de pagamento, confirmação de pedido, restauração de estoque e criação de envio. Migrar isso prematuramente para assíncrono aumentaria risco de duplicidade, inconsistência e complexidade operacional.
-
-Com essa base, o sistema fica preparado para evoluções futuras como DLQ, retries, Outbox Pattern, idempotência, auditoria de eventos e integração com serviços externos.
-
-**Exchange**
-
-| Nome | Tipo |
-| --- | --- |
-| `ecommerce.topic` | Topic Exchange |
-
-**Routing keys**
-
-| Routing key | Origem | Consumidores atuais |
-| --- | --- | --- |
-| `order.created` | `OrderEventPublisher` | `PaymentEventListener`, `InventoryEventListener` |
-| `payment.approved` | `PaymentEventPublisher` | `ShippingEventListener` |
-| `payment.rejected` | `PaymentEventPublisher` | `InventoryEventListener` |
-| `order.cancelled` | `OrderEventPublisher` | `InventoryEventListener` |
-
-**Filas**
-
-| Fila | Objetivo |
-| --- | --- |
-| `payment.order-created.queue` | Receber pedidos criados no módulo de pagamento |
-| `order.payment-result.queue` | Reservada para observação futura de resultados de pagamento |
-| `shipping.payment-approved.queue` | Receber pagamentos aprovados no módulo de envio |
-| `inventory.events.queue` | Receber eventos relevantes para estoque |
+### Event-Driven (Assíncrono)
 
 ```mermaid
 flowchart LR
@@ -280,511 +269,362 @@ flowchart LR
     Exchange -->|payment.rejected| Inventory
 ```
 
-> No MVP, os listeners apenas registram logs. Eles não substituem chamadas diretas entre serviços e não executam processamento automático de pagamento, envio ou estoque.
+
+- **Exchange**: `ecommerce.topic` (Topic Exchange)
+- **Routing Keys**: `order.created`, `payment.approved`, `payment.rejected`, `order.cancelled`
+- **Objetivo**: Preparar para DLQ, retries, idempotência futura
 
 ---
 
-## Estrutura do projeto
-
-```text
-.
-├── docker-compose.yml
-├── pom.xml
-├── mvnw
-├── mvnw.cmd
-└── src
-    ├── main
-    │   ├── java
-    │   │   └── com/joaopablo/ecommerce
-    │   │       ├── auth
-    │   │       ├── cart
-    │   │       ├── category
-    │   │       ├── common
-    │   │       │   └── messaging/rabbitmq
-    │   │       ├── inventory
-    │   │       ├── order
-    │   │       ├── payment
-    │   │       ├── product
-    │   │       ├── shipping
-    │   │       └── BackendApplication.java
-    │   └── resources
-    │       ├── application.yaml
-    │       └── db/migration
-    └── test
-        └── java/com/joaopablo/ecommerce
-```
-
----
-
-## Configuração
-
-A aplicação usa variáveis de ambiente para dados sensíveis e parâmetros externos. Essa separação evita hardcode de credenciais e facilita a execução em ambientes diferentes.
-
-| Variável | Obrigatória | Valor padrão | Descrição |
-| --- | --- | --- | --- |
-| `JWT_SECRET` | Sim | - | Chave secreta usada para assinatura e validação dos tokens JWT |
-| `GOOGLE_CLIENT_ID` | Sim para OAuth2 | - | Client ID da aplicação configurada no Google Cloud Console |
-| `GOOGLE_CLIENT_SECRET` | Sim para OAuth2 | - | Client Secret da aplicação configurada no Google Cloud Console |
-| `RABBITMQ_HOST` | Não | `localhost` | Host do broker RabbitMQ |
-| `RABBITMQ_PORT` | Não | `5672` | Porta AMQP usada pela aplicação |
-| `RABBITMQ_USERNAME` | Não | `guest` | Usuário de conexão com RabbitMQ |
-| `RABBITMQ_PASSWORD` | Não | `guest` | Senha de conexão com RabbitMQ |
-
-Exemplo de `.env`:
-
-```env
-JWT_SECRET=change-me-with-a-strong-secret-change-me-with-a-strong-secret
-GOOGLE_CLIENT_ID=your-google-client-id
-GOOGLE_CLIENT_SECRET=your-google-client-secret
-
-RABBITMQ_HOST=localhost
-RABBITMQ_PORT=5672
-RABBITMQ_USERNAME=guest
-RABBITMQ_PASSWORD=guest
-```
-
-Configurações locais padrão:
-
-| Serviço | Host | Porta | Observação |
-| --- | --- | --- | --- |
-| API | `localhost` | `8080` | Aplicação Spring Boot |
-| PostgreSQL | `localhost` | `5432` | Banco principal |
-| PgAdmin | `localhost` | `5050` | Administração do PostgreSQL |
-| RabbitMQ AMQP | `localhost` | `5672` | Conexão da aplicação |
-| RabbitMQ Management | `localhost` | `15672` | Interface web do RabbitMQ |
-| Redis | `localhost` | `6379` | Necessário para tokens/cache |
-
----
-
-## Docker
-
-O `docker-compose.yml` provisiona os serviços de infraestrutura necessários para desenvolvimento local, exceto Redis, que deve estar disponível separadamente em `localhost:6379`.
-
-| Container | Imagem | Finalidade |
-| --- | --- | --- |
-| `ecommerce-postgres` | `postgres:17` | Banco relacional da aplicação |
-| `ecommerce-pgadmin` | `dpage/pgadmin4` | Interface para administração do PostgreSQL |
-| `ecommerce-rabbitmq` | `rabbitmq:3.13-management` | Broker AMQP e painel de gerenciamento |
-
-Subir toda a infraestrutura definida no compose:
-
-```bash
-docker compose up -d
-```
-
-Subir apenas banco e mensageria:
-
-```bash
-docker compose up -d postgres rabbitmq
-```
-
-Acompanhar logs dos containers:
-
-```bash
-docker compose logs -f
-```
-
-Parar os containers:
-
-```bash
-docker compose down
-```
-
-Credenciais locais:
-
-| Serviço | URL | Usuário | Senha |
-| --- | --- | --- | --- |
-| PgAdmin | `http://localhost:5050` | `admin@admin.com` | `admin` |
-| RabbitMQ Management | `http://localhost:15672` | `guest` | `guest` |
-| PostgreSQL | `localhost:5432/ecommerce` | `postgres` | `postgres` |
-
----
-
-## Como executar
+## 🚀 Como Executar
 
 ### 1. Clone
-
 ```bash
 git clone <repository-url>
 cd enterprise-ecommerce/backend
 ```
 
 ### 2. Configuração
-
-Crie um arquivo `.env` na raiz do projeto:
-
 ```bash
-touch .env
+cp .env.example .env
+# Edite .env com suas credenciais
 ```
 
-Preencha as variáveis com base na seção [Configuração](#configuração).
-
 ### 3. Docker
+```bash
+docker compose up -d
+```
 
-Suba os containers de infraestrutura:
+### 4. Redis
+Certifique-se de que Redis está rodando em `localhost:6379`
+
+### 5. Build
+```bash
+./mvnw clean install
+```
+
+### 6. Executar
+```bash
+./mvnw spring-boot:run
+```
+
+API disponível em: `http://localhost:8080`
+
+---
+
+## 📚 API Documentation
+
+### Swagger UI
+
+OpenAPI JSON
+
+Acesse: `http://localhost:8080/v3/api-docs`
+
+**Recursos:**
+- Explorar todos os endpoints
+- Visualizar schemas de request/response
+- Testar requisições com autenticação Bearer
+- Gerar código cliente
+
+### Autenticação
+
+Para endpoints protegidos, clique em **Authorize** e informe:
+
+```
+Bearer <seu-access-token>
+```
+
+### Endpoints Principais
+
+#### Auth
+| Método | Endpoint | Descrição |
+| --- | --- | --- |
+| POST | `/api/v1/auth/register` | Registrar usuário |
+| POST | `/api/v1/auth/login` | Login JWT |
+| POST | `/api/v1/auth/refresh` | Renovar token |
+| POST | `/api/v1/auth/logout` | Logout (revoga refresh token) |
+| GET | `/api/v1/auth/google` | Login com Google OAuth2 |
+
+#### Products
+| Método | Endpoint | Descrição |
+| --- | --- | --- |
+| GET | `/api/v1/products` | Listar com paginação |
+| POST | `/api/v1/products` | Criar produto |
+| GET | `/api/v1/products/{id}` | Buscar por ID |
+| PUT | `/api/v1/products/{id}` | Atualizar |
+| DELETE | `/api/v1/products/{id}` | Deletar |
+
+#### Orders
+| Método | Endpoint | Descrição |
+| --- | --- | --- |
+| POST | `/api/v1/orders` | Criar pedido |
+| GET | `/api/v1/orders` | Listar |
+| GET | `/api/v1/orders/{id}` | Buscar por ID |
+| PATCH | `/api/v1/orders/{id}/status` | Atualizar status |
+| PATCH | `/api/v1/orders/{id}/cancel` | Cancelar |
+
+#### Payments
+| Método | Endpoint | Descrição |
+| --- | --- | --- |
+| POST | `/api/v1/payments` | Criar pagamento |
+| GET | `/api/v1/payments/{id}` | Buscar por ID |
+| PATCH | `/api/v1/payments/{id}/approve` | Aprovar |
+| PATCH | `/api/v1/payments/{id}/reject` | Rejeitar |
+| PATCH | `/api/v1/payments/{id}/refund` | Estornar |
+
+#### Shipping
+| Método | Endpoint | Descrição |
+| --- | --- | --- |
+| POST | `/api/v1/shippings` | Criar envio |
+| GET | `/api/v1/shippings` | Listar |
+| GET | `/api/v1/shippings/{id}` | Buscar por ID |
+| PATCH | `/api/v1/shippings/{id}/ship` | Marcar como enviado |
+| PATCH | `/api/v1/shippings/{id}/deliver` | Marcar como entregue |
+
+---
+
+## ⚙️ Configuração
+
+**Variáveis de Ambiente Obrigatórias:**
+
+```env
+JWT_SECRET=seu-secret-forte-aqui
+GOOGLE_CLIENT_ID=seu-client-id
+GOOGLE_CLIENT_SECRET=seu-client-secret
+```
+
+**Opcionais:**
+
+```env
+RABBITMQ_HOST=localhost
+RABBITMQ_PORT=5672
+RABBITMQ_USERNAME=guest
+RABBITMQ_PASSWORD=guest
+```
+
+**Serviços Locais:**
+
+| Serviço | URL | Credenciais |
+| --- | --- | --- |
+| API | `http://localhost:8080` | - |
+| Swagger | `http://localhost:8080/swagger-ui/index.html` | - |
+| PostgreSQL | `localhost:5432/ecommerce` | postgres / postgres |
+| PgAdmin | `http://localhost:5050` | admin@admin.com / admin |
+| RabbitMQ Management | `http://localhost:15672` | guest / guest |
+| Redis | `localhost:6379` | - |
+
+---
+
+## 🐳 Docker
+
+A aplicação utiliza **Docker Compose** para provisionar toda a infraestrutura necessária ao ambiente de desenvolvimento.
+
+### Arquitetura
+
+```text
+                 Docker Compose
+
+               ┌───────────────┐
+               │  Spring Boot  │
+               └───────┬───────┘
+                       │
+        ┌──────────────┼──────────────┐
+        │              │              │
+        ▼              ▼              ▼
+ ┌──────────┐   ┌──────────┐   ┌────────────┐
+ │PostgreSQL│   │  Redis   │   │ RabbitMQ   │
+ └──────────┘   └──────────┘   └────────────┘
+        │
+        ▼
+ ┌──────────┐
+ │ PgAdmin  │
+ └──────────┘
+```
+
+### Iniciar a infraestrutura
 
 ```bash
 docker compose up -d
 ```
 
-### 4. Banco
+### Containers Provisionados
 
-O PostgreSQL será exposto em:
+| Serviço | Imagem | Porta |
+|----------|---------|------:|
+| Spring Boot API | Local Build | 8080 |
+| PostgreSQL | `postgres:17` | 5432 |
+| PgAdmin | `dpage/pgadmin4` | 5050 |
+| Redis | `redis:7-alpine` | 6379 |
+| RabbitMQ | `rabbitmq:3.13-management` | 5672 / 15672 |
 
-```text
-localhost:5432
-```
-
-As migrações Flyway são executadas automaticamente na inicialização da aplicação.
-
-### 5. Redis
-
-Garanta que o Redis esteja rodando localmente:
-
-```text
-localhost:6379
-```
-
-### 6. Build
-
-Compile e execute os testes:
+### Parar a infraestrutura
 
 ```bash
-./mvnw clean install
+docker compose down
 ```
 
-Para apenas empacotar sem rodar testes:
+O Docker Compose simplifica o ambiente de desenvolvimento, garantindo que banco de dados, cache, mensageria e ferramentas administrativas sejam iniciados de forma consistente com um único comando.
 
-```bash
-./mvnw -DskipTests package
-```
+## 🖼️ Screenshots
 
-### 7. Execução
+Ferramentas principais utilizadas para desenvolvimento, monitoramento e testes.
 
-Inicie a aplicação:
+### Swagger UI - Documentação Interativa
 
-```bash
-./mvnw spring-boot:run
-```
+![Swagger UI](docs/images/swagger.png)
 
-A API ficará disponível em:
-
-```text
-http://localhost:8080
-```
+Interface OpenAPI gerada automaticamente pelo Springdoc, permitindo explorar endpoints, visualizar modelos, validar payloads e testar requisições com autenticação Bearer integrada.
 
 ---
 
-## Screenshots
+### RabbitMQ Management - Painel Administrativo
 
-### Swagger UI
+![RabbitMQ Management](docs/images/rabbitmq-queues.png)
 
-![Swagger UI](../docs/images/swagger.png)
-
-Interface interativa gerada pelo Springdoc OpenAPI para explorar endpoints, visualizar schemas e testar requisições autenticadas.
-
-### RabbitMQ Management
-
-![RabbitMQ Management](../docs/images/rabbitmq-queues.png)
-
-Painel web do RabbitMQ para inspecionar exchanges, filas, bindings, mensagens e taxa de consumo/publicação.
+Console web do RabbitMQ para monitorar exchanges, visualizar filas, inspecionar bindings por routing key e acompanhar taxa de publicação/consumo de mensagens em tempo real.
 
 ---
 
-## Swagger
+### JaCoCo Coverage - Relatório de Cobertura
 
-A documentação OpenAPI está disponível via Swagger UI:
+![JaCoCo Coverage Report](docs/images/jacoco-report.png)
+
+Análise de cobertura de código revelando quais linhas foram executadas durante testes, com métricas detalhadas (67% instructions, 44% branches, 74% classes, 66% methods).
+
+---
+
+## ☁️ Deploy AWS
+
+A aplicação foi preparada para execução em ambiente de produção utilizando serviços da AWS.
+
+### Arquitetura da Infraestrutura
 
 ```text
+                    Internet
+                        │
+                        ▼
+            ┌────────────────────┐
+            │ Amazon EC2          │
+            │ Spring Boot + Docker│
+            └──────────┬──────────┘
+                       │
+        ┌──────────────┼──────────────┐
+        │              │              │
+        ▼              ▼              ▼
+ ┌────────────┐  ┌──────────┐  ┌────────────┐
+ │Amazon RDS  │  │  Redis   │  │ RabbitMQ   │
+ │PostgreSQL  │  │  Cache   │  │ Messaging  │
+ └────────────┘  └──────────┘  └────────────┘
+```
+
+A API é executada em uma instância **Amazon EC2**, enquanto o banco de dados utiliza o **Amazon RDS PostgreSQL**. Redis é responsável pelo cache e gerenciamento de tokens, e RabbitMQ pela comunicação orientada a eventos.
+
+---
+
+### Amazon EC2
+
+![Amazon EC2](docs/images/ec2.png)
+
+Instância Linux responsável pela execução da aplicação Spring Boot containerizada com Docker.
+
+---
+
+### Amazon RDS PostgreSQL
+
+![Amazon RDS](docs/images/rds.png)
+
+Banco de dados PostgreSQL gerenciado pela AWS, oferecendo persistência, backups automáticos e snapshots.
+
+---
+
+### AWS Console
+
+![AWS Console](docs/images/ec2Console.png)
+
+Visão geral da infraestrutura provisionada no ambiente AWS.
+
+---
+
+### Containers em Execução
+
+![Docker PS](docs/images/dockerPs-a.png)
+
+Containers responsáveis pela API e pelos serviços auxiliares utilizados pela aplicação.
+
+---
+
+### Acesso
+
+**Swagger Local**
+
+```
 http://localhost:8080/swagger-ui/index.html
 ```
 
-O contrato OpenAPI em JSON fica disponível em:
+**Swagger Produção**
 
-```text
-http://localhost:8080/v3/api-docs
+```
+http://13.59.197.68:8080/swagger-ui/index.html
 ```
 
-No Swagger é possível:
+## ✅ Testes
 
-- Visualizar todos os endpoints documentados.
-- Conferir exemplos de request e response.
-- Validar modelos de entrada e saída.
-- Testar endpoints protegidos usando autenticação Bearer.
+A qualidade da aplicação é garantida por testes automatizados cobrindo autenticação, regras de negócio e endpoints REST.
 
-Para endpoints protegidos, clique em **Authorize** e informe:
+### Ferramentas Utilizadas
 
-```text
-Bearer <access-token>
-```
+| Ferramenta | Uso |
+|------------|-----|
+| **JUnit 5** | Testes unitários |
+| **Mockito** | Mocks e isolamento de dependências |
+| **MockMvc** | Testes de integração dos endpoints REST |
+| **JaCoCo** | Relatórios de cobertura de código |
 
----
+### Cobertura
 
-## RabbitMQ Management
+- Autenticação JWT e OAuth2
+- Refresh Token e Logout
+- Endpoints REST
+- Regras de negócio
+- Tratamento de exceções
 
-Com o Docker Compose em execução, acesse:
-
-```text
-http://localhost:15672
-```
-
-Credenciais:
-
-```text
-Usuário: guest
-Senha: guest
-```
-
-No painel é possível inspecionar:
-
-- Exchange `ecommerce.topic`
-- Filas criadas pela aplicação
-- Bindings por routing key
-- Mensagens publicadas e consumidas
-- Taxa de publicação/consumo
-
----
-
-## Exemplos de autenticação
-
-### Login JWT
-
-```http
-POST /api/v1/auth/login HTTP/1.1
-Host: localhost:8080
-Content-Type: application/json
-
-{
-  "email": "joao.pablo@email.com",
-  "password": "Senha@123"
-}
-```
-
-Resposta esperada:
-
-```json
-{
-  "token": "eyJhbGciOiJIUzI1NiJ9...",
-  "refreshToken": "550e8400-e29b-41d4-a716-446655440000",
-  "type": "Bearer",
-  "expiresIn": 86400000
-}
-```
-
-### Bearer Token
-
-Use o token retornado no login em endpoints protegidos:
-
-```http
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...
-```
-
-Exemplo com `curl`:
-
-```bash
-curl -H "Authorization: Bearer <access-token>" \
-  http://localhost:8080/api/v1/products
-```
-
-### Google OAuth2
-
-Para iniciar o login com Google:
-
-```text
-GET http://localhost:8080/api/v1/auth/google
-```
-
-Também é possível usar o fluxo padrão do Spring Security:
-
-```text
-GET http://localhost:8080/oauth2/authorization/google
-```
-
----
-
-## Exemplos de endpoints
-
-Os endpoints abaixo refletem os controllers existentes e podem ser explorados com mais detalhes no Swagger.
-
-### Auth
-
-| Método | Endpoint | Descrição |
-| --- | --- | --- |
-| `POST` | `/api/v1/auth/register` | Registra um novo usuário |
-| `POST` | `/api/v1/auth/login` | Autentica usuário e retorna tokens |
-| `POST` | `/api/v1/auth/refresh` | Renova access token com refresh token |
-| `POST` | `/api/v1/auth/logout` | Revoga refresh token |
-| `GET` | `/api/v1/auth/google` | Inicia autenticação com Google |
-
-### Products
-
-| Método | Endpoint | Descrição |
-| --- | --- | --- |
-| `POST` | `/api/v1/products` | Cria produto |
-| `GET` | `/api/v1/products` | Lista produtos com paginação/filtros |
-| `GET` | `/api/v1/products/{id}` | Busca produto por ID |
-| `PUT` | `/api/v1/products/{id}` | Atualiza produto |
-| `DELETE` | `/api/v1/products/{id}` | Remove produto |
-
-### Orders
-
-| Método | Endpoint | Descrição |
-| --- | --- | --- |
-| `POST` | `/api/v1/orders` | Cria pedido |
-| `GET` | `/api/v1/orders` | Lista pedidos |
-| `GET` | `/api/v1/orders/{id}` | Busca pedido por ID |
-| `GET` | `/api/v1/orders/user/{userId}` | Lista pedidos de um usuário |
-| `PATCH` | `/api/v1/orders/{id}/status` | Atualiza status do pedido |
-| `PATCH` | `/api/v1/orders/{id}/cancel` | Cancela pedido |
-
-### Payments
-
-| Método | Endpoint | Descrição |
-| --- | --- | --- |
-| `POST` | `/api/v1/payments` | Cria pagamento |
-| `GET` | `/api/v1/payments/{id}` | Busca pagamento por ID |
-| `PATCH` | `/api/v1/payments/{id}/approve` | Aprova pagamento |
-| `PATCH` | `/api/v1/payments/{id}/reject` | Rejeita pagamento |
-| `PATCH` | `/api/v1/payments/{id}/refund` | Estorna pagamento |
-
-### Shipping
-
-| Método | Endpoint | Descrição |
-| --- | --- | --- |
-| `POST` | `/api/v1/shippings` | Cria envio |
-| `GET` | `/api/v1/shippings` | Lista envios |
-| `GET` | `/api/v1/shippings/{id}` | Busca envio por ID |
-| `GET` | `/api/v1/shippings/order/{orderId}` | Busca envio por pedido |
-| `PATCH` | `/api/v1/shippings/{id}/ship` | Marca como enviado |
-| `PATCH` | `/api/v1/shippings/{id}/out-for-delivery` | Marca como saiu para entrega |
-| `PATCH` | `/api/v1/shippings/{id}/deliver` | Marca como entregue |
-
----
-
-## Testes
-
-A aplicação possui uma suíte completa de testes automatizados que validam todos os aspectos críticos do sistema.
-
-### Tecnologias de teste
-
-A suíte de testes utiliza as seguintes tecnologias:
-
-- **JUnit 5** - Framework de testes
-- **Spring Boot Test** - Suporte a testes no Spring
-- **MockMvc** - Teste de endpoints REST sem servidor
-- **Mockito** - Mock de dependências
-- **Testes unitários** - Testes de unidades individuais (serviços, repositórios)
-- **Testes de integração** - Testes de fluxos completos com múltiplos componentes
-
-### Cobertura de funcionalidades
-
-Os testes cobrem:
-
-- Autenticação e autorização com JWT
-- Fluxo de refresh token
-- Logout com revogação de tokens
-- Endpoints REST de todos os módulos
-- Regras de negócio críticas (estoque, pagamento, pedidos)
-- Fluxos de integração entre módulos
-- Tratamento de exceções e validações
-
-### Executar testes
-
-| Comando | Descrição |
-| --- | --- |
-| `./mvnw test` | Executa a suíte de testes sem empacotar a aplicação |
-| `./mvnw clean install` | Limpa, compila, testa e instala o artefato no repositório local Maven |
-| `./mvnw -DskipTests package` | Gera o pacote da aplicação sem executar testes |
+### Executar os testes
 
 ```bash
 ./mvnw test
-```
-
-```bash
 ./mvnw clean install
 ```
 
-```bash
-./mvnw -DskipTests package
-```
-
-> Alguns testes de integração dependem de serviços locais, como PostgreSQL, Redis e RabbitMQ, conforme configuração do ambiente.
-
-### Cobertura de testes com JaCoCo
-
-O projeto utiliza **JaCoCo** (Java Code Coverage) para medir a cobertura de código. JaCoCo é uma ferramenta que analisa quais linhas de código foram executadas durante os testes, fornecendo métricas detalhadas de cobertura por instruções, branches, classes e métodos.
-
-**Métricas atuais de cobertura:**
+### Métricas (JaCoCo)
 
 | Métrica | Cobertura |
-| --- | --- |
-| Instructions | 67% |
-| Branches | 44% |
-| Classes | 74% |
-| Methods | 66% |
+|----------|----------:|
+| Instructions | **67%** |
+| Branches | **44%** |
+| Classes | **74%** |
+| Methods | **66%** |
 
-**Relatório de cobertura:**
+O relatório JaCoCo permite identificar áreas críticas da aplicação e acompanhar a evolução da cobertura de testes ao longo do desenvolvimento.
 
-![JaCoCo Coverage Report](../docs/images/jacoco-report.png)
+## 🔗 Links
 
----
-
-## Roadmap
-
-### Mensageria
-
-- [ ] Dead Letter Queues para eventos não processados
-- [ ] Retry com backoff para consumidores RabbitMQ
-- [ ] Outbox Pattern para publicação transacional confiável
-- [ ] Idempotência em consumers
-- [ ] Estratégia de versionamento de eventos
-
-### Observabilidade
-
-- [ ] Correlation ID
-- [ ] Logs estruturados
-- [ ] Métricas de aplicação
-- [ ] Dashboards operacionais
-- [ ] Tracing distribuído
-
-### Infraestrutura
-
-- [ ] Containerização da aplicação
-- [ ] Health checks para serviços externos
-- [ ] Profiles específicos por ambiente
-- [ ] Configuração centralizada por ambiente
-
-### Arquitetura
-
-- [ ] Refinar contratos de eventos
-- [ ] Evoluir consumidores observacionais para casos de uso reais
-- [ ] Avaliar extração futura de módulos para microsserviços
-- [ ] Definir limites transacionais para fluxos assíncronos
-
-### Deploy
-
-- [ ] Pipeline CI/CD
-- [ ] Deploy em Kubernetes
-- [ ] Deploy em cloud provider
-- [ ] Estratégia de rollback
-
-### Testes
-
-- [ ] Testcontainers para PostgreSQL, Redis e RabbitMQ
-- [ ] Testes de contrato para API REST
-- [ ] Testes de integração para eventos RabbitMQ
-- [ ] Testes end-to-end dos fluxos principais
+- **GitHub:** [J040Pablo/enterprise-ecommerce](https://github.com/J040Pablo/enterprise-ecommerce)
+- **Swagger Produção:** `https://your-production-host/swagger-ui/index.html`
+- **Swagger Local:** `http://localhost:8080/swagger-ui/index.html`
+- **RabbitMQ Management:** `http://localhost:15672`
+- **PgAdmin:** `http://localhost:5050`
 
 ---
 
-## Autor
+## 👨‍💻 Autor
 
-Desenvolvido por **João Pablo**.
+**João Pablo**
 
-Backend developer com foco em Java, Spring Boot, APIs REST, segurança, persistência relacional e arquitetura de sistemas corporativos. Este projeto foi criado para demonstrar domínio técnico em construção de APIs, modularização, documentação, mensageria e evolução incremental de arquitetura.
+Backend Developer | Java | Spring Boot
 
-Conecte-se:
+Especializado em desenvolvimento de APIs REST utilizando Java e Spring Boot, com foco em arquitetura de software, segurança, mensageria e cloud.
+
+### Contato
 
 - [GitHub](https://github.com/J040Pablo)
 - [LinkedIn](https://linkedin.com/in/joaopablodelgadogomes)
-

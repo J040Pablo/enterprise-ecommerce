@@ -1,24 +1,29 @@
 spring:
+
   application:
     name: backend
+
+  profiles:
+    active: ${SPRING_PROFILE:prod}
 
   security:
     oauth2:
       client:
         registration:
           google:
-            client-id: ${GOOGLE_CLIENT_ID:#{null}}
-            client-secret: ${GOOGLE_CLIENT_SECRET:#{null}}
+            client-id: ${GOOGLE_CLIENT_ID:}
+            client-secret: ${GOOGLE_CLIENT_SECRET:}
             scope:
               - openid
               - profile
               - email
 
   datasource:
-    url: ${DB_URL:jdbc:h2:mem:devdb;DB_CLOSE_DELAY=-1;MODE=PostgreSQL}
-    driver-class-name: ${DB_DRIVER:org.h2.Driver}
-    username: ${DB_USERNAME:sa}
-    password: ${DB_PASSWORD:}
+
+    url: ${DB_URL:jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:ecommerce}}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: ${DB_DRIVER:org.postgresql.Driver}
 
   data:
     redis:
@@ -26,30 +31,27 @@ spring:
       port: ${REDIS_PORT:6379}
 
   jpa:
+    open-in-view: false
     hibernate:
-      ddl-auto: ${JPA_DDL_AUTO:update}
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
+      ddl-auto: ${JPA_DDL_AUTO:validate}
+    show-sql: ${SHOW_SQL:false}
 
   flyway:
-    enabled: ${FLYWAY_ENABLED:false}
+    enabled: ${FLYWAY_ENABLED:true}
     locations: classpath:db/migration
+
 
   rabbitmq:
     host: ${RABBITMQ_HOST:localhost}
     port: ${RABBITMQ_PORT:5672}
     username: ${RABBITMQ_USERNAME:guest}
     password: ${RABBITMQ_PASSWORD:guest}
-    virtual-host: /
-    publisher-confirm-type: correlated
-    publisher-returns: true
+
 
 server:
-  port: 8080
+  port: ${SERVER_PORT:8080}
 
 jwt:
   secret: ${JWT_SECRET:}
-  expiration-ms: 86400000
-  refresh-expiration-ms: 604800000
+  expiration-ms: ${JWT_EXPIRATION:86400000}
+  refresh-expiration-ms: ${JWT_REFRESH_EXPIRATION:604800000}
