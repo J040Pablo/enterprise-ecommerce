@@ -17,6 +17,30 @@ jobs:
     runs-on: ubuntu-latest
 
 
+    services:
+
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+
+      rabbitmq:
+        image: rabbitmq:3-management
+        ports:
+          - 5672:5672
+        options: >-
+          --health-cmd "rabbitmq-diagnostics -q ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+
     steps:
 
       - name: Checkout repository
@@ -33,4 +57,4 @@ jobs:
 
       - name: Run backend tests
         working-directory: backend
-        run: mvn clean verify
+        run: mvn clean verify -Dspring.profiles.active=test
