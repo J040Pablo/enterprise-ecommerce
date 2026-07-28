@@ -471,7 +471,7 @@ Ferramentas principais utilizadas para desenvolvimento, monitoramento e testes.
 
 ### Swagger UI - Documentação Interativa
 
-![Swagger UI](docs/images/swagger.png)
+![Swagger UI](../docs/images/swagger.png)
 
 Interface OpenAPI gerada automaticamente pelo Springdoc, permitindo explorar endpoints, visualizar modelos, validar payloads e testar requisições com autenticação Bearer integrada.
 
@@ -479,7 +479,7 @@ Interface OpenAPI gerada automaticamente pelo Springdoc, permitindo explorar end
 
 ### RabbitMQ Management - Painel Administrativo
 
-![RabbitMQ Management](docs/images/rabbitmq-queues.png)
+![RabbitMQ Management](../docs/images/rabbitmq-queues.png)
 
 Console web do RabbitMQ para monitorar exchanges, visualizar filas, inspecionar bindings por routing key e acompanhar taxa de publicação/consumo de mensagens em tempo real.
 
@@ -487,7 +487,7 @@ Console web do RabbitMQ para monitorar exchanges, visualizar filas, inspecionar 
 
 ### JaCoCo Coverage - Relatório de Cobertura
 
-![JaCoCo Coverage Report](docs/images/jacoco-report.png)
+![JaCoCo Coverage Report](../docs/images/jacoco-report.png)
 
 Análise de cobertura de código revelando quais linhas foram executadas durante testes, com métricas detalhadas (67% instructions, 44% branches, 74% classes, 66% methods).
 
@@ -523,7 +523,7 @@ A API é executada em uma instância **Amazon EC2**, enquanto o banco de dados u
 
 ### Amazon EC2
 
-![Amazon EC2](docs/images/ec2.png)
+![Amazon EC2](../docs/images/rds.png)
 
 Instância Linux responsável pela execução da aplicação Spring Boot containerizada com Docker.
 
@@ -531,7 +531,7 @@ Instância Linux responsável pela execução da aplicação Spring Boot contain
 
 ### Amazon RDS PostgreSQL
 
-![Amazon RDS](docs/images/rds.png)
+![Amazon RDS](../docs/images/ec2Console.png)
 
 Banco de dados PostgreSQL gerenciado pela AWS, oferecendo persistência, backups automáticos e snapshots.
 
@@ -539,7 +539,7 @@ Banco de dados PostgreSQL gerenciado pela AWS, oferecendo persistência, backups
 
 ### AWS Console
 
-![AWS Console](docs/images/ec2Console.png)
+![AWS Console](../docs/images/dockerPs-a.png)
 
 Visão geral da infraestrutura provisionada no ambiente AWS.
 
@@ -609,7 +609,7 @@ O relatório JaCoCo permite identificar áreas críticas da aplicação e acompa
 ## 🔗 Links
 
 - **GitHub:** [J040Pablo/enterprise-ecommerce](https://github.com/J040Pablo/enterprise-ecommerce)
-- **Swagger Produção:** `https://your-production-host/swagger-ui/index.html`
+- **Swagger Produção:** [http://13.59.197.68:8080/swagger-ui/index.html](http://13.59.197.68:8080/swagger-ui/index.html)
 - **Swagger Local:** `http://localhost:8080/swagger-ui/index.html`
 - **RabbitMQ Management:** `http://localhost:15672`
 - **PgAdmin:** `http://localhost:5050`
