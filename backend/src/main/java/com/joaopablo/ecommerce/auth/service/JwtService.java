@@ -2,7 +2,10 @@ package com.joaopablo.ecommerce.auth.service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -18,11 +21,18 @@ public class JwtService {
     private final SecretKey signingKey;
     private final long expirationMs;
 
+    private static final Logger log = LoggerFactory.getLogger(JwtService.class);
+
     public JwtService(
-            @Value("${jwt.secret}") String secret,
-            @Value("${jwt.expiration-ms}") long expirationMs
+            @Value("${jwt.secret:}") String secret,
+            @Value("${jwt.expiration-ms:86400000}") long expirationMs
     ) {
-        this.signingKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        if (secret == null || secret.isBlank()) {
+            log.warn("JWT secret not set. Generating an ephemeral signing key — not suitable for production. Set JWT_SECRET env var to provide a persistent secret.");
+            this.signingKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+        } else {
+            this.signingKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        }
         this.expirationMs = expirationMs;
     }
 
