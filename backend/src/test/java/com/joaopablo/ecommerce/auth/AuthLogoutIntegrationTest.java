@@ -18,6 +18,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.joaopablo.ecommerce.test.util.TestDataCleaner;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -31,11 +33,17 @@ class AuthLogoutIntegrationTest {
     @Autowired
     private RefreshTokenRepository refreshTokenRepository;
 
+    @Autowired
+    private TestDataCleaner testDataCleaner;
+
     private String userEmail;
     private String userPassword;
 
     @BeforeEach
     void setUp() {
+        // Ensure a clean DB and that essential seed data (roles) exist
+        testDataCleaner.cleanAll();
+
         userEmail = "logout.test." + System.currentTimeMillis() + "@email.com";
         userPassword = "Password@123";
 

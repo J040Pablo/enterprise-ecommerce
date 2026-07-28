@@ -27,6 +27,8 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.joaopablo.ecommerce.test.util.TestDataCleaner;
+
 import java.math.BigDecimal;
 import java.util.UUID;
 
@@ -69,18 +71,16 @@ class CartControllerIntegrationTest {
     private User testUser;
     private Product testProduct;
 
+    @Autowired
+    private TestDataCleaner testDataCleaner;
+
     @BeforeEach
     void setup() {
-        cartRepository.deleteAll();
-        inventoryRepository.deleteAll();
-        productRepository.deleteAll();
-        categoryRepository.deleteAll();
-        userRoleRepository.deleteAll();
-        userRepository.deleteAll();
-        roleRepository.deleteAll();
+        // Centralized cleaner handles deletion in safe order (respects FK constraints)
+        testDataCleaner.cleanAll();
 
-        Role customerRole = roleRepository.save(
-                Role.builder().name("CUSTOMER").description("Customer role").build()
+        Role customerRole = roleRepository.findByName("CUSTOMER").orElseGet(() ->
+                roleRepository.save(Role.builder().name("CUSTOMER").description("Customer role").build())
         );
 
         testUser = User.builder()
