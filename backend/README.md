@@ -547,7 +547,7 @@ Visão geral da infraestrutura provisionada no ambiente AWS.
 
 ### Containers em Execução
 
-![Docker PS](docs/images/dockerPs-a.png)
+![Docker PS](../docs/images/dockerPs-a.png))
 
 Containers responsáveis pela API e pelos serviços auxiliares utilizados pela aplicação.
 
