@@ -29,10 +29,52 @@
         </mat-icon>
       </a>
 
-      <a mat-stroked-button routerLink="/auth/login" class="login-btn">
-        <mat-icon>account_circle</mat-icon>
-        Entrar
-      </a>
+      <!-- Unauthenticated View -->
+      <ng-container *ngIf="!authService.isAuthenticated()">
+        <a mat-stroked-button routerLink="/auth/login" class="nav-auth-btn">
+          <mat-icon>login</mat-icon>
+          Entrar
+        </a>
+        <a mat-flat-button color="accent" routerLink="/auth/register" class="nav-register-btn">
+          Cadastrar
+        </a>
+      </ng-container>
+
+      <!-- Authenticated View -->
+      <ng-container *ngIf="authService.isAuthenticated()">
+        <button mat-button [matMenuTriggerFor]="userMenu" class="user-profile-btn">
+          <div class="user-avatar">
+            {{ (authService.currentUser()?.firstName?.charAt(0) || 'U') }}
+          </div>
+          <span class="user-name">{{ authService.currentUser()?.firstName }}</span>
+          <mat-icon>arrow_drop_down</mat-icon>
+        </button>
+
+        <mat-menu #userMenu="matMenu" xPosition="before" class="custom-user-menu">
+          <div class="user-menu-header" (click)="$event.stopPropagation()">
+            <div class="user-menu-name">
+              {{ authService.currentUser()?.firstName }} {{ authService.currentUser()?.lastName }}
+            </div>
+            <div class="user-menu-email">
+              {{ authService.currentUser()?.email }}
+            </div>
+          </div>
+          <mat-divider></mat-divider>
+          <a mat-menu-item routerLink="/orders">
+            <mat-icon>receipt_long</mat-icon>
+            <span>Meus Pedidos</span>
+          </a>
+          <a mat-menu-item routerLink="/admin">
+            <mat-icon>admin_panel_settings</mat-icon>
+            <span>Painel Admin</span>
+          </a>
+          <mat-divider></mat-divider>
+          <button mat-menu-item (click)="logout()" class="logout-menu-item">
+            <mat-icon color="warn">logout</mat-icon>
+            <span class="warn-text">Sair</span>
+          </button>
+        </mat-menu>
+      </ng-container>
     </div>
   </div>
 </mat-toolbar>

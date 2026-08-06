@@ -1,0 +1,94 @@
+<div class="detail-container">
+  <!-- Back -->
+  <button mat-button id="btn-back-products" class="back-btn" (click)="goBack()">
+    <mat-icon>arrow_back</mat-icon>
+    Voltar ao catálogo
+  </button>
+
+  <!-- Loading -->
+  @if (loading()) {
+    <div class="loading-wrapper">
+      <mat-spinner diameter="52" />
+    </div>
+  }
+
+  <!-- Error -->
+  @if (error() && !loading()) {
+    <div class="error-card">
+      <mat-icon>error_outline</mat-icon>
+      <p>{{ error() }}</p>
+      <button mat-stroked-button (click)="loadProduct()">
+        <mat-icon>refresh</mat-icon> Tentar novamente
+      </button>
+    </div>
+  }
+
+  <!-- Product -->
+  @if (product() && !loading()) {
+    <div class="product-layout">
+      <!-- Image Area -->
+      <div class="product-image-area">
+        <mat-icon class="big-icon">inventory_2</mat-icon>
+        @if (!product()!.active) {
+          <div class="unavailable-overlay">Indisponível</div>
+        }
+      </div>
+
+      <!-- Info -->
+      <div class="product-info">
+        <div class="category-chip">{{ product()!.categoryName }}</div>
+        <h1 class="product-name">{{ product()!.name }}</h1>
+        <p class="product-description">{{ product()!.description }}</p>
+
+        <mat-divider class="divider" />
+
+        <div class="price-section">
+          <span class="price">{{ formatPrice(product()!.price) }}</span>
+        </div>
+
+        @if (product()!.active) {
+          <!-- Quantity Selector -->
+          <div class="qty-section">
+            <span class="qty-label">Quantidade</span>
+            <div class="qty-controls">
+              <button
+                mat-icon-button
+                id="btn-decrement-qty"
+                (click)="decrementQty()"
+                [disabled]="quantity <= 1"
+              >
+                <mat-icon>remove</mat-icon>
+              </button>
+              <span class="qty-value" id="qty-display">{{ quantity }}</span>
+              <button
+                mat-icon-button
+                id="btn-increment-qty"
+                (click)="incrementQty()"
+              >
+                <mat-icon>add</mat-icon>
+              </button>
+            </div>
+          </div>
+
+          <div class="action-buttons">
+            <button
+              mat-flat-button
+              color="primary"
+              id="btn-add-to-cart"
+              class="add-btn"
+              (click)="addToCart()"
+            >
+              <mat-icon>add_shopping_cart</mat-icon>
+              Adicionar ao Carrinho
+            </button>
+          </div>
+        } @else {
+          <p class="unavailable-text">
+            <mat-icon>block</mat-icon>
+            Este produto está indisponível no momento.
+          </p>
+        }
+      </div>
+    </div>
+  }
+</div>

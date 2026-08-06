@@ -4,7 +4,7 @@ spring:
     name: backend
 
   profiles:
-    active: ${SPRING_PROFILE:prod}
+    active: ${SPRING_PROFILE:dev}
 
   security:
     oauth2:
@@ -55,3 +55,7 @@ jwt:
   secret: ${JWT_SECRET:}
   expiration-ms: ${JWT_EXPIRATION:86400000}
   refresh-expiration-ms: ${JWT_REFRESH_EXPIRATION:604800000}
+
+app:
+  oauth2:
+    redirect-uri: ${OAUTH2_REDIRECT_URI:http://localhost:4200/auth/callback}

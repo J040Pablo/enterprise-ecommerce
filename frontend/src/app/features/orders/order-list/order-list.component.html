@@ -1,0 +1,105 @@
+<div class="orders-container">
+  <header class="page-header">
+    <h1>
+      <mat-icon>receipt_long</mat-icon>
+      Meus Pedidos
+    </h1>
+    <p>Acompanhe o histórico e status de suas compras.</p>
+  </header>
+
+  <!-- Loading -->
+  @if (loading()) {
+    <div class="loading-wrapper">
+      <mat-spinner diameter="52" />
+      <p>Buscando seus pedidos...</p>
+    </div>
+  }
+
+  <!-- Error -->
+  @if (error() && !loading()) {
+    <div class="error-card">
+      <mat-icon>error_outline</mat-icon>
+      <p>{{ error() }}</p>
+      <button mat-stroked-button (click)="loadOrders()">
+        <mat-icon>refresh</mat-icon> Tentar novamente
+      </button>
+    </div>
+  }
+
+  <!-- Content -->
+  @if (!loading() && !error()) {
+    @if (orders().length === 0) {
+      <div class="empty-orders">
+        <mat-icon class="empty-icon">receipt</mat-icon>
+        <h2>Nenhum pedido encontrado</h2>
+        <p>Você ainda não realizou nenhum pedido em nossa loja.</p>
+        <a mat-flat-button color="primary" routerLink="/products" id="btn-browse-catalog">
+          <mat-icon>storefront</mat-icon>
+          Ir às Compras
+        </a>
+      </div>
+    } @else {
+      <div class="orders-list">
+        @for (order of orders(); track order.id) {
+          <mat-accordion class="order-accordion">
+            <mat-expansion-panel class="order-panel">
+              <mat-expansion-panel-header>
+                <mat-panel-title class="panel-title">
+                  <span class="order-id">Pedido #{{ order.id.substring(0, 8) }}...</span>
+                </mat-panel-title>
+                <mat-panel-description class="panel-desc">
+                  <span class="status-badge" [class]="statusColor(order.status)">
+                    {{ statusLabel(order.status) }}
+                  </span>
+                  <span class="order-total">{{ formatPrice(order.totalAmount) }}</span>
+                </mat-panel-description>
+              </mat-expansion-panel-header>
+
+              <div class="order-details-content">
+                <p class="full-id"><strong>ID Completo:</strong> {{ order.id }}</p>
+
+                <h4 class="section-title">Itens do Pedido</h4>
+                <div class="items-grid">
+                  @for (item of order.items; track item.productId) {
+                    <div class="order-item-row">
+                      <mat-icon class="item-icon">inventory_2</mat-icon>
+                      <div class="item-info">
+                        <span class="item-name">{{ item.productName }}</span>
+                        <span class="item-qty-price">{{ item.quantity }} × {{ formatPrice(item.unitPrice) }}</span>
+                      </div>
+                      <span class="item-subtotal">{{ formatPrice(item.subtotal) }}</span>
+                    </div>
+                  }
+                </div>
+
+                <mat-divider class="content-divider" />
+
+                <div class="tracking-payment-info">
+                  @if (order.payment) {
+                    <div class="info-badge">
+                      <mat-icon>payment</mat-icon>
+                      <span>Pagamento: <strong>{{ order.payment.status }}</strong></span>
+                    </div>
+                  }
+                  @if (order.shipping) {
+                    <div class="info-badge">
+                      <mat-icon>local_shipping</mat-icon>
+                      <span>Rastreio: <strong>{{ order.shipping.trackingCode || 'Processando' }}</strong></span>
+                    </div>
+                  }
+                </div>
+
+                <div class="panel-actions">
+                  <a mat-stroked-button color="primary" [routerLink]="['/checkout/confirmation', order.id]">
+                    <mat-icon>visibility</mat-icon>
+                    Ver Detalhes do Pedido
+                  </a>
+                </div>
+              </div>
+            </mat-expansion-panel>
+          </mat-accordion>
+        }
+      </div>
+    }
+  }
+</div>

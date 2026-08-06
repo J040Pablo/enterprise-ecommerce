@@ -83,7 +83,7 @@
     }
   }
 
-  .login-btn {
+  .nav-auth-btn {
     border-color: rgba(255, 255, 255, 0.2);
     color: #ffffff;
     display: flex;
@@ -97,4 +97,53 @@
       color: #38bdf8;
     }
   }
+
+  .nav-register-btn {
+    background-color: #38bdf8 !important;
+    color: #0f172a !important;
+    font-weight: 600;
+  }
+
+  .user-profile-btn {
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0 0.5rem;
+
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #38bdf8;
+      color: #0f172a;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+    }
+
+    .user-name {
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+  }
+}
+
+.user-menu-header {
+  padding: 0.75rem 1rem;
+  .user-menu-name {
+    font-weight: 600;
+    color: #0f172a;
+    font-size: 0.95rem;
+  }
+  .user-menu-email {
+    font-size: 0.8rem;
+    color: #64748b;
+  }
+}
+
+.warn-text {
+  color: #dc2626;
 }

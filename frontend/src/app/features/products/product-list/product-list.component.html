@@ -1,0 +1,103 @@
+<div class="products-container">
+  <!-- Page Header -->
+  <header class="page-header">
+    <div class="header-content">
+      <h1>Catálogo de Produtos</h1>
+      <p>Encontre os melhores produtos para você.</p>
+    </div>
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Buscar produtos...</mat-label>
+      <input matInput [formControl]="searchControl" id="product-search-input" />
+      <mat-icon matPrefix>search</mat-icon>
+    </mat-form-field>
+  </header>
+
+  <!-- Loading -->
+  @if (loading()) {
+    <div class="loading-wrapper">
+      <mat-spinner diameter="52" />
+      <p>Carregando produtos...</p>
+    </div>
+  }
+
+  <!-- Error -->
+  @if (error() && !loading()) {
+    <div class="error-card">
+      <mat-icon>error_outline</mat-icon>
+      <p>{{ error() }}</p>
+      <button mat-stroked-button (click)="loadProducts()">
+        <mat-icon>refresh</mat-icon> Tentar novamente
+      </button>
+    </div>
+  }
+
+  <!-- Products Grid -->
+  @if (!loading() && !error()) {
+    @if (products().length === 0) {
+      <div class="empty-state">
+        <mat-icon>inventory_2</mat-icon>
+        <h2>Nenhum produto encontrado</h2>
+        <p>Tente um termo de busca diferente.</p>
+      </div>
+    } @else {
+      <div class="product-grid">
+        @for (product of products(); track product.id) {
+          <mat-card class="product-card" [class.inactive]="!product.active">
+            <div class="card-image-area" (click)="viewDetail(product.id)">
+              <mat-icon class="product-icon">inventory_2</mat-icon>
+              @if (!product.active) {
+                <span class="inactive-badge">Indisponível</span>
+              }
+            </div>
+
+            <mat-card-header>
+              <mat-card-title>{{ product.name }}</mat-card-title>
+              <mat-card-subtitle>{{ product.categoryName }}</mat-card-subtitle>
+            </mat-card-header>
+
+            <mat-card-content>
+              <p class="product-description">{{ product.description }}</p>
+              <div class="price-row">
+                <span class="price-tag">{{ formatPrice(product.price) }}</span>
+              </div>
+            </mat-card-content>
+
+            <mat-card-actions class="card-actions">
+              <button
+                mat-stroked-button
+                id="btn-detail-{{ product.id }}"
+                (click)="viewDetail(product.id)"
+              >
+                <mat-icon>visibility</mat-icon>
+                Detalhes
+              </button>
+              <button
+                mat-flat-button
+                color="primary"
+                id="btn-add-{{ product.id }}"
+                [disabled]="!product.active"
+                [matTooltip]="!product.active ? 'Produto indisponível' : 'Adicionar ao carrinho'"
+                (click)="addToCart(product)"
+              >
+                <mat-icon>add_shopping_cart</mat-icon>
+                Adicionar
+              </button>
+            </mat-card-actions>
+          </mat-card>
+        }
+      </div>
+
+      <!-- Paginator -->
+      <mat-paginator
+        id="product-paginator"
+        [length]="totalElements()"
+        [pageSize]="pageSize"
+        [pageIndex]="pageIndex"
+        [pageSizeOptions]="[8, 12, 24]"
+        showFirstLastButtons
+        (page)="onPageChange($event)"
+        aria-label="Navegar entre páginas de produtos"
+      />
+    }
+  }
+</div>

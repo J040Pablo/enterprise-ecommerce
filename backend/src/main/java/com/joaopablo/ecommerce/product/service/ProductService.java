@@ -13,6 +13,7 @@ import com.joaopablo.ecommerce.product.exception.ProductNotFoundException;
 import com.joaopablo.ecommerce.product.mapper.ProductMapper;
 import com.joaopablo.ecommerce.product.repository.ProductRepository;
 import com.joaopablo.ecommerce.product.specification.ProductSpecification;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,7 +31,7 @@ public class ProductService {
     private final CategoryRepository categoryRepository;
     private final InventoryService inventoryService;
 
-
+    @Transactional
     public ProductResponse create(CreateProductRequest request) {
 
         Product product = mapper.toEntity(request);
@@ -42,93 +43,71 @@ public class ProductService {
 
         Product savedProduct = repository.save(product);
 
-
         inventoryService.createInventory(
                 savedProduct,
-                request.getInitialQuantity()
-        );
-
+                request.getInitialQuantity());
 
         return mapper.toResponse(savedProduct);
-
     }
 
+    @Transactional(readOnly = true)
+    public Page<ProductResponse> findAll(
+            ProductFilterRequest filter,
+            Pageable pageable) {
 
-    public Page<ProductResponse> findAll(ProductFilterRequest filter, Pageable pageable) {
-
-        Specification<Product> specification =
-                (root, query, criteriaBuilder) -> null;
-
+        Specification<Product> specification = (root, query, criteriaBuilder) -> null;
 
         if (filter.getName() != null && !filter.getName().isBlank()) {
 
             specification = specification.and(
-                    ProductSpecification.hasName(filter.getName())
-            );
-
+                    ProductSpecification.hasName(filter.getName()));
         }
-
 
         if (filter.getMinPrice() != null) {
 
             specification = specification.and(
-                    ProductSpecification.minPrice(filter.getMinPrice())
-            );
-
+                    ProductSpecification.minPrice(filter.getMinPrice()));
         }
-
 
         if (filter.getMaxPrice() != null) {
 
             specification = specification.and(
-                    ProductSpecification.maxPrice(filter.getMaxPrice())
-            );
-
+                    ProductSpecification.maxPrice(filter.getMaxPrice()));
         }
-
 
         if (filter.getActive() != null) {
 
             specification = specification.and(
-                    ProductSpecification.isActive(filter.getActive())
-            );
-
+                    ProductSpecification.isActive(filter.getActive()));
         }
-
 
         if (filter.getCategoryId() != null) {
 
             specification = specification.and(
-                    ProductSpecification.hasCategory(filter.getCategoryId())
-            );
-
+                    ProductSpecification.hasCategory(filter.getCategoryId()));
         }
-
 
         return repository.findAll(specification, pageable)
                 .map(mapper::toResponse);
-
     }
 
+    @Transactional(readOnly = true)
     public ProductResponse findById(UUID id) {
 
         return mapper.toResponse(
-                findEntityById(id)
-        );
-
+                findEntityById(id));
     }
 
-
-    public ProductResponse update(UUID id, UpdateProductRequest request) {
+    @Transactional
+    public ProductResponse update(
+            UUID id,
+            UpdateProductRequest request) {
 
         Product product = findEntityById(id);
 
-
         mapper.updateEntity(
                 request,
-                product
-        );
-
+                product);
 
         if (request.getCategoryId() != null) {
 
@@ -136,32 +115,25 @@ public class ProductService {
                     .orElseThrow(() -> new CategoryNotFoundException(request.getCategoryId()));
 
             product.setCategory(category);
-
         }
-
 
         Product savedProduct = repository.save(product);
 
-
         return mapper.toResponse(savedProduct);
-
     }
 
-
+    @Transactional
     public void delete(UUID id) {
 
         Product product = findEntityById(id);
 
         repository.delete(product);
-
     }
-
 
     private Product findEntityById(UUID id) {
 
         return repository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException(id));
-
     }
 
 }

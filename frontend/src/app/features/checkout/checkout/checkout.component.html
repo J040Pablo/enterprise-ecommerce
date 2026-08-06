@@ -1,0 +1,95 @@
+<div class="checkout-container">
+  <header class="checkout-header">
+    <h1>
+      <mat-icon>payment</mat-icon>
+      Finalizar Pedido
+    </h1>
+  </header>
+
+  <div class="checkout-layout">
+    <!-- Order Items Review -->
+    <mat-card class="items-card">
+      <mat-card-header>
+        <mat-card-title>Itens do Pedido</mat-card-title>
+        <mat-card-subtitle>{{ cartService.cartCount() }} {{ cartService.cartCount() === 1 ? 'produto' : 'produtos' }}</mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <div class="items-list">
+          @for (item of cartService.items(); track item.productId) {
+            <div class="checkout-item">
+              <div class="item-image">
+                <mat-icon>inventory_2</mat-icon>
+              </div>
+              <div class="item-details">
+                <span class="item-name">{{ item.productName }}</span>
+                <span class="item-qty">Quantidade: {{ item.quantity }}</span>
+              </div>
+              <span class="item-price">{{ formatPrice(item.price * item.quantity) }}</span>
+            </div>
+          }
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Order Summary & Confirm -->
+    <div class="summary-column">
+      <mat-card class="summary-card">
+        <mat-card-header>
+          <mat-card-title>Resumo</mat-card-title>
+        </mat-card-header>
+
+        <mat-card-content>
+          @for (item of cartService.items(); track item.productId) {
+            <div class="summary-row">
+              <span class="summary-name">{{ item.productName }} × {{ item.quantity }}</span>
+              <span>{{ formatPrice(item.price * item.quantity) }}</span>
+            </div>
+          }
+
+          <mat-divider class="divider" />
+
+          <div class="total-row">
+            <span class="total-label">Total</span>
+            <span class="total-value">{{ formatPrice(cartService.cartTotal()) }}</span>
+          </div>
+        </mat-card-content>
+
+        <mat-card-actions class="confirm-actions">
+          @if (error()) {
+            <div class="error-msg">
+              <mat-icon>error_outline</mat-icon>
+              <span>{{ error() }}</span>
+            </div>
+          }
+
+          <button
+            mat-flat-button
+            color="primary"
+            id="btn-place-order"
+            class="confirm-btn"
+            [disabled]="submitting()"
+            (click)="placeOrder()"
+          >
+            @if (submitting()) {
+              <ng-container>
+                <mat-spinner diameter="20" />
+                <span>Processando...</span>
+              </ng-container>
+            } @else {
+              <ng-container>
+                <mat-icon>check_circle</mat-icon>
+                <span>Confirmar Pedido</span>
+              </ng-container>
+            }
+          </button>
+
+          <a mat-stroked-button routerLink="/cart" id="btn-back-cart">
+            <mat-icon>arrow_back</mat-icon>
+            Voltar ao carrinho
+          </a>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+  </div>
+</div>

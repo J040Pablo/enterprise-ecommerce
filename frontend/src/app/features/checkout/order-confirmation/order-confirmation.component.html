@@ -1,0 +1,114 @@
+<div class="confirmation-container">
+
+  <!-- Loading -->
+  @if (loading()) {
+    <div class="loading-wrapper">
+      <mat-spinner diameter="52" />
+      <p>Carregando pedido...</p>
+    </div>
+  }
+
+  <!-- Error -->
+  @if (error() && !loading()) {
+    <div class="error-card">
+      <mat-icon>error_outline</mat-icon>
+      <p>{{ error() }}</p>
+      <a mat-stroked-button routerLink="/orders">Ver meus pedidos</a>
+    </div>
+  }
+
+  <!-- Success -->
+  @if (order() && !loading()) {
+    <div class="success-banner">
+      <div class="success-icon-wrapper">
+        <mat-icon class="success-icon">check_circle</mat-icon>
+      </div>
+      <h1>Pedido realizado com sucesso!</h1>
+      <p class="order-code">Nº do pedido: <strong>{{ order()!.id }}</strong></p>
+    </div>
+
+    <div class="confirmation-layout">
+      <!-- Items -->
+      <mat-card class="items-card">
+        <mat-card-header>
+          <mat-card-title>Itens do pedido</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="items-list">
+            @for (item of order()!.items; track item.productId) {
+              <div class="confirm-item">
+                <div class="item-icon">
+                  <mat-icon>inventory_2</mat-icon>
+                </div>
+                <div class="item-details">
+                  <span class="item-name">{{ item.productName }}</span>
+                  <span class="item-meta">{{ item.quantity }} × {{ formatPrice(item.unitPrice) }}</span>
+                </div>
+                <span class="item-subtotal">{{ formatPrice(item.subtotal) }}</span>
+              </div>
+            }
+          </div>
+
+          <mat-divider />
+
+          <div class="total-row">
+            <span>Total</span>
+            <span class="total-value">{{ formatPrice(order()!.totalAmount) }}</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Status & Actions -->
+      <div class="side-column">
+        <mat-card class="status-card">
+          <mat-card-header>
+            <mat-card-title>Status do Pedido</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="status-badge" [class]="statusColor(order()!.status)">
+              <mat-icon>circle</mat-icon>
+              {{ statusLabel(order()!.status) }}
+            </div>
+
+            @if (order()!.payment) {
+              <div class="meta-row">
+                <mat-icon>payment</mat-icon>
+                <span>Pagamento: <strong>{{ order()!.payment!.status }}</strong></span>
+              </div>
+            }
+
+            @if (order()!.shipping) {
+              <div class="meta-row">
+                <mat-icon>local_shipping</mat-icon>
+                <span>
+                  Código de rastreio:
+                  <strong>{{ order()!.shipping!.trackingCode || 'Aguardando' }}</strong>
+                </span>
+              </div>
+            }
+          </mat-card-content>
+
+          <mat-card-actions class="side-actions">
+            <a
+              mat-flat-button
+              color="primary"
+              routerLink="/orders"
+              id="btn-view-orders"
+            >
+              <mat-icon>receipt_long</mat-icon>
+              Meus Pedidos
+            </a>
+            <a
+              mat-stroked-button
+              routerLink="/products"
+              id="btn-continue-shopping"
+            >
+              <mat-icon>storefront</mat-icon>
+              Continuar comprando
+            </a>
+          </mat-card-actions>
+        </mat-card>
+      </div>
+    </div>
+  }
+</div>

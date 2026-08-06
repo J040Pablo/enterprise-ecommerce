@@ -59,8 +59,8 @@ services:
 
 
   backend:
+    build: .
     image: ecommerce-backend:latest
-    container_name: ecommerce-backend
 
     depends_on:
       - postgres
@@ -92,6 +92,9 @@ services:
 
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+
+      OAUTH2_REDIRECT_URI: http://localhost:4200/auth/callback
+
 
 
 volumes:

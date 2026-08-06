@@ -1,0 +1,93 @@
+<div class="auth-container">
+  <mat-card class="auth-card">
+    <mat-card-header class="auth-header">
+      <mat-card-title>
+        <mat-icon class="brand-icon">person_add</mat-icon>
+        Criar sua Conta
+      </mat-card-title>
+      <mat-card-subtitle>Cadastre-se para realizar compras no Enterprise E-Commerce</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div *ngIf="errorMessage()" class="alert-error">
+        <mat-icon>error_outline</mat-icon>
+        <span>{{ errorMessage() }}</span>
+      </div>
+
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Nome</mat-label>
+            <input matInput formControlName="firstName" placeholder="João" />
+            <mat-error *ngIf="registerForm.get('firstName')?.hasError('required')">Nome é obrigatório.</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Sobrenome</mat-label>
+            <input matInput formControlName="lastName" placeholder="Pablo" />
+            <mat-error *ngIf="registerForm.get('lastName')?.hasError('required')">Sobrenome é obrigatório.</mat-error>
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>E-mail</mat-label>
+          <input matInput formControlName="email" type="email" placeholder="joao.pablo@email.com" />
+          <mat-icon matPrefix>email</mat-icon>
+          <mat-error *ngIf="registerForm.get('email')?.hasError('required')">E-mail é obrigatório.</mat-error>
+          <mat-error *ngIf="registerForm.get('email')?.hasError('email')">Informe um e-mail válido.</mat-error>
+        </mat-form-field>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>CPF</mat-label>
+            <input matInput formControlName="cpf" placeholder="123.456.789-00" />
+            <mat-icon matPrefix>badge</mat-icon>
+            <mat-error *ngIf="registerForm.get('cpf')?.hasError('required')">CPF é obrigatório.</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Telefone</mat-label>
+            <input matInput formControlName="phone" placeholder="+55 11 99999-9999" />
+            <mat-icon matPrefix>phone</mat-icon>
+            <mat-error *ngIf="registerForm.get('phone')?.hasError('required')">Telefone é obrigatório.</mat-error>
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Senha</mat-label>
+          <input matInput [type]="hidePassword() ? 'password' : 'text'" formControlName="password" />
+          <mat-icon matPrefix>lock</mat-icon>
+          <button mat-icon-button matSuffix (click)="hidePassword.set(!hidePassword())" type="button" aria-label="Toggle password visibility">
+            <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          <mat-error *ngIf="registerForm.get('password')?.hasError('required')">Senha é obrigatória.</mat-error>
+          <mat-error *ngIf="registerForm.get('password')?.hasError('minlength')">Mínimo de 8 caracteres.</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Confirmar Senha</mat-label>
+          <input matInput [type]="hidePassword() ? 'password' : 'text'" formControlName="confirmPassword" />
+          <mat-icon matPrefix>lock_reset</mat-icon>
+          <mat-error *ngIf="registerForm.hasError('passwordMismatch') && registerForm.get('confirmPassword')?.touched">
+            As senhas não coincidem.
+          </mat-error>
+        </mat-form-field>
+
+        <button
+          mat-raised-button
+          color="primary"
+          type="submit"
+          class="full-width submit-btn"
+          [disabled]="registerForm.invalid || isLoading()"
+        >
+          <mat-spinner diameter="20" *ngIf="isLoading()"></mat-spinner>
+          <span *ngIf="!isLoading()">Cadastrar</span>
+        </button>
+      </form>
+    </mat-card-content>
+
+    <mat-card-footer class="auth-footer">
+      <p>Já possui uma conta? <a routerLink="/auth/login">Faça Login</a></p>
+    </mat-card-footer>
+  </mat-card>
+</div>
