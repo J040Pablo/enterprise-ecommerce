@@ -1,0 +1,38 @@
+<mat-toolbar color="primary" class="app-header">
+  <div class="header-container">
+    <div class="brand-section">
+      <a routerLink="/" class="logo-link">
+        <mat-icon class="logo-icon">storefront</mat-icon>
+        <span class="logo-text">Enterprise<span class="highlight">Shop</span></span>
+      </a>
+    </div>
+
+    <nav class="nav-links">
+      <a mat-button routerLink="/products" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}">
+        <mat-icon>inventory_2</mat-icon>
+        Produtos
+      </a>
+      <a mat-button routerLink="/orders" routerLinkActive="active-link">
+        <mat-icon>receipt_long</mat-icon>
+        Pedidos
+      </a>
+      <a mat-button routerLink="/admin" routerLinkActive="active-link">
+        <mat-icon>dashboard</mat-icon>
+        Admin
+      </a>
+    </nav>
+
+    <div class="actions-section">
+      <a mat-icon-button routerLink="/cart" routerLinkActive="active-link" aria-label="Carrinho de compras">
+        <mat-icon [matBadge]="cartItemCount" [matBadgeHidden]="cartItemCount === 0" matBadgeColor="warn">
+          shopping_cart
+        </mat-icon>
+      </a>
+
+      <a mat-stroked-button routerLink="/auth/login" class="login-btn">
+        <mat-icon>account_circle</mat-icon>
+        Entrar
+      </a>
+    </div>
+  </div>
+</mat-toolbar>
