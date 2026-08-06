@@ -1,0 +1,187 @@
+.admin-sidenav-container {
+  height: 100vh;
+  width: 100vw;
+  background-color: #f8fafc;
+}
+
+.admin-sidenav {
+  width: 260px;
+  background: #0f172a;
+  color: #ffffff;
+  border-right: 1px solid #1e293b;
+
+  ::ng-deep .mat-drawer-inner-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: #0f172a;
+  }
+
+  .brand-header {
+    padding: 1.5rem 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+
+      .brand-icon {
+        color: #38bdf8;
+        font-size: 28px;
+        width: 28px;
+        height: 28px;
+      }
+
+      .brand-title {
+        font-size: 1.15rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        color: #ffffff;
+      }
+    }
+
+    .brand-badge {
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.2rem 0.5rem;
+      border-radius: 6px;
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+    }
+  }
+
+  .nav-list {
+    padding: 1rem 0.75rem;
+    flex: 1;
+
+    .nav-item {
+      border-radius: 8px;
+      margin-bottom: 0.35rem;
+      transition: all 0.2s ease;
+      background: transparent;
+
+      ::ng-deep .mdc-list-item__primary-text,
+      ::ng-deep .mat-mdc-list-item-title {
+        color: #cbd5e1 !important;
+        font-weight: 500 !important;
+        font-size: 0.925rem !important;
+      }
+
+      mat-icon {
+        color: #94a3b8 !important;
+        transition: color 0.2s ease;
+      }
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.08) !important;
+
+        ::ng-deep .mdc-list-item__primary-text,
+        ::ng-deep .mat-mdc-list-item-title {
+          color: #ffffff !important;
+        }
+
+        mat-icon {
+          color: #38bdf8 !important;
+        }
+      }
+
+      &.active-link {
+        background: #2563eb !important;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+
+        ::ng-deep .mdc-list-item__primary-text,
+        ::ng-deep .mat-mdc-list-item-title {
+          color: #ffffff !important;
+          font-weight: 600 !important;
+        }
+
+        mat-icon {
+          color: #ffffff !important;
+        }
+      }
+    }
+  }
+
+  mat-divider {
+    border-top-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .sidenav-footer {
+    padding: 1.25rem;
+
+    .store-link {
+      width: 100%;
+      color: #f1f5f9;
+      border-color: rgba(255, 255, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+
+      mat-icon {
+        color: #38bdf8;
+      }
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: #38bdf8;
+      }
+    }
+  }
+}
+
+.admin-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.admin-toolbar {
+  border-bottom: 1px solid #e2e8f0;
+  padding: 0 1.5rem;
+  height: 64px;
+
+  .toolbar-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-left: 1rem;
+  }
+
+  .spacer {
+    flex: 1;
+  }
+
+  .user-profile {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+
+    .user-info {
+      display: flex;
+      flex-direction: column;
+      text-align: right;
+
+      .user-name {
+        font-size: 0.9rem;
+        font-weight: 600;
+      }
+
+      .user-role {
+        font-size: 0.75rem;
+        opacity: 0.8;
+      }
+    }
+  }
+}
+
+.page-body {
+  padding: 2rem;
+  flex: 1;
+  background-color: #f8fafc;
+  overflow-y: auto;
+}

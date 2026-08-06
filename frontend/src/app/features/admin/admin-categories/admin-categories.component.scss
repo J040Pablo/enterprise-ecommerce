@@ -1,0 +1,151 @@
+.categories-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+
+  h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+  }
+
+  p {
+    color: #64748b;
+    margin: 0.25rem 0 0 0;
+  }
+}
+
+.filter-section {
+  margin-bottom: 1rem;
+
+  .search-field {
+    width: 100%;
+    max-width: 400px;
+  }
+}
+
+.table-progress-bar {
+  margin-bottom: -4px;
+  border-radius: 2px 2px 0 0;
+}
+
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+
+  p {
+    margin-top: 1rem;
+    color: #64748b;
+  }
+}
+
+.table-card {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+
+  .table-responsive {
+    overflow-x: auto;
+    max-height: 600px;
+  }
+
+  table {
+    width: 100%;
+
+    th {
+      font-weight: 600;
+      color: #475569;
+      background: #f8fafc;
+      white-space: nowrap;
+    }
+
+    td {
+      color: #334155;
+      height: 52px;
+
+      &.font-medium {
+        font-weight: 600;
+      }
+
+      &.description-cell {
+        color: #64748b;
+        max-width: 320px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
+
+    tr.table-row:hover td {
+      background: #f8fafc;
+      transition: background 0.15s ease;
+    }
+  }
+
+  .active-chip {
+    background-color: #dcfce7 !important;
+    color: #15803d !important;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .inactive-chip {
+    background-color: #fee2e2 !important;
+    color: #b91c1c !important;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .chip-icon {
+    font-size: 14px !important;
+    width: 14px !important;
+    height: 14px !important;
+  }
+
+  .actions-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .action-loading {
+    display: flex;
+    align-items: center;
+    padding: 0 0.5rem;
+  }
+
+  .empty-cell {
+    text-align: center;
+    padding: 3rem;
+    color: #94a3b8;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+
+    mat-icon {
+      font-size: 2rem;
+      width: 2rem;
+      height: 2rem;
+    }
+  }
+}

@@ -1,30 +1,148 @@
-<div class="admin-container">
+<div class="dashboard-container">
   <header class="page-header">
-    <h1>Painel Administrativo</h1>
-    <p>Gerenciamento de produtos, estoques e pedidos.</p>
+    <div>
+      <h1>Painel Geral</h1>
+      <p>Métricas gerais e estoque em tempo real do e-commerce</p>
+    </div>
+    <button mat-flat-button color="primary" (click)="loadMetrics()" [disabled]="loading()">
+      <mat-icon>refresh</mat-icon>
+      Atualizar
+    </button>
   </header>
 
-  <div class="stats-grid">
-    <div class="stat-card">
-      <mat-icon class="blue">inventory_2</mat-icon>
-      <div class="info">
-        <span class="value">128</span>
-        <span class="label">Produtos Ativos</span>
-      </div>
-    </div>
-    <div class="stat-card">
-      <mat-icon class="green">shopping_bag</mat-icon>
-      <div class="info">
-        <span class="value">42</span>
-        <span class="label">Pedidos Hoje</span>
-      </div>
-    </div>
-    <div class="stat-card">
-      <mat-icon class="purple">people</mat-icon>
-      <div class="info">
-        <span class="value">1,250</span>
-        <span class="label">Clientes Registrados</span>
-      </div>
-    </div>
+  <!-- Estado de Carregamento -->
+  <div class="loading-state" *ngIf="loading()">
+    <mat-spinner diameter="48"></mat-spinner>
+    <p>Carregando métricas do servidor...</p>
+  </div>
+
+  <!-- Estado de Erro -->
+  <div class="error-state" *ngIf="error() && !loading()">
+    <mat-icon color="warn">error</mat-icon>
+    <p>{{ error() }}</p>
+    <button mat-stroked-button color="primary" (click)="loadMetrics()">Tentar Novamente</button>
+  </div>
+
+  <!-- Cards de Estatísticas -->
+  <div class="stats-grid" *ngIf="!loading() && !error()">
+    <!-- Card Produtos e Estoque -->
+    <mat-card class="stat-card blue">
+      <mat-card-header>
+        <div class="icon-wrapper">
+          <mat-icon>inventory_2</mat-icon>
+        </div>
+        <mat-card-title>{{ stats().totalProducts }}</mat-card-title>
+        <mat-card-subtitle>Produtos Cadastrados</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="sub-metrics">
+          <div class="metric-row">
+            <span>Ativos no Catálogo:</span>
+            <strong>{{ stats().activeProducts }}</strong>
+          </div>
+          <div class="metric-row">
+            <span>Estoque Total:</span>
+            <strong>{{ stats().totalStockQuantity }} unid.</strong>
+          </div>
+        </div>
+      </mat-card-content>
+      <mat-card-actions>
+        <a mat-button routerLink="/admin/products">
+          Gerenciar Produtos
+          <mat-icon>chevron_right</mat-icon>
+        </a>
+      </mat-card-actions>
+    </mat-card>
+
+    <!-- Card Pedidos -->
+    <mat-card class="stat-card green">
+      <mat-card-header>
+        <div class="icon-wrapper">
+          <mat-icon>shopping_cart</mat-icon>
+        </div>
+        <mat-card-title>{{ stats().totalOrders }}</mat-card-title>
+        <mat-card-subtitle>Pedidos Efetuados</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="sub-metrics">
+          <div class="metric-row">
+            <span>Pendentes:</span>
+            <strong>{{ stats().pendingOrders }}</strong>
+          </div>
+          <div class="metric-row">
+            <span>Confirmados:</span>
+            <strong>{{ stats().confirmedOrders }}</strong>
+          </div>
+        </div>
+      </mat-card-content>
+      <mat-card-actions>
+        <a mat-button routerLink="/admin/orders">
+          Gerenciar Pedidos
+          <mat-icon>chevron_right</mat-icon>
+        </a>
+      </mat-card-actions>
+    </mat-card>
+
+    <!-- Card Pagamentos -->
+    <mat-card class="stat-card purple">
+      <mat-card-header>
+        <div class="icon-wrapper">
+          <mat-icon>payments</mat-icon>
+        </div>
+        <mat-card-title>{{ stats().totalPayments }}</mat-card-title>
+        <mat-card-subtitle>Pagamentos Processados</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="sub-metrics">
+          <div class="metric-row">
+            <span>Aprovados:</span>
+            <strong>{{ stats().approvedPayments }}</strong>
+          </div>
+        </div>
+      </mat-card-content>
+      <mat-card-actions>
+        <a mat-button routerLink="/admin/payments">
+          Ver Pagamentos
+          <mat-icon>chevron_right</mat-icon>
+        </a>
+      </mat-card-actions>
+    </mat-card>
+
+    <!-- Card Envios e Rastreio -->
+    <mat-card class="stat-card orange">
+      <mat-card-header>
+        <div class="icon-wrapper">
+          <mat-icon>local_shipping</mat-icon>
+        </div>
+        <mat-card-title>{{ stats().totalShipments }}</mat-card-title>
+        <mat-card-subtitle>Entregas Registradas</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="sub-metrics">
+          <div class="metric-row">
+            <span>PROCESSING:</span>
+            <strong>{{ stats().processingShipments }}</strong>
+          </div>
+          <div class="metric-row">
+            <span>SHIPPED:</span>
+            <strong>{{ stats().shippedShipments }}</strong>
+          </div>
+          <div class="metric-row">
+            <span>OUT_FOR_DELIVERY:</span>
+            <strong>{{ stats().outForDeliveryShipments }}</strong>
+          </div>
+          <div class="metric-row">
+            <span>DELIVERED:</span>
+            <strong>{{ stats().deliveredShipments }}</strong>
+          </div>
+        </div>
+      </mat-card-content>
+      <mat-card-actions>
+        <a mat-button routerLink="/admin/shipping">
+          Ver Rastreamento
+          <mat-icon>chevron_right</mat-icon>
+        </a>
+      </mat-card-actions>
+    </mat-card>
   </div>
 </div>

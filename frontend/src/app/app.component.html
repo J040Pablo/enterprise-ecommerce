@@ -1,9 +1,9 @@
-<div class="app-layout">
-  <app-header></app-header>
+<div class="app-layout" [class.admin-layout-root]="isAdminRoute()">
+  <app-header *ngIf="!isAdminRoute()"></app-header>
 
-  <main class="main-content">
+  <main [class.main-content]="!isAdminRoute()" [class.admin-main-container]="isAdminRoute()">
     <router-outlet></router-outlet>
   </main>
 
-  <app-footer></app-footer>
+  <app-footer *ngIf="!isAdminRoute()"></app-footer>
 </div>

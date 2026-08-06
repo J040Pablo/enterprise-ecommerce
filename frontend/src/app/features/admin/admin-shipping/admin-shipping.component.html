@@ -1,0 +1,144 @@
+<div class="shipping-container">
+  <header class="page-header">
+    <div>
+      <h1>Gerenciamento de Entregas e Rastreamento</h1>
+      <p>Gerencie o ciclo de logística e status de envio dos pedidos</p>
+    </div>
+    <button mat-flat-button color="primary" (click)="loadShippings()" [disabled]="loading()" id="btn-refresh-shipping">
+      <mat-icon>refresh</mat-icon>
+      Atualizar Lista
+    </button>
+  </header>
+
+  <!-- UUID Search -->
+  <div class="filter-section">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Buscar por UUID (envio ou pedido)</mat-label>
+      <input matInput [formControl]="uuidSearch" placeholder="Cole ou digite o ID..." id="input-shipping-uuid-search" />
+      <button *ngIf="uuidSearch.value" mat-icon-button matSuffix (click)="clearUuidSearch()" aria-label="Limpar">
+        <mat-icon>close</mat-icon>
+      </button>
+      <mat-icon matSuffix *ngIf="!uuidSearch.value">search</mat-icon>
+    </mat-form-field>
+  </div>
+
+  <!-- Progress Bar -->
+  <mat-progress-bar *ngIf="loading()" mode="indeterminate" class="table-progress-bar"></mat-progress-bar>
+
+  <!-- Error State -->
+  <div class="error-state" *ngIf="error() && !loading()">
+    <mat-icon color="warn">error</mat-icon>
+    <p>{{ error() }}</p>
+    <button mat-stroked-button color="primary" (click)="loadShippings()">Tentar Novamente</button>
+  </div>
+
+  <!-- Table Card -->
+  <div class="table-card" *ngIf="!error()">
+    <div class="table-responsive">
+      <table mat-table [dataSource]="displayedShippings()" class="shipping-table">
+
+        <!-- ID Column -->
+        <ng-container matColumnDef="id" sticky>
+          <th mat-header-cell *matHeaderCellDef>ID Envio</th>
+          <td mat-cell *matCellDef="let element">
+            <app-copy-uuid [uuid]="element.id"></app-copy-uuid>
+          </td>
+        </ng-container>
+
+        <!-- Order ID Column -->
+        <ng-container matColumnDef="orderId">
+          <th mat-header-cell *matHeaderCellDef>ID Pedido</th>
+          <td mat-cell *matCellDef="let element">
+            <app-copy-uuid [uuid]="element.orderId"></app-copy-uuid>
+          </td>
+        </ng-container>
+
+        <!-- Tracking Code Column -->
+        <ng-container matColumnDef="trackingCode">
+          <th mat-header-cell *matHeaderCellDef>Código Rastreio</th>
+          <td mat-cell *matCellDef="let element" class="font-medium">
+            <span class="tracking-tag">{{ element.trackingCode || 'Sem código' }}</span>
+          </td>
+        </ng-container>
+
+        <!-- Carrier Column -->
+        <ng-container matColumnDef="carrier">
+          <th mat-header-cell *matHeaderCellDef>Transportadora</th>
+          <td mat-cell *matCellDef="let element">
+            {{ element.carrier || 'Correios' }}
+          </td>
+        </ng-container>
+
+        <!-- Status Column -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let element">
+            <mat-chip [class]="getStatusClass(element.status)" class="status-chip">
+              <mat-icon class="chip-icon">{{ getStatusIcon(element.status) }}</mat-icon>
+              {{ element.status }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Ações de Logística</th>
+          <td mat-cell *matCellDef="let element">
+            <div class="actions-cell" *ngIf="actionLoadingId() !== element.id">
+              <button
+                mat-stroked-button
+                class="btn-sm btn-ship"
+                [disabled]="element.status !== 'PROCESSING'"
+                (click)="markShipped(element)"
+                title="Marcar como Enviado">
+                <mat-icon>local_shipping</mat-icon>
+                Enviar
+              </button>
+
+              <button
+                mat-stroked-button
+                class="btn-sm btn-out"
+                [disabled]="element.status !== 'SHIPPED'"
+                (click)="markOutForDelivery(element)"
+                title="Saiu para Entrega">
+                <mat-icon>directions_car</mat-icon>
+                Saiu p/ Entrega
+              </button>
+
+              <button
+                mat-stroked-button
+                class="btn-sm btn-deliver"
+                [disabled]="element.status !== 'OUT_FOR_DELIVERY'"
+                (click)="markDelivered(element)"
+                title="Marcar como Entregue">
+                <mat-icon>check_circle</mat-icon>
+                Entregue
+              </button>
+            </div>
+
+            <mat-spinner diameter="24" *ngIf="actionLoadingId() === element.id"></mat-spinner>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="table-row"></tr>
+
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell empty-cell" [attr.colspan]="displayedColumns.length">
+            Nenhum registro de entrega encontrado.
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <mat-paginator
+      [length]="shippings().length"
+      [pageSize]="pageSize()"
+      [pageIndex]="pageIndex()"
+      [pageSizeOptions]="[5, 10, 25, 50]"
+      (page)="onPageChange($event)"
+      showFirstLastButtons
+      aria-label="Página de entregas">
+    </mat-paginator>
+  </div>
+</div>

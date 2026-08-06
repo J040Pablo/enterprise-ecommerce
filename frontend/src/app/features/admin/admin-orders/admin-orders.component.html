@@ -1,0 +1,150 @@
+<div class="orders-container">
+  <header class="page-header">
+    <div>
+      <h1>Gerenciamento de Pedidos</h1>
+      <p>Visualize e gerencie todos os pedidos do e-commerce</p>
+    </div>
+    <button mat-flat-button color="primary" (click)="loadOrders()" [disabled]="loading()" id="btn-refresh-orders">
+      <mat-icon>refresh</mat-icon>
+      Atualizar
+    </button>
+  </header>
+
+  <!-- UUID Search -->
+  <div class="filter-section">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Buscar por UUID do pedido</mat-label>
+      <input matInput [formControl]="uuidSearch" placeholder="Cole ou digite o ID..." id="input-orders-uuid-search" />
+      <button *ngIf="uuidSearch.value" mat-icon-button matSuffix (click)="clearUuidSearch()" aria-label="Limpar">
+        <mat-icon>close</mat-icon>
+      </button>
+      <mat-icon matSuffix *ngIf="!uuidSearch.value">search</mat-icon>
+    </mat-form-field>
+  </div>
+
+  <!-- Progress Bar -->
+  <mat-progress-bar *ngIf="loading()" mode="indeterminate" class="table-progress-bar"></mat-progress-bar>
+
+  <!-- Error State -->
+  <div class="error-state" *ngIf="error() && !loading()">
+    <mat-icon color="warn">error</mat-icon>
+    <p>{{ error() }}</p>
+    <button mat-stroked-button color="primary" (click)="loadOrders()">Tentar Novamente</button>
+  </div>
+
+  <!-- Table Card -->
+  <div class="table-card" *ngIf="!error()">
+    <div class="table-responsive">
+      <table mat-table [dataSource]="displayedOrders()" class="orders-table">
+
+        <!-- ID do Pedido -->
+        <ng-container matColumnDef="id" sticky>
+          <th mat-header-cell *matHeaderCellDef>ID Pedido</th>
+          <td mat-cell *matCellDef="let element">
+            <app-copy-uuid [uuid]="element.id"></app-copy-uuid>
+          </td>
+        </ng-container>
+
+        <!-- ID do Usuário -->
+        <ng-container matColumnDef="userId">
+          <th mat-header-cell *matHeaderCellDef>ID Usuário</th>
+          <td mat-cell *matCellDef="let element">
+            <app-copy-uuid [uuid]="element.userId"></app-copy-uuid>
+          </td>
+        </ng-container>
+
+        <!-- Data de Criação -->
+        <ng-container matColumnDef="createdAt">
+          <th mat-header-cell *matHeaderCellDef>Data</th>
+          <td mat-cell *matCellDef="let element" class="date-cell">
+            {{ element.createdAt | date:'dd/MM/yyyy HH:mm' }}
+          </td>
+        </ng-container>
+
+        <!-- Status -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let element">
+            <mat-chip [ngClass]="getStatusClass(element.status)" class="status-chip">
+              <mat-icon class="chip-icon">{{ getStatusIcon(element.status) }}</mat-icon>
+              {{ element.status }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <!-- Valor Total -->
+        <ng-container matColumnDef="totalAmount">
+          <th mat-header-cell *matHeaderCellDef>Valor Total</th>
+          <td mat-cell *matCellDef="let element" class="amount-cell">
+            {{ element.totalAmount | currency:'BRL':'symbol':'1.2-2' }}
+          </td>
+        </ng-container>
+
+        <!-- Ações -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Ações</th>
+          <td mat-cell *matCellDef="let element">
+            <div class="actions-cell" *ngIf="actionLoadingId() !== element.id">
+              <!-- Status menu -->
+              <button
+                mat-stroked-button
+                [matMenuTriggerFor]="statusMenu"
+                class="btn-sm"
+                *ngIf="element.status !== 'CANCELLED' && element.status !== 'DELIVERED'">
+                <mat-icon>swap_vert</mat-icon>
+                Status
+              </button>
+              <mat-menu #statusMenu="matMenu">
+                <button
+                  mat-menu-item
+                  *ngFor="let s of statusList"
+                  [disabled]="s === element.status"
+                  (click)="changeStatus(element, s)">
+                  <mat-icon>{{ s === element.status ? 'check' : 'arrow_forward' }}</mat-icon>
+                  {{ s }}
+                </button>
+              </mat-menu>
+
+              <!-- Cancel button -->
+              <button
+                mat-icon-button
+                color="warn"
+                title="Cancelar Pedido"
+                (click)="cancelOrder(element)"
+                *ngIf="element.status !== 'CANCELLED' && element.status !== 'DELIVERED'">
+                <mat-icon>cancel</mat-icon>
+              </button>
+
+              <span
+                class="no-actions-text"
+                *ngIf="element.status === 'CANCELLED' || element.status === 'DELIVERED'">
+                {{ element.status === 'DELIVERED' ? 'Entregue' : 'Cancelado' }}
+              </span>
+            </div>
+
+            <mat-spinner diameter="24" *ngIf="actionLoadingId() === element.id"></mat-spinner>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="table-row"></tr>
+
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell empty-cell" [attr.colspan]="displayedColumns.length">
+            Nenhum pedido encontrado.
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <mat-paginator
+      [length]="orders().length"
+      [pageSize]="pageSize()"
+      [pageIndex]="pageIndex()"
+      [pageSizeOptions]="[5, 10, 25]"
+      (page)="onPageChange($event)"
+      showFirstLastButtons
+      aria-label="Selecione a página de pedidos">
+    </mat-paginator>
+  </div>
+</div>

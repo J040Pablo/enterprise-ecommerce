@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap, catchError, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { CreateOrderRequest, OrderResponse } from '../models/order.model';
+import { CreateOrderRequest, OrderResponse, OrderStatus } from '../models/order.model';
 
 @Injectable({ providedIn: 'root' })
 export class OrderService {
@@ -29,6 +29,14 @@ export class OrderService {
   }
 
   /**
+   * GET /api/v1/orders
+   * Lista todos os pedidos no sistema (Admin).
+   */
+  getAllOrders(): Observable<OrderResponse[]> {
+    return this.http.get<OrderResponse[]>(this.API_URL);
+  }
+
+  /**
    * GET /api/v1/orders/user/{userId}
    * Lista todos os pedidos de um usuário.
    */
@@ -42,5 +50,21 @@ export class OrderService {
    */
   getOrderById(id: string): Observable<OrderResponse> {
     return this.http.get<OrderResponse>(`${this.API_URL}/${id}`);
+  }
+
+  /**
+   * PATCH /api/v1/orders/{id}/status
+   * Atualiza o status do pedido.
+   */
+  updateStatus(id: string, status: OrderStatus): Observable<OrderResponse> {
+    return this.http.patch<OrderResponse>(`${this.API_URL}/${id}/status`, { status });
+  }
+
+  /**
+   * PATCH /api/v1/orders/{id}/cancel
+   * Cancela o pedido.
+   */
+  cancelOrder(id: string): Observable<OrderResponse> {
+    return this.http.patch<OrderResponse>(`${this.API_URL}/${id}/cancel`, {});
   }
 }

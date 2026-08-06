@@ -1,0 +1,112 @@
+<div class="categories-container">
+  <header class="page-header">
+    <div>
+      <h1>Gerenciamento de Categorias</h1>
+      <p>Categorias de produtos cadastradas no e-commerce</p>
+    </div>
+    <button mat-flat-button color="primary" (click)="openCreateDialog()" id="btn-new-category">
+      <mat-icon>add</mat-icon>
+      Nova Categoria
+    </button>
+  </header>
+
+  <!-- Search -->
+  <div class="filter-section">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Buscar categoria</mat-label>
+      <input matInput [formControl]="searchControl" placeholder="Nome ou descrição..." id="input-category-search" />
+      <button *ngIf="searchControl.value" mat-icon-button matSuffix (click)="clearSearch()" aria-label="Limpar busca">
+        <mat-icon>close</mat-icon>
+      </button>
+      <mat-icon matSuffix *ngIf="!searchControl.value">search</mat-icon>
+    </mat-form-field>
+  </div>
+
+  <!-- Progress Bar Loading -->
+  <mat-progress-bar *ngIf="loading()" mode="indeterminate" class="table-progress-bar"></mat-progress-bar>
+
+  <!-- Error State -->
+  <div class="error-state" *ngIf="error() && !loading()">
+    <mat-icon color="warn">error</mat-icon>
+    <p>{{ error() }}</p>
+    <button mat-stroked-button color="primary" (click)="loadCategories()">Tentar Novamente</button>
+  </div>
+
+  <!-- Table Card -->
+  <div class="table-card" *ngIf="!error()">
+    <div class="table-responsive">
+      <table mat-table [dataSource]="dataSource" matSort class="categories-table">
+
+        <!-- Name Column -->
+        <ng-container matColumnDef="name" sticky>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Nome</th>
+          <td mat-cell *matCellDef="let element" class="font-medium">{{ element.name }}</td>
+        </ng-container>
+
+        <!-- Description Column -->
+        <ng-container matColumnDef="description">
+          <th mat-header-cell *matHeaderCellDef>Descrição</th>
+          <td mat-cell *matCellDef="let element" class="description-cell">
+            {{ element.description || '—' }}
+          </td>
+        </ng-container>
+
+        <!-- Active Column -->
+        <ng-container matColumnDef="active">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
+          <td mat-cell *matCellDef="let element">
+            <mat-chip [class.active-chip]="element.active" [class.inactive-chip]="!element.active">
+              <mat-icon class="chip-icon">{{ element.active ? 'check_circle' : 'cancel' }}</mat-icon>
+              {{ element.active ? 'Ativa' : 'Inativa' }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Ações</th>
+          <td mat-cell *matCellDef="let element">
+            <div class="actions-cell" *ngIf="actionLoadingId() !== element.id">
+              <button
+                mat-icon-button
+                color="primary"
+                (click)="openEditDialog(element)"
+                matTooltip="Editar"
+                [id]="'btn-edit-cat-' + element.id">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                color="warn"
+                (click)="confirmDelete(element)"
+                matTooltip="Excluir"
+                [id]="'btn-delete-cat-' + element.id">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+            <div class="action-loading" *ngIf="actionLoadingId() === element.id">
+              <mat-progress-bar mode="indeterminate" style="width:60px"></mat-progress-bar>
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="table-row"></tr>
+
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell empty-cell" [attr.colspan]="displayedColumns.length">
+            <mat-icon>inbox</mat-icon>
+            <span>Nenhuma categoria encontrada.</span>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <mat-paginator
+      [pageSize]="10"
+      [pageSizeOptions]="[5, 10, 25, 50]"
+      showFirstLastButtons
+      aria-label="Selecione a página de categorias">
+    </mat-paginator>
+  </div>
+</div>

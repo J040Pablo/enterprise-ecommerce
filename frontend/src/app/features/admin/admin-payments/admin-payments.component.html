@@ -1,0 +1,131 @@
+<div class="payments-container">
+  <header class="page-header">
+    <div>
+      <h1>Gerenciamento de Pagamentos</h1>
+      <p>Acompanhamento e processamento financeiro dos pedidos</p>
+    </div>
+    <button mat-flat-button color="primary" (click)="loadPayments()" [disabled]="loading()" id="btn-refresh-payments">
+      <mat-icon>refresh</mat-icon>
+      Atualizar
+    </button>
+  </header>
+
+  <!-- UUID Search -->
+  <div class="filter-section">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Buscar por UUID (pagamento ou pedido)</mat-label>
+      <input matInput [formControl]="uuidSearch" placeholder="Cole ou digite o ID..." id="input-payments-uuid-search" />
+      <button *ngIf="uuidSearch.value" mat-icon-button matSuffix (click)="clearUuidSearch()" aria-label="Limpar">
+        <mat-icon>close</mat-icon>
+      </button>
+      <mat-icon matSuffix *ngIf="!uuidSearch.value">search</mat-icon>
+    </mat-form-field>
+  </div>
+
+  <!-- Progress Bar -->
+  <mat-progress-bar *ngIf="loading()" mode="indeterminate" class="table-progress-bar"></mat-progress-bar>
+
+  <!-- Error State -->
+  <div class="error-state" *ngIf="error() && !loading()">
+    <mat-icon color="warn">error</mat-icon>
+    <p>{{ error() }}</p>
+    <button mat-stroked-button color="primary" (click)="loadPayments()">Tentar Novamente</button>
+  </div>
+
+  <!-- Table Card -->
+  <div class="table-card" *ngIf="!error()">
+    <div class="table-responsive">
+      <table mat-table [dataSource]="displayedPayments()" class="payments-table">
+
+        <!-- ID Pagamento -->
+        <ng-container matColumnDef="id" sticky>
+          <th mat-header-cell *matHeaderCellDef>ID Pagamento</th>
+          <td mat-cell *matCellDef="let element">
+            <app-copy-uuid [uuid]="element.id"></app-copy-uuid>
+          </td>
+        </ng-container>
+
+        <!-- ID Pedido -->
+        <ng-container matColumnDef="orderId">
+          <th mat-header-cell *matHeaderCellDef>ID Pedido</th>
+          <td mat-cell *matCellDef="let element">
+            <app-copy-uuid [uuid]="element.orderId"></app-copy-uuid>
+          </td>
+        </ng-container>
+
+        <!-- Status -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let element">
+            <mat-chip [ngClass]="getStatusClass(element.status)" class="status-chip">
+              <mat-icon class="chip-icon">{{ getStatusIcon(element.status) }}</mat-icon>
+              {{ element.status }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <!-- Valor Total -->
+        <ng-container matColumnDef="totalAmount">
+          <th mat-header-cell *matHeaderCellDef>Valor</th>
+          <td mat-cell *matCellDef="let element" class="amount-cell">
+            {{ element.totalAmount | currency:'BRL':'symbol':'1.2-2' }}
+          </td>
+        </ng-container>
+
+        <!-- Ações -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Ações</th>
+          <td mat-cell *matCellDef="let element">
+            <div class="actions-cell" *ngIf="actionLoadingId() !== element.id">
+              <!-- PENDING: Allow Approve & Reject -->
+              <ng-container *ngIf="element.status === 'PENDING'">
+                <button mat-flat-button color="primary" class="btn-sm" (click)="approve(element)" title="Aprovar">
+                  <mat-icon>check_circle</mat-icon>
+                  Aprovar
+                </button>
+                <button mat-stroked-button color="warn" class="btn-sm" (click)="reject(element)" title="Rejeitar">
+                  <mat-icon>cancel</mat-icon>
+                  Rejeitar
+                </button>
+              </ng-container>
+
+              <!-- APPROVED: Allow Refund -->
+              <ng-container *ngIf="element.status === 'APPROVED'">
+                <button mat-stroked-button color="warn" class="btn-sm" (click)="refund(element)" title="Estornar">
+                  <mat-icon>history</mat-icon>
+                  Estornar
+                </button>
+              </ng-container>
+
+              <!-- REJECTED & REFUNDED: No actions -->
+              <span class="no-actions-text" *ngIf="element.status === 'REJECTED' || element.status === 'REFUNDED'">
+                Sem ações disponíveis
+              </span>
+            </div>
+
+            <mat-spinner diameter="24" *ngIf="actionLoadingId() === element.id"></mat-spinner>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="table-row"></tr>
+
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell empty-cell" [attr.colspan]="displayedColumns.length">
+            Nenhum pagamento registrado.
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <mat-paginator
+      [length]="payments().length"
+      [pageSize]="pageSize()"
+      [pageIndex]="pageIndex()"
+      [pageSizeOptions]="[5, 10, 25]"
+      (page)="onPageChange($event)"
+      showFirstLastButtons
+      aria-label="Selecione a página de pagamentos">
+    </mat-paginator>
+  </div>
+</div>

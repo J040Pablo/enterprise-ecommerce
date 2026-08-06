@@ -1,0 +1,119 @@
+<div class="products-container">
+  <header class="page-header">
+    <div>
+      <h1>Gerenciamento de Produtos</h1>
+      <p>Catálogo completo de produtos registrados no e-commerce</p>
+    </div>
+    <button mat-flat-button color="primary" (click)="openCreateDialog()">
+      <mat-icon>add</mat-icon>
+      Novo Produto
+    </button>
+  </header>
+
+  <!-- Filtro de busca -->
+  <div class="filter-section">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Buscar por nome do produto</mat-label>
+      <input matInput [formControl]="searchControl" placeholder="Digite o nome..." />
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="loading()">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Buscando produtos...</p>
+  </div>
+
+  <!-- Error State -->
+  <div class="error-state" *ngIf="error() && !loading()">
+    <mat-icon color="warn">error</mat-icon>
+    <p>{{ error() }}</p>
+    <button mat-stroked-button color="primary" (click)="loadProducts()">Tentar Novamente</button>
+  </div>
+
+  <!-- Table State -->
+  <div class="table-card" *ngIf="!loading() && !error()">
+    <div class="table-responsive">
+      <table mat-table [dataSource]="dataSource" matSort class="products-table">
+        <!-- ID Column -->
+        <ng-container matColumnDef="id">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
+          <td mat-cell *matCellDef="let element">
+            <app-copy-uuid [uuid]="element.id"></app-copy-uuid>
+          </td>
+        </ng-container>
+
+        <!-- Name Column -->
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Nome</th>
+          <td mat-cell *matCellDef="let element" class="font-medium">
+            {{ element.name }}
+          </td>
+        </ng-container>
+
+        <!-- Category Column -->
+        <ng-container matColumnDef="categoryName">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Categoria</th>
+          <td mat-cell *matCellDef="let element">
+            <span class="category-tag">{{ element.categoryName || 'Geral' }}</span>
+          </td>
+        </ng-container>
+
+        <!-- Price Column -->
+        <ng-container matColumnDef="price">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Preço</th>
+          <td mat-cell *matCellDef="let element" class="price-cell">
+            {{ element.price | currency:'BRL':'symbol':'1.2-2' }}
+          </td>
+        </ng-container>
+
+        <!-- Active Status Column -->
+        <ng-container matColumnDef="active">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
+          <td mat-cell *matCellDef="let element">
+            <mat-chip [class.active-chip]="element.active" [class.inactive-chip]="!element.active">
+              {{ element.active ? 'Ativo' : 'Inativo' }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Ações</th>
+          <td mat-cell *matCellDef="let element">
+            <div class="actions-cell" *ngIf="actionLoadingId() !== element.id">
+              <button mat-icon-button color="primary" (click)="openEditDialog(element)" title="Editar Produto">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button color="warn" (click)="confirmDelete(element)" title="Excluir Produto">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+            <mat-spinner diameter="24" *ngIf="actionLoadingId() === element.id"></mat-spinner>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+        <!-- Empty Row -->
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell empty-cell" [attr.colspan]="displayedColumns.length">
+            Nenhum produto encontrado.
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <mat-paginator
+      [length]="totalElements()"
+      [pageSize]="pageSize()"
+      [pageIndex]="pageIndex()"
+      [pageSizeOptions]="[5, 10, 25, 50]"
+      (page)="onPageChange($event)"
+      showFirstLastButtons
+      aria-label="Selecione a página de produtos">
+    </mat-paginator>
+  </div>
+</div>

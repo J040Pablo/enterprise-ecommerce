@@ -1,0 +1,45 @@
+<h2 mat-dialog-title class="dialog-header">
+  <mat-icon color="primary">{{ data.isEdit ? 'edit' : 'add_box' }}</mat-icon>
+  <span>{{ data.isEdit ? 'Editar Categoria' : 'Nova Categoria' }}</span>
+</h2>
+
+<mat-dialog-content class="dialog-body">
+  <form [formGroup]="form" id="categoryForm" (ngSubmit)="onSubmit()" class="form-container">
+
+    <!-- Name -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Nome da Categoria</mat-label>
+      <input matInput formControlName="name" placeholder="Ex: Eletrônicos" />
+      <mat-error *ngIf="form.get('name')?.hasError('required')">Nome é obrigatório.</mat-error>
+      <mat-error *ngIf="form.get('name')?.hasError('maxlength')">Máximo 100 caracteres.</mat-error>
+    </mat-form-field>
+
+    <!-- Description -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Descrição</mat-label>
+      <textarea matInput formControlName="description" rows="3"
+        placeholder="Descrição opcional da categoria..."></textarea>
+      <mat-error *ngIf="form.get('description')?.hasError('maxlength')">Máximo 500 caracteres.</mat-error>
+    </mat-form-field>
+
+    <!-- Active (edit mode only) -->
+    <div class="checkbox-row" *ngIf="data.isEdit">
+      <mat-checkbox formControlName="active" color="primary">
+        Categoria Ativa
+      </mat-checkbox>
+    </div>
+
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="dialog-footer">
+  <button mat-button type="button" (click)="onCancel()">Cancelar</button>
+  <button
+    mat-flat-button
+    color="primary"
+    type="submit"
+    form="categoryForm"
+    [disabled]="form.invalid">
+    {{ data.isEdit ? 'Salvar Alterações' : 'Criar Categoria' }}
+  </button>
+</mat-dialog-actions>

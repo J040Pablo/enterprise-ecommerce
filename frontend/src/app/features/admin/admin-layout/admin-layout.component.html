@@ -1,0 +1,105 @@
+<mat-sidenav-container class="admin-sidenav-container" autosize>
+  <!-- Sidebar Navigation -->
+  <mat-sidenav #sidenav [opened]="sidenavOpened()" mode="side" class="admin-sidenav">
+    <div class="brand-header">
+      <div class="brand-logo">
+        <mat-icon class="brand-icon">shield</mat-icon>
+        <span class="brand-title">Admin Panel</span>
+      </div>
+      <span class="brand-badge">v1.0</span>
+    </div>
+
+    <mat-nav-list class="nav-list">
+      <a
+        mat-list-item
+        routerLink="/admin/dashboard"
+        routerLinkActive="active-link"
+        [routerLinkActiveOptions]="{exact: true}"
+        class="nav-item">
+        <mat-icon matListItemIcon>dashboard</mat-icon>
+        <span matListItemTitle>Dashboard</span>
+      </a>
+
+      <a
+        mat-list-item
+        routerLink="/admin/products"
+        routerLinkActive="active-link"
+        class="nav-item">
+        <mat-icon matListItemIcon>inventory_2</mat-icon>
+        <span matListItemTitle>Produtos</span>
+      </a>
+
+      <a
+        mat-list-item
+        routerLink="/admin/categories"
+        routerLinkActive="active-link"
+        class="nav-item">
+        <mat-icon matListItemIcon>category</mat-icon>
+        <span matListItemTitle>Categorias</span>
+      </a>
+
+      <a
+        mat-list-item
+        routerLink="/admin/orders"
+        routerLinkActive="active-link"
+        class="nav-item">
+        <mat-icon matListItemIcon>shopping_cart</mat-icon>
+        <span matListItemTitle>Pedidos</span>
+      </a>
+
+      <a
+        mat-list-item
+        routerLink="/admin/payments"
+        routerLinkActive="active-link"
+        class="nav-item">
+        <mat-icon matListItemIcon>payments</mat-icon>
+        <span matListItemTitle>Pagamentos</span>
+      </a>
+
+      <a
+        mat-list-item
+        routerLink="/admin/shipping"
+        routerLinkActive="active-link"
+        class="nav-item">
+        <mat-icon matListItemIcon>local_shipping</mat-icon>
+        <span matListItemTitle>Shipping</span>
+      </a>
+    </mat-nav-list>
+
+    <mat-divider></mat-divider>
+
+    <div class="sidenav-footer">
+      <a mat-stroked-button routerLink="/products" class="store-link">
+        <mat-icon>storefront</mat-icon>
+        Voltar à Loja
+      </a>
+    </div>
+  </mat-sidenav>
+
+  <!-- Main Content Area -->
+  <mat-sidenav-content class="admin-content">
+    <mat-toolbar class="admin-toolbar" color="primary">
+      <button mat-icon-button (click)="toggleSidenav()" aria-label="Toggle sidenav">
+        <mat-icon>menu</mat-icon>
+      </button>
+
+      <span class="toolbar-title">Painel Administrativo</span>
+
+      <span class="spacer"></span>
+
+      <div class="user-profile" *ngIf="currentUser() as user">
+        <div class="user-info">
+          <span class="user-name">{{ user.firstName }} {{ user.lastName }}</span>
+          <span class="user-role">ADMIN</span>
+        </div>
+        <button mat-icon-button color="warn" (click)="logout()" matTooltip="Encerrar Sessão">
+          <mat-icon>logout</mat-icon>
+        </button>
+      </div>
+    </mat-toolbar>
+
+    <main class="page-body">
+      <router-outlet></router-outlet>
+    </main>
+  </mat-sidenav-content>
+</mat-sidenav-container>
