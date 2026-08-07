@@ -66,6 +66,7 @@
 
   table {
     width: 100%;
+    table-layout: fixed;
 
     th {
       font-weight: 600;
@@ -95,61 +96,160 @@
     }
   }
 
+  /* =========================
+     STATUS
+     ========================= */
+
   .status-chip {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 4px;
-    font-size: 0.75rem;
+    justify-content: center;
+    gap: 3px;
+
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+
+    box-sizing: border-box;
+
+    font-size: 0.65rem;
     font-weight: 600;
+    line-height: 1;
+
+    padding: 0.3rem 0.4rem;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .chip-icon {
-    font-size: 14px !important;
-    width: 14px !important;
-    height: 14px !important;
+    flex-shrink: 0;
+
+    font-size: 12px !important;
+    width: 12px !important;
+    height: 12px !important;
+    line-height: 12px !important;
   }
 
-  .status-processing { background-color: #fef3c7 !important; color: #d97706 !important; }
-  .status-shipped    { background-color: #e0f2fe !important; color: #0284c7 !important; }
-  .status-out        { background-color: #e0e7ff !important; color: #4338ca !important; }
-  .status-delivered  { background-color: #dcfce7 !important; color: #16a34a !important; }
-  .status-cancelled  { background-color: #fee2e2 !important; color: #dc2626 !important; }
+  .status-processing {
+    background-color: #fef3c7 !important;
+    color: #d97706 !important;
+  }
+
+  .status-shipped {
+    background-color: #e0f2fe !important;
+    color: #0284c7 !important;
+  }
+
+  .status-out {
+    background-color: #e0e7ff !important;
+    color: #4338ca !important;
+  }
+
+  .status-delivered {
+    background-color: #dcfce7 !important;
+    color: #16a34a !important;
+  }
+
+  .status-cancelled {
+    background-color: #fee2e2 !important;
+    color: #dc2626 !important;
+  }
+
+  /* =========================
+     ACTIONS
+     ========================= */
 
   .actions-cell {
     display: flex;
     align-items: center;
+    justify-content: flex-start;
     gap: 0.5rem;
+    min-width: 0;
 
     .btn-sm {
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       height: 36px;
-      line-height: 36px;
+      min-height: 36px;
+      line-height: normal;
+
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+
+      gap: 0.375rem;
+      padding: 0 0.55rem;
+
+      white-space: nowrap;
+      box-sizing: border-box;
 
       mat-icon {
-        font-size: 16px;
-        width: 16px;
-        height: 16px;
-        margin-right: 0.25rem;
+        flex-shrink: 0;
+
+        font-size: 15px;
+        width: 15px;
+        height: 15px;
+        line-height: 15px;
+
+        margin-right: 0;
       }
 
       &.btn-ship {
         color: #0284c7;
         border-color: #bae6fd;
-        &:hover:not([disabled]) { background: #f0f9ff; }
+
+        &:hover:not([disabled]) {
+          background: #f0f9ff;
+        }
       }
 
       &.btn-out {
         color: #4338ca;
         border-color: #c7d2fe;
-        &:hover:not([disabled]) { background: #eef2ff; }
+
+        &:hover:not([disabled]) {
+          background: #eef2ff;
+        }
       }
 
       &.btn-deliver {
         color: #16a34a;
         border-color: #bbf7d0;
-        &:hover:not([disabled]) { background: #f0fdf4; }
+
+        &:hover:not([disabled]) {
+          background: #f0fdf4;
+        }
       }
     }
+  }
+
+  /* =========================
+     TABLE COLUMNS
+     ========================= */
+
+  .mat-column-id,
+  .mat-column-orderId {
+    width: 180px;
+  }
+
+  .mat-column-trackingCode {
+    width: 170px;
+  }
+
+  .mat-column-carrier {
+    width: 150px;
+  }
+
+  .mat-column-status {
+    width: 155px;
+    min-width: 155px;
+    max-width: 155px;
+  }
+
+  .mat-column-actions {
+    width: 340px;
+    min-width: 340px;
   }
 
   .empty-cell {

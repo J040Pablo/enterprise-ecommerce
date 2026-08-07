@@ -66,6 +66,7 @@
 
   table {
     width: 100%;
+    table-layout: fixed;
 
     th {
       font-weight: 600;
@@ -124,13 +125,32 @@
   .actions-cell {
     display: flex;
     align-items: center;
+    justify-content: flex-start;
     gap: 0.25rem;
   }
 
   .action-loading {
     display: flex;
     align-items: center;
+    justify-content: center;
+    min-height: 36px;
     padding: 0 0.5rem;
+  }
+
+  .mat-column-name {
+    width: 220px;
+  }
+
+  .mat-column-description {
+    width: auto;
+  }
+
+  .mat-column-active {
+    width: 140px;
+  }
+
+  .mat-column-actions {
+    width: 104px;
   }
 
   .empty-cell {

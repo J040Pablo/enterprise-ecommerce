@@ -32,3 +32,71 @@ html, body {
 .mat-mdc-card {
   border-radius: 12px !important;
 }
+
+/* Admin panel table and action button consistency */
+.categories-container,
+.products-container,
+.orders-container,
+.payments-container,
+.shipping-container {
+  .page-header > button[mat-flat-button],
+  .page-header > a[mat-flat-button],
+  .page-header > button[mat-stroked-button],
+  .page-header > a[mat-stroked-button] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 40px;
+    line-height: 1;
+  }
+
+  .page-header mat-icon {
+    display: block;
+    flex-shrink: 0;
+  }
+
+  .table-card table {
+    width: 100%;
+    table-layout: fixed;
+  }
+
+  .table-card th,
+  .table-card td {
+    vertical-align: middle;
+  }
+
+  .actions-cell {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.375rem;
+    min-height: 36px;
+    flex-wrap: nowrap;
+  }
+
+  .actions-cell > button,
+  .actions-cell > a,
+  .actions-cell > .mat-mdc-icon-button,
+  .actions-cell > .btn-sm {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
+    height: 36px;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .actions-cell > button mat-icon,
+  .actions-cell > a mat-icon,
+  .actions-cell > .mat-mdc-icon-button mat-icon,
+  .actions-cell > .btn-sm mat-icon {
+    display: block;
+    flex-shrink: 0;
+  }
+
+  .mat-column-actions {
+    white-space: nowrap;
+  }
+}

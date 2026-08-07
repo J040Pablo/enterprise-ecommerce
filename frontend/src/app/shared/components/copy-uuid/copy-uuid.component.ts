@@ -42,6 +42,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
       align-items: center;
       gap: 0.25rem;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      line-height: 1;
       white-space: nowrap;
     }
 
@@ -53,14 +54,27 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
     }
 
     .copy-btn {
-      width: 24px !important;
-      height: 24px !important;
-      line-height: 24px !important;
+      width: 28px !important;
+      height: 28px !important;
+      min-width: 28px !important;
+      min-height: 28px !important;
+      padding: 0 !important;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1 !important;
+      flex-shrink: 0;
+
+      .mat-mdc-button-touch-target {
+        width: 28px !important;
+        height: 28px !important;
+      }
 
       mat-icon {
-        font-size: 14px !important;
-        width: 14px !important;
-        height: 14px !important;
+        display: block;
+        font-size: 16px !important;
+        width: 16px !important;
+        height: 16px !important;
         color: #94a3b8;
         transition: color 0.15s ease;
       }

@@ -32,9 +32,25 @@
 .form-row {
   display: flex;
   gap: 1rem;
+  align-items: stretch;
 
   .half-width {
     flex: 1;
+    min-width: 0;
+  }
+
+  .mat-mdc-form-field {
+    display: flex;
+    width: 100%;
+  }
+
+  .mat-mdc-form-field .mat-mdc-text-field-wrapper {
+    height: 56px;
+  }
+
+  .mat-mdc-form-field .mat-mdc-form-field-flex {
+    height: 100%;
+    align-items: center;
   }
 }
 
@@ -45,11 +61,25 @@
 
   .category-field {
     flex: 1;
+    display: flex;
   }
 
   .btn-new-category {
+    align-self: flex-start;
     margin-top: 4px;
+    width: 56px;
+    min-width: 56px;
+    height: 56px;
+    min-height: 56px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     flex-shrink: 0;
+
+    mat-icon {
+      display: block;
+    }
   }
 }
 

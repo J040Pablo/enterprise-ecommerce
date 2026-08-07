@@ -66,6 +66,7 @@
 
   table {
     width: 100%;
+    table-layout: fixed;
 
     th {
       font-weight: 600;
@@ -112,12 +113,24 @@
   .actions-cell {
     display: flex;
     align-items: center;
+    justify-content: flex-start;
     gap: 0.5rem;
+
+    .no-actions-text {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      font-style: italic;
+      line-height: 1;
+    }
 
     .btn-sm {
       font-size: 0.775rem;
       height: 36px;
       line-height: 36px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.375rem;
 
       mat-icon {
         font-size: 16px;
@@ -127,11 +140,23 @@
       }
     }
 
-    .no-actions-text {
-      font-size: 0.8rem;
-      color: #94a3b8;
-      font-style: italic;
-    }
+  }
+
+  .mat-column-id,
+  .mat-column-orderId {
+    width: 180px;
+  }
+
+  .mat-column-status {
+    width: 140px;
+  }
+
+  .mat-column-totalAmount {
+    width: 150px;
+  }
+
+  .mat-column-actions {
+    width: 250px;
   }
 
   .empty-cell {

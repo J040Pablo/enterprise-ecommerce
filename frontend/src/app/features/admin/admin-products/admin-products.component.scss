@@ -61,6 +61,7 @@
 
   table {
     width: 100%;
+    table-layout: fixed;
 
     th {
       font-weight: 600;
@@ -102,9 +103,30 @@
       .actions-cell {
         display: flex;
         align-items: center;
+        justify-content: flex-start;
         gap: 0.25rem;
       }
     }
+  }
+
+  .mat-column-id {
+    width: 180px;
+  }
+
+  .mat-column-categoryName {
+    width: 160px;
+  }
+
+  .mat-column-price {
+    width: 140px;
+  }
+
+  .mat-column-active {
+    width: 120px;
+  }
+
+  .mat-column-actions {
+    width: 104px;
   }
 
   .empty-cell {
