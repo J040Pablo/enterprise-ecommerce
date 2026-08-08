@@ -22,6 +22,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -142,6 +143,22 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
     }
 
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ApiErrorResponse> handleMethodNotSupported(
+            HttpRequestMethodNotSupportedException ex,
+            HttpServletRequest request) {
+
+        ApiErrorResponse body = ApiErrorResponse.builder()
+                .timestamp(Instant.now())
+                .status(HttpStatus.METHOD_NOT_ALLOWED.value())
+                .error(HttpStatus.METHOD_NOT_ALLOWED.getReasonPhrase())
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(body);
+    }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorResponse> handleGeneric(

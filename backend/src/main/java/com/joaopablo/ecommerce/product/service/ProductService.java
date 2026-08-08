@@ -47,7 +47,7 @@ public class ProductService {
                 savedProduct,
                 request.getInitialQuantity());
 
-        return mapper.toResponse(savedProduct);
+        return toResponse(savedProduct);
     }
 
     @Transactional(readOnly = true)
@@ -88,14 +88,13 @@ public class ProductService {
         }
 
         return repository.findAll(specification, pageable)
-                .map(mapper::toResponse);
+                .map(this::toResponse);
     }
 
     @Transactional(readOnly = true)
     public ProductResponse findById(UUID id) {
 
-        return mapper.toResponse(
-                findEntityById(id));
+        return toResponse(findEntityById(id));
     }
 
     @Transactional
@@ -119,7 +118,7 @@ public class ProductService {
 
         Product savedProduct = repository.save(product);
 
-        return mapper.toResponse(savedProduct);
+        return toResponse(savedProduct);
     }
 
     @Transactional
@@ -134,6 +133,15 @@ public class ProductService {
 
         return repository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException(id));
+    }
+
+    /**
+     * Maps the product and enriches the response with current stock from Inventory
+     * (single source of truth). Does not store stock on the Product entity.
+     */
+    private ProductResponse toResponse(Product product) {
+        Integer stockQuantity = inventoryService.getQuantityOrZero(product.getId());
+        return mapper.toResponse(product, stockQuantity);
     }
 
 }

@@ -1,4 +1,4 @@
-.products-container {
+.inventory-container {
   max-width: 1200px;
   margin: 0 auto;
 }
@@ -31,7 +31,8 @@
   }
 }
 
-.loading-state, .error-state {
+.loading-state,
+.error-state {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -61,7 +62,6 @@
 
   table {
     width: 100%;
-    table-layout: fixed;
 
     th {
       font-weight: 600;
@@ -76,9 +76,26 @@
         font-weight: 500;
       }
 
-      &.price-cell {
-        font-weight: 600;
-        color: #0f172a;
+      .thumb-wrap {
+        width: 48px;
+        height: 48px;
+        border-radius: 8px;
+        overflow: hidden;
+        background: #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        .product-thumb {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+        }
+
+        .thumb-fallback {
+          color: #64748b;
+        }
       }
 
       .category-tag {
@@ -88,16 +105,6 @@
         border-radius: 6px;
         font-size: 0.8rem;
         font-weight: 500;
-      }
-
-      .active-chip {
-        background-color: #dcfce7 !important;
-        color: #15803d !important;
-      }
-
-      .inactive-chip {
-        background-color: #fee2e2 !important;
-        color: #b91c1c !important;
       }
 
       .stock-badge {
@@ -124,38 +131,19 @@
           color: #b91c1c;
         }
       }
-
-      .actions-cell {
-        display: flex;
-        align-items: center;
-        justify-content: flex-start;
-        gap: 0.25rem;
-      }
     }
   }
 
-  .mat-column-id {
-    width: 180px;
-  }
-
-  .mat-column-categoryName {
-    width: 160px;
-  }
-
-  .mat-column-price {
-    width: 120px;
+  .mat-column-image {
+    width: 72px;
   }
 
   .mat-column-stock {
-    width: 100px;
-  }
-
-  .mat-column-active {
-    width: 120px;
+    width: 110px;
   }
 
   .mat-column-actions {
-    width: 104px;
+    width: 140px;
   }
 
   .empty-cell {

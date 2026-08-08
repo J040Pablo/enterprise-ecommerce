@@ -33,6 +33,9 @@ public class Product {
     @Column(nullable = false)
     private Boolean active = true;
 
+    @Column(name = "image_url", length = 512)
+    private String imageUrl;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;

@@ -40,6 +40,11 @@ export const ADMIN_ROUTES: Routes = [
         path: 'shipping',
         loadComponent: () =>
           import('./admin-shipping/admin-shipping.component').then(m => m.AdminShippingComponent)
+      },
+      {
+        path: 'inventory',
+        loadComponent: () =>
+          import('./admin-inventory/admin-inventory.component').then(m => m.AdminInventoryComponent)
       }
     ]
   }

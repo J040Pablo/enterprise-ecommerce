@@ -28,9 +28,20 @@
     <div class="product-layout">
       <!-- Image Area -->
       <div class="product-image-area">
-        <mat-icon class="big-icon">inventory_2</mat-icon>
+        @if (product()!.imageUrl && !imageBroken()) {
+          <img
+            [src]="product()!.imageUrl!"
+            [alt]="product()!.name"
+            class="product-image"
+            (error)="onImageError()"
+          />
+        } @else {
+          <mat-icon class="big-icon">inventory_2</mat-icon>
+        }
         @if (!product()!.active) {
           <div class="unavailable-overlay">Indisponível</div>
+        } @else if (isOutOfStock()) {
+          <div class="unavailable-overlay">Esgotado</div>
         }
       </div>
 
@@ -46,7 +57,12 @@
           <span class="price">{{ formatPrice(product()!.price) }}</span>
         </div>
 
-        @if (product()!.active) {
+        <p class="stock-info" [class.out-of-stock]="isOutOfStock()" [class.low-stock]="isLowStock()">
+          <mat-icon>{{ isOutOfStock() ? 'remove_shopping_cart' : 'inventory' }}</mat-icon>
+          {{ stockLabel() }}
+        </p>
+
+        @if (product()!.active && !isOutOfStock()) {
           <!-- Quantity Selector -->
           <div class="qty-section">
             <span class="qty-label">Quantidade</span>
@@ -64,10 +80,12 @@
                 mat-icon-button
                 id="btn-increment-qty"
                 (click)="incrementQty()"
+                [disabled]="quantity >= maxQuantity()"
               >
                 <mat-icon>add</mat-icon>
               </button>
             </div>
+            <span class="qty-hint">Máximo: {{ maxQuantity() }}</span>
           </div>
 
           <div class="action-buttons">
@@ -82,10 +100,15 @@
               Adicionar ao Carrinho
             </button>
           </div>
-        } @else {
+        } @else if (!product()!.active) {
           <p class="unavailable-text">
             <mat-icon>block</mat-icon>
             Este produto está indisponível no momento.
+          </p>
+        } @else {
+          <p class="unavailable-text">
+            <mat-icon>remove_shopping_cart</mat-icon>
+            Este produto está sem estoque no momento.
           </p>
         }
       </div>

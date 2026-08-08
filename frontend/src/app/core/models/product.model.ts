@@ -8,8 +8,11 @@ export interface Product {
   description: string;
   price: number;
   active: boolean;
+  imageUrl: string | null;
   categoryId: string;
   categoryName: string;
+  /** Current stock from Inventory module (source of truth). */
+  stockQuantity: number;
 }
 
 /**

@@ -58,7 +58,7 @@ export class AdminProductsComponent implements OnInit {
   actionLoadingId = signal<string | null>(null);
 
   searchControl = new FormControl('');
-  displayedColumns: string[] = ['id', 'name', 'categoryName', 'price', 'active', 'actions'];
+  displayedColumns: string[] = ['id', 'name', 'categoryName', 'price', 'stock', 'active', 'actions'];
 
   @ViewChild(MatSort) sort!: MatSort;
 

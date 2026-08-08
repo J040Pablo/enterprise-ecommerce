@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -57,9 +58,10 @@ public class InventoryController {
     }
 
     @PatchMapping("/{productId}/increase")
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(
             summary = "Increase product stock",
-            description = "Adds the specified quantity to the product's current stock level."
+            description = "Adds the specified quantity to the product's current stock level. Admin only."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Stock increased successfully",
@@ -69,6 +71,9 @@ public class InventoryController {
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ApiErrorResponse.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized — JWT token missing or invalid",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ApiErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden — ADMIN role required",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ApiErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "Product not found",
@@ -89,9 +94,10 @@ public class InventoryController {
     }
 
     @PatchMapping("/{productId}/decrease")
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(
             summary = "Decrease product stock",
-            description = "Subtracts the specified quantity from the product's current stock level."
+            description = "Subtracts the specified quantity from the product's current stock level. Admin only."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Stock decreased successfully",
@@ -101,6 +107,9 @@ public class InventoryController {
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ApiErrorResponse.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized — JWT token missing or invalid",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ApiErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden — ADMIN role required",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ApiErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "Product not found",
@@ -116,6 +125,42 @@ public class InventoryController {
 
         return ResponseEntity.ok(
                 service.decreaseStock(productId, quantity)
+        );
+
+    }
+
+    @PutMapping("/{productId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(
+            summary = "Set absolute product stock",
+            description = "Sets the product's stock quantity to an exact value (zero or greater). Admin only."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Stock updated successfully",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = InventoryResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid quantity — must be zero or greater",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ApiErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized — JWT token missing or invalid",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ApiErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden — ADMIN role required",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ApiErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Product not found",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ApiErrorResponse.class)))
+    })
+    public ResponseEntity<InventoryResponse> setStock(
+            @Parameter(description = "UUID of the product", example = "a2e3c1b0-1234-4abc-8def-000000000001", required = true)
+            @PathVariable UUID productId,
+            @Parameter(description = "Absolute stock quantity to set", example = "100", required = true)
+            @RequestParam Integer quantity
+    ) {
+
+        return ResponseEntity.ok(
+                service.setStock(productId, quantity)
         );
 
     }

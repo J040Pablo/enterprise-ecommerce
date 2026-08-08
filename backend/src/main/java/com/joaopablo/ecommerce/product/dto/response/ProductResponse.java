@@ -25,10 +25,16 @@ public record ProductResponse(
         @Schema(description = "Whether the product is active and visible in the catalog", example = "true")
         Boolean active,
 
+        @Schema(description = "Product image URL", example = "https://cdn.example.com/products/notebook.jpg")
+        String imageUrl,
+
         @Schema(description = "UUID of the product's category", example = "b1ffcd00-0d1c-5fg9-cc7e-7cc0ce491b22")
         UUID categoryId,
 
         @Schema(description = "Name of the product's category", example = "Electronics")
-        String categoryName
+        String categoryName,
+
+        @Schema(description = "Current stock quantity from the Inventory module", example = "50")
+        Integer stockQuantity
 
 ) {}

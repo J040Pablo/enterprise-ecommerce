@@ -18,6 +18,28 @@
       <textarea matInput formControlName="description" rows="3" placeholder="Detalhes do produto..."></textarea>
     </mat-form-field>
 
+    <!-- URL da imagem -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>URL da Imagem (opcional)</mat-label>
+      <input matInput formControlName="imageUrl" placeholder="https://cdn.example.com/produto.jpg" />
+      <button
+        mat-icon-button
+        matSuffix
+        type="button"
+        *ngIf="form.get('imageUrl')?.value"
+        matTooltip="Remover imagem"
+        (click)="clearImageUrl()"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+      <mat-hint>Informe uma URL pública da imagem. Deixe vazio para remover.</mat-hint>
+      <mat-error *ngIf="form.get('imageUrl')?.hasError('maxlength')">Máximo de 512 caracteres.</mat-error>
+    </mat-form-field>
+
+    <div class="image-preview" *ngIf="imagePreviewUrl as previewUrl">
+      <img [src]="previewUrl" alt="Pré-visualização" (error)="onPreviewError($event)" />
+    </div>
+
     <div class="form-row">
       <!-- Preço -->
       <mat-form-field appearance="outline" class="half-width">

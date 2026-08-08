@@ -69,9 +69,29 @@ export class ProductFormDialogComponent implements OnInit {
       description: [p?.description || '', [Validators.maxLength(2000)]],
       price: [p?.price || '', [Validators.required, Validators.min(0.01)]],
       initialQuantity: [0, isEdit ? [] : [Validators.required, Validators.min(0)]],
+      imageUrl: [p?.imageUrl || '', [Validators.maxLength(512)]],
       categoryId: [p?.categoryId || '', [Validators.required]],
       active: [p?.active ?? true]
     });
+  }
+
+  get imagePreviewUrl(): string | null {
+    const value = this.form?.get('imageUrl')?.value;
+    if (typeof value !== 'string' || !value.trim()) {
+      return null;
+    }
+    return value.trim();
+  }
+
+  clearImageUrl(): void {
+    this.form.get('imageUrl')?.setValue('');
+  }
+
+  onPreviewError(event: Event): void {
+    const img = event.target as HTMLImageElement | null;
+    if (img) {
+      img.style.display = 'none';
+    }
   }
 
   loadCategories(selectId?: string): void {

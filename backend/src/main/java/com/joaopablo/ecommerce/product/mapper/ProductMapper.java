@@ -5,6 +5,7 @@ import com.joaopablo.ecommerce.product.dto.request.UpdateProductRequest;
 import com.joaopablo.ecommerce.product.dto.response.ProductResponse;
 import com.joaopablo.ecommerce.product.entity.Product;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 @Component
 public class ProductMapper {
@@ -15,12 +16,13 @@ public class ProductMapper {
                 .name(request.getName())
                 .description(request.getDescription())
                 .price(request.getPrice())
+                .imageUrl(normalizeImageUrl(request.getImageUrl()))
                 .build();
 
     }
 
 
-    public ProductResponse toResponse(Product product) {
+    public ProductResponse toResponse(Product product, Integer stockQuantity) {
 
         return ProductResponse.builder()
                 .id(product.getId())
@@ -28,6 +30,7 @@ public class ProductMapper {
                 .description(product.getDescription())
                 .price(product.getPrice())
                 .active(product.getActive())
+                .imageUrl(product.getImageUrl())
                 .categoryId(
                         product.getCategory() != null
                                 ? product.getCategory().getId()
@@ -38,6 +41,7 @@ public class ProductMapper {
                                 ? product.getCategory().getName()
                                 : null
                 )
+                .stockQuantity(stockQuantity)
                 .build();
 
     }
@@ -61,10 +65,21 @@ public class ProductMapper {
             product.setActive(request.getActive());
         }
 
+        if (request.getImageUrl() != null) {
+            product.setImageUrl(normalizeImageUrl(request.getImageUrl()));
+        }
+
         if (request.getCategoryId() != null) {
             // categoria será tratada no service
         }
 
+    }
+
+    private String normalizeImageUrl(String imageUrl) {
+        if (!StringUtils.hasText(imageUrl)) {
+            return null;
+        }
+        return imageUrl.trim();
     }
 
 }

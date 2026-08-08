@@ -42,6 +42,7 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
   readonly product = signal<Product | null>(null);
+  readonly imageBroken = signal(false);
   quantity = 1;
 
   ngOnInit(): void {
@@ -57,12 +58,14 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     if (!this.id) return;
     this.loading.set(true);
     this.error.set(null);
+    this.imageBroken.set(false);
 
     this.productService.getProductById(this.id)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (p) => {
           this.product.set(p);
+          this.quantity = 1;
           this.loading.set(false);
         },
         error: () => {
@@ -72,8 +75,38 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
       });
   }
 
+  stockQuantity(): number {
+    return this.product()?.stockQuantity ?? 0;
+  }
+
+  maxQuantity(): number {
+    return Math.max(this.stockQuantity(), 0);
+  }
+
+  isOutOfStock(): boolean {
+    return this.stockQuantity() <= 0;
+  }
+
+  isLowStock(): boolean {
+    const qty = this.stockQuantity();
+    return qty > 0 && qty <= 5;
+  }
+
+  stockLabel(): string {
+    const qty = this.stockQuantity();
+    if (qty <= 0) return 'Estoque: 0 — Fora de estoque';
+    if (qty <= 5) return `Estoque: ${qty} — Baixo`;
+    return `Estoque: ${qty}`;
+  }
+
+  onImageError(): void {
+    this.imageBroken.set(true);
+  }
+
   incrementQty(): void {
-    this.quantity++;
+    if (this.quantity < this.maxQuantity()) {
+      this.quantity++;
+    }
   }
 
   decrementQty(): void {
@@ -83,6 +116,22 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
   addToCart(): void {
     const p = this.product();
     if (!p) return;
+
+    if (this.isOutOfStock() || !p.active) {
+      this.snackBar.open('Produto indisponível ou sem estoque.', 'Fechar', {
+        duration: 4000,
+        panelClass: ['snack-error'],
+      });
+      return;
+    }
+
+    if (this.quantity > this.maxQuantity()) {
+      this.snackBar.open(`Quantidade máxima disponível: ${this.maxQuantity()}`, 'Fechar', {
+        duration: 4000,
+        panelClass: ['snack-error'],
+      });
+      return;
+    }
 
     this.cartService.addItem(p, this.quantity).subscribe({
       next: () => {

@@ -37,6 +37,13 @@ public class InventoryService {
         return mapper.toResponse(findInventory(productId));
     }
 
+    @Transactional(readOnly = true)
+    public Integer getQuantityOrZero(UUID productId) {
+        return repository.findByProductId(productId)
+                .map(Inventory::getQuantity)
+                .orElse(0);
+    }
+
     @Transactional
     public InventoryResponse increaseStock(UUID productId, Integer quantity) {
 
@@ -62,6 +69,17 @@ public class InventoryService {
 
         inventory.setQuantity(inventory.getQuantity() - quantity);
 
+        return mapper.toResponse(repository.save(inventory));
+    }
+
+    @Transactional
+    public InventoryResponse setStock(UUID productId, Integer quantity) {
+        if (quantity == null || quantity < 0) {
+            throw new IllegalArgumentException("Quantity must be zero or greater.");
+        }
+
+        Inventory inventory = findInventory(productId);
+        inventory.setQuantity(quantity);
         return mapper.toResponse(repository.save(inventory));
     }
 

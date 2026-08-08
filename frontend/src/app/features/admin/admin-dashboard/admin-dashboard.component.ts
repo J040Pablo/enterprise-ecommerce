@@ -2,7 +2,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { forkJoin, of } from 'rxjs';
-import { switchMap, catchError } from 'rxjs/operators';
+import { catchError } from 'rxjs/operators';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -11,7 +11,6 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ProductService } from '../../../core/services/product.service';
 import { OrderService } from '../../../core/services/order.service';
 import { ShippingService } from '../../../core/services/shipping.service';
-import { InventoryService } from '../../../core/services/inventory.service';
 
 export interface DashboardMetrics {
   // Inventory / Products
@@ -56,7 +55,6 @@ export class AdminDashboardComponent implements OnInit {
   private productService = inject(ProductService);
   private orderService = inject(OrderService);
   private shippingService = inject(ShippingService);
-  private inventoryService = inject(InventoryService);
 
   loading = signal<boolean>(true);
   error = signal<string | null>(null);
@@ -93,59 +91,26 @@ export class AdminDashboardComponent implements OnInit {
       orders: this.orderService.getAllOrders().pipe(catchError(() => of([]))),
       shippings: this.shippingService.getAllShippings().pipe(catchError(() => of([])))
     })
-    .pipe(
-      switchMap(({ productsPage, orders, shippings }) => {
+    .subscribe({
+      next: ({ productsPage, orders, shippings }) => {
         const products = productsPage.content || [];
         const totalProducts = productsPage.totalElements || products.length;
         const activeProducts = products.filter(p => p.active === true).length;
-
-        // If there are products, fetch inventory stock for each product
-        if (products.length === 0) {
-          return of({
-            products,
-            totalProducts,
-            activeProducts,
-            totalStockQuantity: 0,
-            orders,
-            shippings
-          });
-        }
-
-        const inventoryRequests = products.map(p =>
-          this.inventoryService.getInventoryByProductId(p.id)
+        // stockQuantity is enriched from Inventory on the product API response
+        const totalStockQuantity = products.reduce(
+          (acc, p) => acc + (p.stockQuantity ?? 0),
+          0
         );
 
-        return forkJoin(inventoryRequests).pipe(
-          switchMap(inventories => {
-            const totalStockQuantity = inventories.reduce(
-              (acc, curr) => acc + (curr.quantity || 0),
-              0
-            );
-            return of({
-              products,
-              totalProducts,
-              activeProducts,
-              totalStockQuantity,
-              orders,
-              shippings
-            });
-          })
-        );
-      })
-    )
-    .subscribe({
-      next: ({ totalProducts, activeProducts, totalStockQuantity, orders, shippings }) => {
         const orderList = orders || [];
         const totalOrders = orderList.length;
         const pendingOrders = orderList.filter(o => o.status === 'PENDING').length;
         const confirmedOrders = orderList.filter(o => o.status === 'CONFIRMED').length;
 
-        // Payments
         const paymentsList = orderList.filter(o => o.payment != null).map(o => o.payment!);
         const totalPayments = paymentsList.length;
         const approvedPayments = paymentsList.filter(p => p.status === 'APPROVED').length;
 
-        // Shipments
         let shippingList = shippings || [];
         if (shippingList.length === 0) {
           shippingList = orderList.filter(o => o.shipping != null).map(o => ({

@@ -9,6 +9,7 @@ export interface CreateProductPayload {
   description?: string;
   price: number;
   initialQuantity: number;
+  imageUrl?: string | null;
   categoryId: string;
 }
 
@@ -17,6 +18,8 @@ export interface UpdateProductPayload {
   description?: string;
   price?: number;
   active?: boolean;
+  /** Send empty string to clear the image. */
+  imageUrl?: string | null;
   categoryId?: string;
 }
 

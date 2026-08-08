@@ -36,6 +36,10 @@ public class CreateProductRequest {
     @Schema(description = "Initial stock quantity — zero or more", example = "50", requiredMode = Schema.RequiredMode.REQUIRED)
     private Integer initialQuantity;
 
+    @Size(max = 512)
+    @Schema(description = "Optional product image URL", example = "https://cdn.example.com/products/notebook.jpg")
+    private String imageUrl;
+
     @NotNull(message = "Category is required.")
     @Schema(description = "UUID of the category this product belongs to", example = "b1ffcd00-0d1c-5fg9-cc7e-7cc0ce491b22", requiredMode = Schema.RequiredMode.REQUIRED)
     private UUID categoryId;

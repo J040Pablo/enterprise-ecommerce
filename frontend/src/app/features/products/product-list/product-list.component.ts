@@ -107,7 +107,18 @@ export class ProductListComponent implements OnInit, OnDestroy {
     this.loadProducts();
   }
 
+  /** Tracks products whose image URL failed to load so we show the fallback icon. */
+  readonly brokenImages = new Set<string>();
+
   addToCart(product: Product): void {
+    if (!this.canAddToCart(product)) {
+      this.snackBar.open('Produto indisponível ou sem estoque.', 'Fechar', {
+        duration: 4000,
+        panelClass: ['snack-error'],
+      });
+      return;
+    }
+
     this.cartService.addItem(product, 1).subscribe({
       next: () => {
         this.snackBar.open(`"${product.name}" adicionado ao carrinho`, 'Ver Carrinho', {
@@ -126,6 +137,40 @@ export class ProductListComponent implements OnInit, OnDestroy {
 
   viewDetail(id: string): void {
     this.router.navigate(['/products', id]);
+  }
+
+  onImageError(productId: string): void {
+    this.brokenImages.add(productId);
+  }
+
+  stockQuantity(product: Product): number {
+    return product.stockQuantity ?? 0;
+  }
+
+  isOutOfStock(product: Product): boolean {
+    return this.stockQuantity(product) <= 0;
+  }
+
+  isLowStock(product: Product): boolean {
+    const qty = this.stockQuantity(product);
+    return qty > 0 && qty <= 5;
+  }
+
+  stockLabel(product: Product): string {
+    const qty = this.stockQuantity(product);
+    if (qty <= 0) return 'Fora de estoque';
+    if (qty <= 5) return `Em estoque: ${qty} (baixo)`;
+    return `Em estoque: ${qty}`;
+  }
+
+  canAddToCart(product: Product): boolean {
+    return product.active && !this.isOutOfStock(product);
+  }
+
+  addToCartTooltip(product: Product): string {
+    if (!product.active) return 'Produto indisponível';
+    if (this.isOutOfStock(product)) return 'Sem estoque';
+    return 'Adicionar ao carrinho';
   }
 
   formatPrice(value: number): string {

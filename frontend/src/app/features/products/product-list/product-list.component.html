@@ -42,11 +42,22 @@
     } @else {
       <div class="product-grid">
         @for (product of products(); track product.id) {
-          <mat-card class="product-card" [class.inactive]="!product.active">
+          <mat-card class="product-card" [class.inactive]="!product.active || isOutOfStock(product)">
             <div class="card-image-area" (click)="viewDetail(product.id)">
-              <mat-icon class="product-icon">inventory_2</mat-icon>
+              @if (product.imageUrl && !brokenImages.has(product.id)) {
+                <img
+                  [src]="product.imageUrl"
+                  [alt]="product.name"
+                  class="product-image"
+                  (error)="onImageError(product.id)"
+                />
+              } @else {
+                <mat-icon class="product-icon">inventory_2</mat-icon>
+              }
               @if (!product.active) {
                 <span class="inactive-badge">Indisponível</span>
+              } @else if (isOutOfStock(product)) {
+                <span class="inactive-badge">Esgotado</span>
               }
             </div>
 
@@ -60,6 +71,9 @@
               <div class="price-row">
                 <span class="price-tag">{{ formatPrice(product.price) }}</span>
               </div>
+              <p class="stock-label" [class.out-of-stock]="isOutOfStock(product)" [class.low-stock]="isLowStock(product)">
+                {{ stockLabel(product) }}
+              </p>
             </mat-card-content>
 
             <mat-card-actions class="card-actions">
@@ -75,8 +89,8 @@
                 mat-flat-button
                 color="primary"
                 id="btn-add-{{ product.id }}"
-                [disabled]="!product.active"
-                [matTooltip]="!product.active ? 'Produto indisponível' : 'Adicionar ao carrinho'"
+                [disabled]="!canAddToCart(product)"
+                [matTooltip]="addToCartTooltip(product)"
                 (click)="addToCart(product)"
               >
                 <mat-icon>add_shopping_cart</mat-icon>
