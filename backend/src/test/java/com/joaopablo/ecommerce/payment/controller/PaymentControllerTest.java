@@ -9,10 +9,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
@@ -20,6 +20,8 @@ import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -39,7 +41,7 @@ class PaymentControllerTest {
     private PaymentService service;
 
     @Test
-    @WithMockUser
+    @WithMockUser(roles = "CUSTOMER")
     void shouldCreatePayment() throws Exception {
         UUID orderId = UUID.randomUUID();
         CreatePaymentRequest request = new CreatePaymentRequest(orderId, "PIX");
@@ -63,7 +65,7 @@ class PaymentControllerTest {
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(roles = "CUSTOMER")
     void shouldFindPaymentById() throws Exception {
         UUID paymentId = UUID.randomUUID();
         PaymentResponse response = PaymentResponse.builder()
@@ -79,7 +81,7 @@ class PaymentControllerTest {
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(roles = "ADMIN")
     void shouldApprovePayment() throws Exception {
         UUID paymentId = UUID.randomUUID();
         PaymentResponse response = PaymentResponse.builder()
@@ -95,7 +97,7 @@ class PaymentControllerTest {
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(roles = "ADMIN")
     void shouldRejectPayment() throws Exception {
         UUID paymentId = UUID.randomUUID();
         PaymentResponse response = PaymentResponse.builder()
@@ -111,7 +113,7 @@ class PaymentControllerTest {
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(roles = "ADMIN")
     void shouldRefundPayment() throws Exception {
         UUID paymentId = UUID.randomUUID();
         PaymentResponse response = PaymentResponse.builder()
@@ -124,5 +126,38 @@ class PaymentControllerTest {
         mockMvc.perform(patch("/api/v1/payments/{id}/refund", paymentId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("REFUNDED"));
+    }
+
+    @Test
+    @WithMockUser(roles = "CUSTOMER")
+    void customerShouldNotApprovePayment() throws Exception {
+        UUID paymentId = UUID.randomUUID();
+
+        mockMvc.perform(patch("/api/v1/payments/{id}/approve", paymentId))
+                .andExpect(status().isForbidden());
+
+        verify(service, never()).approvePayment(any());
+    }
+
+    @Test
+    @WithMockUser(roles = "CUSTOMER")
+    void customerShouldNotRejectPayment() throws Exception {
+        UUID paymentId = UUID.randomUUID();
+
+        mockMvc.perform(patch("/api/v1/payments/{id}/reject", paymentId))
+                .andExpect(status().isForbidden());
+
+        verify(service, never()).rejectPayment(any());
+    }
+
+    @Test
+    @WithMockUser(roles = "CUSTOMER")
+    void customerShouldNotRefundPayment() throws Exception {
+        UUID paymentId = UUID.randomUUID();
+
+        mockMvc.perform(patch("/api/v1/payments/{id}/refund", paymentId))
+                .andExpect(status().isForbidden());
+
+        verify(service, never()).refundPayment(any());
     }
 }

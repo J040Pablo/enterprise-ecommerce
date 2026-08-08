@@ -11,10 +11,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
@@ -23,6 +23,8 @@ import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -42,7 +44,7 @@ class OrderControllerTest {
     private OrderService service;
 
     @Test
-    @WithMockUser
+    @WithMockUser(roles = "CUSTOMER")
     void shouldCreateOrder() throws Exception {
         CreateOrderRequest request = new CreateOrderRequest(UUID.randomUUID(), List.of(
                 new OrderItemRequest(UUID.randomUUID(), 1)
@@ -63,7 +65,7 @@ class OrderControllerTest {
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(roles = "ADMIN")
     void shouldUpdateStatus() throws Exception {
         UUID orderId = UUID.randomUUID();
         UpdateOrderStatusRequest request = new UpdateOrderStatusRequest(OrderStatus.SHIPPED);
@@ -79,5 +81,37 @@ class OrderControllerTest {
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("SHIPPED"));
+    }
+
+    @Test
+    @WithMockUser(roles = "CUSTOMER")
+    void customerShouldNotUpdateStatus() throws Exception {
+        UUID orderId = UUID.randomUUID();
+        UpdateOrderStatusRequest request = new UpdateOrderStatusRequest(OrderStatus.SHIPPED);
+
+        mockMvc.perform(patch("/api/v1/orders/{id}/status", orderId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden());
+
+        verify(service, never()).updateStatus(any(), any());
+    }
+
+    @Test
+    @WithMockUser(roles = "CUSTOMER")
+    void customerShouldNotListAllOrders() throws Exception {
+        mockMvc.perform(get("/api/v1/orders"))
+                .andExpect(status().isForbidden());
+
+        verify(service, never()).findAll();
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void adminShouldListAllOrders() throws Exception {
+        when(service.findAll()).thenReturn(List.of());
+
+        mockMvc.perform(get("/api/v1/orders"))
+                .andExpect(status().isOk());
     }
 }

@@ -16,6 +16,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -30,6 +31,7 @@ public class PaymentController {
     private final PaymentService service;
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'ADMIN')")
     @Operation(
             summary = "Create a payment",
             description = "Creates a PENDING payment linked to an existing confirmed order."
@@ -53,6 +55,7 @@ public class PaymentController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'ADMIN')")
     @Operation(
             summary = "Get payment by ID",
             description = "Fetches a specific payment and its current status by UUID."
@@ -75,6 +78,7 @@ public class PaymentController {
     }
 
     @PatchMapping("/{id}/approve")
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(
             summary = "Approve payment",
             description = "Approves a PENDING payment and automatically confirms the associated order."
@@ -89,6 +93,9 @@ public class PaymentController {
             @ApiResponse(responseCode = "401", description = "Unauthorized — JWT token missing or invalid",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ApiErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden — ADMIN role required",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ApiErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "Payment not found",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ApiErrorResponse.class)))
@@ -100,6 +107,7 @@ public class PaymentController {
     }
 
     @PatchMapping("/{id}/reject")
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(
             summary = "Reject payment",
             description = "Rejects a PENDING payment, cancels the order, and restores product inventory."
@@ -114,6 +122,9 @@ public class PaymentController {
             @ApiResponse(responseCode = "401", description = "Unauthorized — JWT token missing or invalid",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ApiErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden — ADMIN role required",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ApiErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "Payment not found",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ApiErrorResponse.class)))
@@ -125,6 +136,7 @@ public class PaymentController {
     }
 
     @PatchMapping("/{id}/refund")
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(
             summary = "Refund payment",
             description = "Refunds an APPROVED payment, cancels the order, and restores product inventory."
@@ -137,6 +149,9 @@ public class PaymentController {
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ApiErrorResponse.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized — JWT token missing or invalid",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ApiErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden — ADMIN role required",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ApiErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "Payment not found",

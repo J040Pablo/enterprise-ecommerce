@@ -17,6 +17,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,6 +33,7 @@ public class ShippingController {
     private final ShippingService service;
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(
             summary = "Create a shipping",
             description = "Creates a shipping record in PROCESSING status for a CONFIRMED order with an approved payment."
@@ -46,6 +48,9 @@ public class ShippingController {
             @ApiResponse(responseCode = "401", description = "Unauthorized — JWT token missing or invalid",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ApiErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden — ADMIN role required",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ApiErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "Order not found",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ApiErrorResponse.class)))
@@ -55,6 +60,7 @@ public class ShippingController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'ADMIN')")
     @Operation(
             summary = "Get shipping by ID",
             description = "Fetches a specific shipping record and its tracking information by UUID."
@@ -77,6 +83,7 @@ public class ShippingController {
     }
 
     @GetMapping("/order/{orderId}")
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'ADMIN')")
     @Operation(
             summary = "Get shipping by order ID",
             description = "Fetches the shipping record associated with a given order UUID."
@@ -102,14 +109,18 @@ public class ShippingController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(
             summary = "List all shippings",
-            description = "Returns all shipping records in the system."
+            description = "Returns all shipping records in the system. Restricted to admins."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Shipping list returned",
                     content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "401", description = "Unauthorized — JWT token missing or invalid",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ApiErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden — ADMIN role required",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ApiErrorResponse.class)))
     })
@@ -118,6 +129,7 @@ public class ShippingController {
     }
 
     @PatchMapping("/{id}/ship")
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(
             summary = "Mark as shipped",
             description = "Advances shipping status from PROCESSING to SHIPPED and records the shipped timestamp."
@@ -132,6 +144,9 @@ public class ShippingController {
             @ApiResponse(responseCode = "401", description = "Unauthorized — JWT token missing or invalid",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ApiErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden — ADMIN role required",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ApiErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "Shipping not found",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ApiErrorResponse.class)))
@@ -143,6 +158,7 @@ public class ShippingController {
     }
 
     @PatchMapping("/{id}/out-for-delivery")
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(
             summary = "Mark as out for delivery",
             description = "Advances shipping status from SHIPPED to OUT_FOR_DELIVERY."
@@ -157,6 +173,9 @@ public class ShippingController {
             @ApiResponse(responseCode = "401", description = "Unauthorized — JWT token missing or invalid",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ApiErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden — ADMIN role required",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ApiErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "Shipping not found",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ApiErrorResponse.class)))
@@ -168,6 +187,7 @@ public class ShippingController {
     }
 
     @PatchMapping("/{id}/deliver")
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(
             summary = "Mark as delivered",
             description = "Advances shipping status from OUT_FOR_DELIVERY to DELIVERED and records the delivered timestamp."
@@ -180,6 +200,9 @@ public class ShippingController {
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ApiErrorResponse.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized — JWT token missing or invalid",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ApiErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden — ADMIN role required",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ApiErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "Shipping not found",

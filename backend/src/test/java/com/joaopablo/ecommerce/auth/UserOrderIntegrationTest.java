@@ -26,6 +26,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -162,7 +165,18 @@ class UserOrderIntegrationTest {
         assertTrue(roles.contains("CUSTOMER"));
         assertTrue(roles.contains("ADMIN"));
 
-        // 3. Create Order using the User's UUID
+        // 3. Create Order using the User's UUID (authenticated as that user)
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(
+                        savedUser.getEmail(),
+                        "n/a",
+                        List.of(
+                                new SimpleGrantedAuthority("ROLE_CUSTOMER"),
+                                new SimpleGrantedAuthority("ROLE_ADMIN")
+                        )
+                )
+        );
+
         CreateOrderRequest createOrderRequest = CreateOrderRequest.builder()
                 .userId(returnedUserId)
                 .items(List.of(

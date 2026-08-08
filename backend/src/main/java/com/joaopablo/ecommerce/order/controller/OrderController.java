@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -36,6 +37,7 @@ public class OrderController {
     private final OrderService service;
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'ADMIN')")
     @Operation(
             summary = "Place a new order",
             description = "Creates a new order, validates stock availability, and deducts inventory for each item."
@@ -62,6 +64,7 @@ public class OrderController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'ADMIN')")
     @Operation(
             summary = "Get order by ID",
             description = "Fetches a specific order and its items, payment, and shipping summary by UUID."
@@ -84,14 +87,18 @@ public class OrderController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(
             summary = "List all orders",
-            description = "Returns all orders in the system. Typically restricted to admins."
+            description = "Returns all orders in the system. Restricted to admins."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Order list returned",
                     content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "401", description = "Unauthorized — JWT token missing or invalid",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ApiErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden — ADMIN role required",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ApiErrorResponse.class)))
     })
@@ -100,6 +107,7 @@ public class OrderController {
     }
 
     @GetMapping("/user/{userId}")
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'ADMIN')")
     @Operation(
             summary = "List orders by user",
             description = "Returns all orders that belong to a specific user, identified by UUID."
@@ -121,6 +129,7 @@ public class OrderController {
     }
 
     @PatchMapping("/{id}/status")
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(
             summary = "Update order status",
             description = "Transitions an order to a new status (e.g., PENDING → CONFIRMED → SHIPPED → DELIVERED)."
@@ -135,6 +144,9 @@ public class OrderController {
             @ApiResponse(responseCode = "401", description = "Unauthorized — JWT token missing or invalid",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ApiErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden — ADMIN role required",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ApiErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "Order not found",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ApiErrorResponse.class)))
@@ -147,6 +159,7 @@ public class OrderController {
     }
 
     @PatchMapping("/{id}/cancel")
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'ADMIN')")
     @Operation(
             summary = "Cancel an order",
             description = "Cancels an order if it has not yet been shipped. Stock is restored upon cancellation."

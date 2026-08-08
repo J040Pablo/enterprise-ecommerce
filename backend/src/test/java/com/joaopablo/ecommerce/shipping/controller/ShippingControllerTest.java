@@ -22,6 +22,8 @@ import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -41,7 +43,7 @@ class ShippingControllerTest {
     private ShippingService service;
 
     @Test
-    @WithMockUser
+    @WithMockUser(roles = "ADMIN")
     void shouldCreateShipping() throws Exception {
         UUID orderId = UUID.randomUUID();
         CreateShippingRequest request = CreateShippingRequest.builder()
@@ -71,7 +73,7 @@ class ShippingControllerTest {
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(roles = "CUSTOMER")
     void shouldFindShippingById() throws Exception {
         UUID shippingId = UUID.randomUUID();
         ShippingResponse response = ShippingResponse.builder()
@@ -87,7 +89,7 @@ class ShippingControllerTest {
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(roles = "CUSTOMER")
     void shouldFindShippingByOrderId() throws Exception {
         UUID orderId = UUID.randomUUID();
         ShippingResponse response = ShippingResponse.builder()
@@ -104,7 +106,7 @@ class ShippingControllerTest {
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(roles = "ADMIN")
     void shouldListAllShippings() throws Exception {
         when(service.findAll()).thenReturn(List.of(
                 ShippingResponse.builder().id(UUID.randomUUID()).status(ShippingStatus.PROCESSING).build()
@@ -116,7 +118,7 @@ class ShippingControllerTest {
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(roles = "ADMIN")
     void shouldMarkAsShipped() throws Exception {
         UUID shippingId = UUID.randomUUID();
         when(service.markAsShipped(eq(shippingId))).thenReturn(
@@ -129,7 +131,7 @@ class ShippingControllerTest {
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(roles = "ADMIN")
     void shouldMarkAsOutForDelivery() throws Exception {
         UUID shippingId = UUID.randomUUID();
         when(service.markAsOutForDelivery(eq(shippingId))).thenReturn(
@@ -142,7 +144,7 @@ class ShippingControllerTest {
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(roles = "ADMIN")
     void shouldMarkAsDelivered() throws Exception {
         UUID shippingId = UUID.randomUUID();
         when(service.markAsDelivered(eq(shippingId))).thenReturn(
@@ -152,5 +154,47 @@ class ShippingControllerTest {
         mockMvc.perform(patch("/api/v1/shippings/{id}/deliver", shippingId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("DELIVERED"));
+    }
+
+    @Test
+    @WithMockUser(roles = "CUSTOMER")
+    void customerShouldNotMarkAsShipped() throws Exception {
+        UUID shippingId = UUID.randomUUID();
+
+        mockMvc.perform(patch("/api/v1/shippings/{id}/ship", shippingId))
+                .andExpect(status().isForbidden());
+
+        verify(service, never()).markAsShipped(any());
+    }
+
+    @Test
+    @WithMockUser(roles = "CUSTOMER")
+    void customerShouldNotMarkAsOutForDelivery() throws Exception {
+        UUID shippingId = UUID.randomUUID();
+
+        mockMvc.perform(patch("/api/v1/shippings/{id}/out-for-delivery", shippingId))
+                .andExpect(status().isForbidden());
+
+        verify(service, never()).markAsOutForDelivery(any());
+    }
+
+    @Test
+    @WithMockUser(roles = "CUSTOMER")
+    void customerShouldNotMarkAsDelivered() throws Exception {
+        UUID shippingId = UUID.randomUUID();
+
+        mockMvc.perform(patch("/api/v1/shippings/{id}/deliver", shippingId))
+                .andExpect(status().isForbidden());
+
+        verify(service, never()).markAsDelivered(any());
+    }
+
+    @Test
+    @WithMockUser(roles = "CUSTOMER")
+    void customerShouldNotListAllShippings() throws Exception {
+        mockMvc.perform(get("/api/v1/shippings"))
+                .andExpect(status().isForbidden());
+
+        verify(service, never()).findAll();
     }
 }
