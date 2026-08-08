@@ -2,148 +2,497 @@
   position: sticky;
   top: 0;
   z-index: 1000;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%) !important;
+
+  background: #ffffff !important;
+  border-bottom: 1px solid #e5e7eb;
+  box-shadow: none;
+
   padding: 0 1rem;
 }
 
 .header-container {
   max-width: 1200px;
   width: 100%;
+  height: 64px;
   margin: 0 auto;
+
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
+/* =====================================================
+   BRAND
+===================================================== */
+
 .brand-section {
+  flex-shrink: 0;
+
   .logo-link {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.45rem;
+
     text-decoration: none;
-    color: #ffffff;
+    color: #111827;
+
+    font-size: 1.2rem;
     font-weight: 700;
-    font-size: 1.25rem;
-    letter-spacing: -0.5px;
+    letter-spacing: -0.4px;
+
+    &:hover {
+      opacity: 0.75;
+    }
 
     .logo-icon {
-      color: #38bdf8;
-      font-size: 28px;
-      width: 28px;
-      height: 28px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+
+      width: 24px;
+      height: 24px;
+
+      color: #111827;
+      font-size: 24px;
     }
 
     .highlight {
-      color: #38bdf8;
+      color: #2563eb;
     }
   }
 }
+
+/* =====================================================
+   NAVIGATION
+===================================================== */
 
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+
+  gap: 0.35rem;
+
+  margin-left: auto;
+  margin-right: 2.5rem;
 
   a {
-    color: #cbd5e1;
+    position: relative;
+
+    height: 40px;
+    min-height: 40px;
+
+    padding: 0 0.85rem;
+
+    display: inline-flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    gap: 0.45rem;
+
+    color: #6b7280;
+
+    font-size: 0.9rem;
     font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    transition: color 0.2s ease, background-color 0.2s ease;
+
+    text-decoration: none;
+    white-space: nowrap;
+
+    border-radius: 6px;
 
     mat-icon {
-      font-size: 20px;
-      width: 20px;
-      height: 20px;
+      display: inline-flex !important;
+      flex-shrink: 0;
+
+      align-items: center;
+      justify-content: center;
+
+      width: 19px;
+      height: 19px;
+
+      margin: 0 !important;
+      padding: 0 !important;
+
+      font-size: 19px;
+      line-height: 19px;
     }
 
     &:hover {
-      color: #ffffff;
-      background-color: rgba(255, 255, 255, 0.05);
+      color: #111827;
+      background-color: #f8fafc;
     }
 
     &.active-link {
-      color: #38bdf8;
-      background-color: rgba(56, 189, 248, 0.1);
+      color: #111827;
+      font-weight: 600;
+
+      background: transparent;
+
+      &::after {
+        content: '';
+
+        position: absolute;
+
+        left: 0.85rem;
+        right: 0.85rem;
+        bottom: -1px;
+
+        height: 2px;
+
+        background: #2563eb;
+        border-radius: 2px;
+      }
     }
   }
 }
+
+/* =====================================================
+   RIGHT SIDE
+===================================================== */
 
 .actions-section {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  justify-content: flex-end;
+
+  gap: 0.9rem;
+
+  /* Carrinho */
 
   a[mat-icon-button] {
-    color: #cbd5e1;
-    &:hover {
-      color: #ffffff;
-    }
-  }
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
 
-  .nav-auth-btn {
-    border-color: rgba(255, 255, 255, 0.2);
-    color: #ffffff;
-    display: flex;
+    padding: 0;
+
+    display: inline-flex !important;
     align-items: center;
-    gap: 0.4rem;
-    transition: all 0.2s ease;
+    justify-content: center;
+
+    color: #4b5563;
+
+    border-radius: 6px;
 
     &:hover {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: #38bdf8;
-      color: #38bdf8;
+      color: #111827;
+      background: #f3f4f6;
     }
-  }
 
-  .nav-register-btn {
-    background-color: #38bdf8 !important;
-    color: #0f172a !important;
-    font-weight: 600;
-  }
+    &.active-link {
+      color: #2563eb;
+      background: #eff6ff;
+    }
 
-  .user-profile-btn {
-    color: #ffffff;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0 0.5rem;
+    mat-icon {
+      margin: 0 !important;
 
-    .user-avatar {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background: #38bdf8;
-      color: #0f172a;
-      font-weight: 700;
-      display: flex;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.9rem;
-    }
 
-    .user-name {
-      font-weight: 600;
-      font-size: 0.95rem;
+      width: 22px;
+      height: 22px;
+
+      font-size: 22px;
+      line-height: 22px;
     }
   }
 }
 
-.user-menu-header {
-  padding: 0.75rem 1rem;
-  .user-menu-name {
-    font-weight: 600;
-    color: #0f172a;
-    font-size: 0.95rem;
+/* =====================================================
+   LOGIN
+===================================================== */
+
+.nav-auth-btn {
+  height: 38px;
+  min-height: 38px;
+
+  padding: 0 0.9rem;
+
+  display: inline-flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  gap: 0.4rem;
+
+  color: #374151;
+
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+
+  font-size: 0.875rem;
+  font-weight: 500;
+
+  white-space: nowrap;
+
+  mat-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    width: 18px;
+    height: 18px;
+
+    margin: 0 !important;
+
+    font-size: 18px;
+    line-height: 18px;
   }
-  .user-menu-email {
+
+  &:hover {
+    color: #111827;
+    border-color: #9ca3af;
+    background: #f9fafb;
+  }
+}
+
+/* =====================================================
+   REGISTER
+===================================================== */
+
+.nav-register-btn {
+  height: 38px;
+  min-height: 38px;
+
+  padding: 0 1rem;
+
+  display: inline-flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  background: #2563eb !important;
+  color: #ffffff !important;
+
+  border-radius: 6px;
+
+  font-size: 0.875rem;
+  font-weight: 600;
+
+  box-shadow: none;
+
+  &:hover {
+    background: #1d4ed8 !important;
+  }
+}
+
+/* =====================================================
+   USER PROFILE
+===================================================== */
+
+.user-profile-btn {
+  height: 42px !important;
+  min-height: 42px !important;
+
+  padding: 0 0.55rem !important;
+
+  display: inline-flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  gap: 0.65rem !important;
+
+  color: #374151;
+
+  border-radius: 6px;
+
+  white-space: nowrap;
+
+  /* IMPORTANTE:
+     remove qualquer comportamento do MDC
+     que possa empilhar os elementos */
+
+  .mdc-button__label {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    gap: 0.65rem !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  &:hover {
+    background: #f8fafc;
+  }
+
+  /* Avatar */
+
+  .user-avatar {
+    flex: 0 0 30px;
+
+    width: 30px;
+    height: 30px;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    border-radius: 50%;
+
+    background: #111827;
+    color: #ffffff;
+
     font-size: 0.8rem;
-    color: #64748b;
+    font-weight: 600;
+
+    line-height: 30px;
+
+    text-align: center;
+  }
+
+  /* Nome */
+
+  .user-name {
+    flex: 0 1 auto;
+
+    display: block !important;
+
+    max-width: 130px;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    color: #374151;
+
+    font-size: 0.875rem;
+    font-weight: 500;
+
+    line-height: 1.2;
+  }
+
+  /* Seta */
+
+  .user-arrow {
+    flex: 0 0 20px;
+
+    width: 20px;
+    height: 20px;
+
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    color: #9ca3af;
+
+    font-size: 20px;
+    line-height: 20px;
+  }
+}
+
+/* =====================================================
+   USER MENU
+===================================================== */
+
+.user-menu-header {
+  padding: 0.85rem 1rem;
+
+  .user-menu-name {
+    color: #111827;
+
+    font-size: 0.9rem;
+    font-weight: 600;
+
+    line-height: 1.3;
+  }
+
+  .user-menu-email {
+    margin-top: 0.2rem;
+
+    color: #6b7280;
+
+    font-size: 0.78rem;
+    line-height: 1.3;
   }
 }
 
 .warn-text {
   color: #dc2626;
+}
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 900px) {
+  .nav-links {
+    margin-right: 1.25rem;
+
+    a {
+      padding: 0 0.6rem;
+
+      mat-icon {
+        margin: 0 !important;
+      }
+    }
+  }
+
+  .user-profile-btn {
+    .user-name {
+      display: none !important;
+    }
+
+    .mdc-button__label {
+      gap: 0.5rem !important;
+    }
+  }
+}
+
+@media (max-width: 650px) {
+  .app-header {
+    padding: 0 0.75rem;
+  }
+
+  .header-container {
+    height: 58px;
+  }
+
+  .nav-links {
+    display: none;
+  }
+
+  .actions-section {
+    gap: 0.5rem;
+  }
+
+  .nav-auth-btn {
+    padding: 0 0.7rem;
+
+    span {
+      display: none;
+    }
+
+    mat-icon {
+      margin: 0 !important;
+    }
+  }
+
+  .nav-register-btn {
+    padding: 0 0.75rem !important;
+  }
+
+  .user-profile-btn {
+    padding: 0 0.3rem !important;
+
+    .user-name {
+      display: none !important;
+    }
+  }
 }

@@ -9,6 +9,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../../core/services/auth.service';
+import { CartService } from '../../../core/services/cart.service';
 
 @Component({
   selector: 'app-login',
@@ -30,6 +31,7 @@ import { AuthService } from '../../../core/services/auth.service';
 export class LoginComponent {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
+  private cartService = inject(CartService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
@@ -54,7 +56,10 @@ export class LoginComponent {
       next: () => {
         this.isLoading.set(false);
         const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/products';
-        this.router.navigateByUrl(returnUrl);
+        this.cartService.loadCart().subscribe({
+          next: () => this.router.navigateByUrl(returnUrl),
+          error: () => this.router.navigateByUrl(returnUrl)
+        });
       },
       error: (err) => {
         this.isLoading.set(false);

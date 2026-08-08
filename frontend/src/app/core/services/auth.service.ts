@@ -97,9 +97,9 @@ export class AuthService {
 
   /**
    * Extrai dados básicos do JWT para preencher o objeto User.
-   * ATENÇÃO: o claim `sub` deste token contém o e-mail, NÃO o UUID do usuário.
-   * Por isso `id` é deixado em branco aqui — quem deve preenchê-lo é
-   * handleOAuthCallback (via param userId) ou o login email/senha (via LoginResponseDTO).
+   * ATENÇÃO: o claim `sub` contém o e-mail, NÃO o UUID do usuário.
+   * O UUID vem do claim `userId` (emitido por JwtService) e/ou do query param
+   * `userId` no redirect OAuth (preferido em handleOAuthCallback).
    */
   private decodeUserFromToken(token: string): User {
     try {
@@ -112,9 +112,8 @@ export class AuthService {
         : (payload.roles ? [payload.roles] : ['CUSTOMER']);
 
       // payload.sub = e-mail (não UUID) — NÃO usar como id
-      // payload.userId seria o UUID se adicionado como claim customizado no futuro
       return {
-        id: payload.userId || '',          // '' será sobrescrito por handleOAuthCallback
+        id: payload.userId || '',
         email: payload.sub || payload.email || '',
         firstName: payload.firstName || payload.given_name || payload.name || 'Usuário',
         lastName: payload.lastName || payload.family_name || '',

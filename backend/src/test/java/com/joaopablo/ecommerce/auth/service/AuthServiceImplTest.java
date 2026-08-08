@@ -100,7 +100,7 @@ class AuthServiceImplTest {
 
 
 
-        when(jwtService.generateToken("user@email.com"))
+        when(jwtService.generateToken("user@email.com", user.getId()))
                 .thenReturn("access-123");
 
         when(jwtService.getExpirationMs())
@@ -173,7 +173,7 @@ class AuthServiceImplTest {
         when(refreshTokenService.rotate("old-refresh"))
                 .thenReturn(rotated);
 
-        when(jwtService.generateToken("user@email.com"))
+        when(jwtService.generateToken("user@email.com", user.getId()))
                 .thenReturn("new-access");
 
         when(jwtService.getExpirationMs())

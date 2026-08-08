@@ -85,8 +85,15 @@ export class CheckoutComponent implements OnInit {
     this.orderService.createOrder(payload).subscribe({
       next: (order) => {
         console.info('[ORDER-DEBUG] Pedido criado com sucesso:', order.id);
-        this.cartService.clearCart();
-        this.router.navigate(['/checkout/confirmation', order.id]);
+        this.cartService.clearCart().subscribe({
+          next: () => {
+            this.router.navigate(['/checkout/confirmation', order.id]);
+          },
+          error: () => {
+            // Mesmo se limpar o carrinho falhar, navegue para confirmação
+            this.router.navigate(['/checkout/confirmation', order.id]);
+          }
+        });
       },
       error: (err) => {
         console.error('[ORDER-DEBUG] Erro na criação do pedido:', err);

@@ -90,7 +90,7 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public LoginResponseDTO issueTokens(User user) {
 
-        String accessToken = jwtService.generateToken(user.getEmail());
+        String accessToken = jwtService.generateToken(user.getEmail(), user.getId());
 
         RefreshToken refreshToken = refreshTokenService.create(user);
 
@@ -130,7 +130,7 @@ public class AuthServiceImpl implements AuthService {
         User user = rotated.getUser();
 
         String accessToken =
-                jwtService.generateToken(user.getEmail());
+                jwtService.generateToken(user.getEmail(), user.getId());
 
 
         return TokenRefreshResponseDTO.builder()

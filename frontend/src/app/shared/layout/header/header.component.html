@@ -1,80 +1,189 @@
-<mat-toolbar color="primary" class="app-header">
+<header class="app-header">
   <div class="header-container">
+
+    <!-- BRAND -->
     <div class="brand-section">
-      <a routerLink="/" class="logo-link">
+      <a routerLink="/products" class="logo-link">
         <mat-icon class="logo-icon">storefront</mat-icon>
-        <span class="logo-text">Enterprise<span class="highlight">Shop</span></span>
+        <span>Enterprise<span class="highlight">Commerce</span></span>
       </a>
     </div>
 
+    <!-- NAVIGATION -->
     <nav class="nav-links">
-      <a mat-button routerLink="/products" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}">
+      <a
+        mat-button
+        routerLink="/products"
+        routerLinkActive="active-link"
+        [routerLinkActiveOptions]="{ exact: true }">
+
         <mat-icon>inventory_2</mat-icon>
-        Produtos
+        <span>Produtos</span>
       </a>
-      <a mat-button routerLink="/orders" routerLinkActive="active-link">
+
+      <a
+        mat-button
+        routerLink="/orders"
+        routerLinkActive="active-link">
+
         <mat-icon>receipt_long</mat-icon>
-        Pedidos
+        <span>Pedidos</span>
       </a>
-      <a mat-button routerLink="/admin" routerLinkActive="active-link">
-        <mat-icon>dashboard</mat-icon>
-        Admin
+
+      <a
+        mat-button
+        routerLink="/admin"
+        routerLinkActive="active-link">
+
+        <mat-icon>space_dashboard</mat-icon>
+        <span>Admin</span>
       </a>
     </nav>
 
+    <!-- RIGHT ACTIONS -->
     <div class="actions-section">
-      <a mat-icon-button routerLink="/cart" routerLinkActive="active-link" aria-label="Carrinho de compras">
-        <mat-icon [matBadge]="cartItemCount" [matBadgeHidden]="cartItemCount === 0" matBadgeColor="warn">
+
+      <!-- CART -->
+      <a
+        mat-icon-button
+        routerLink="/cart"
+        routerLinkActive="active-link"
+        aria-label="Carrinho de compras">
+
+        <mat-icon
+          [matBadge]="cartItemCount"
+          [matBadgeHidden]="cartItemCount === 0"
+          matBadgeColor="warn">
+
           shopping_cart
+
         </mat-icon>
       </a>
 
-      <!-- Unauthenticated View -->
+      <!-- UNAUTHENTICATED -->
       <ng-container *ngIf="!authService.isAuthenticated()">
-        <a mat-stroked-button routerLink="/auth/login" class="nav-auth-btn">
+
+        <a
+          mat-stroked-button
+          routerLink="/auth/login"
+          class="nav-auth-btn">
+
           <mat-icon>login</mat-icon>
-          Entrar
+          <span>Entrar</span>
+
         </a>
-        <a mat-flat-button color="accent" routerLink="/auth/register" class="nav-register-btn">
-          Cadastrar
+
+        <a
+          mat-flat-button
+          routerLink="/auth/register"
+          class="nav-register-btn">
+
+          <span>Cadastrar</span>
+
         </a>
+
       </ng-container>
 
-      <!-- Authenticated View -->
+      <!-- AUTHENTICATED -->
       <ng-container *ngIf="authService.isAuthenticated()">
-        <button mat-button [matMenuTriggerFor]="userMenu" class="user-profile-btn">
-          <div class="user-avatar">
-            {{ (authService.currentUser()?.firstName?.charAt(0) || 'U') }}
-          </div>
-          <span class="user-name">{{ authService.currentUser()?.firstName }}</span>
-          <mat-icon>arrow_drop_down</mat-icon>
+
+        <button
+          mat-button
+          [matMenuTriggerFor]="userMenu"
+          class="user-profile-btn"
+          type="button">
+
+          <!-- AVATAR -->
+          <span class="user-avatar">
+            {{ authService.currentUser()?.firstName?.charAt(0) || 'U' }}
+          </span>
+
+          <!-- NAME -->
+          <span class="user-name">
+            {{ authService.currentUser()?.firstName }}
+          </span>
+
+          <!-- ARROW -->
+          <mat-icon class="user-arrow">
+            arrow_drop_down
+          </mat-icon>
+
         </button>
 
-        <mat-menu #userMenu="matMenu" xPosition="before" class="custom-user-menu">
-          <div class="user-menu-header" (click)="$event.stopPropagation()">
+        <!-- USER MENU -->
+        <mat-menu
+          #userMenu="matMenu"
+          xPosition="before"
+          class="custom-user-menu">
+
+          <!-- USER INFO -->
+          <div
+            class="user-menu-header"
+            (click)="$event.stopPropagation()">
+
             <div class="user-menu-name">
-              {{ authService.currentUser()?.firstName }} {{ authService.currentUser()?.lastName }}
+              {{ authService.currentUser()?.firstName }}
+              {{ authService.currentUser()?.lastName }}
             </div>
+
             <div class="user-menu-email">
               {{ authService.currentUser()?.email }}
             </div>
+
           </div>
+
           <mat-divider></mat-divider>
-          <a mat-menu-item routerLink="/orders">
+
+          <!-- ORDERS -->
+          <a
+            mat-menu-item
+            routerLink="/orders">
+
             <mat-icon>receipt_long</mat-icon>
-            <span>Meus Pedidos</span>
+
+            <span>
+              Meus Pedidos
+            </span>
+
           </a>
-          <a mat-menu-item routerLink="/admin">
+
+          <!-- ADMIN -->
+          <a
+            mat-menu-item
+            routerLink="/admin">
+
             <mat-icon>admin_panel_settings</mat-icon>
-            <span>Painel Admin</span>
+
+            <span>
+              Painel Admin
+            </span>
+
           </a>
+
           <mat-divider></mat-divider>
-          <button mat-menu-item (click)="logout()" class="logout-menu-item">
-            <mat-icon color="warn">logout</mat-icon>
-            <span class="warn-text">Sair</span>
+
+          <!-- LOGOUT -->
+          <button
+            mat-menu-item
+            type="button"
+            (click)="logout()"
+            class="logout-menu-item">
+
+            <mat-icon color="warn">
+              logout
+            </mat-icon>
+
+            <span class="warn-text">
+              Sair
+            </span>
+
           </button>
+
         </mat-menu>
+
       </ng-container>
+
     </div>
+
   </div>
-</mat-toolbar>
+</header>

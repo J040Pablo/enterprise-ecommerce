@@ -14,6 +14,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
+import java.util.List;
+import java.util.UUID;
+
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -48,16 +51,24 @@ class OAuth2SuccessHandlerTest {
     @Test
     void onAuthenticationSuccess_shouldRedirectWithTokensInQueryParams() throws Exception {
         when(authentication.getPrincipal()).thenReturn(oAuth2User);
+        UUID userId = UUID.fromString("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
         LoginResponseDTO loginResponse = LoginResponseDTO.builder()
                 .token("mock-access-token")
                 .refreshToken("mock-refresh-token")
                 .type("Bearer")
                 .expiresIn(86400000)
+                .user(LoginResponseDTO.UserLoginResponse.builder()
+                        .id(userId)
+                        .firstName("João")
+                        .lastName("Pablo")
+                        .email("joao.pablo@email.com")
+                        .roles(List.of("CUSTOMER"))
+                        .build())
                 .build();
         when(oAuthUserService.loginWithGoogle(oAuth2User)).thenReturn(loginResponse);
 
         oAuth2SuccessHandler.onAuthenticationSuccess(request, response, authentication);
 
-        verify(response).sendRedirect("http://localhost:4200/auth/callback?token=mock-access-token&refreshToken=mock-refresh-token");
+        verify(response).sendRedirect("http://localhost:4200/auth/callback?token=mock-access-token&refreshToken=mock-refresh-token&userId=" + userId);
     }
 }

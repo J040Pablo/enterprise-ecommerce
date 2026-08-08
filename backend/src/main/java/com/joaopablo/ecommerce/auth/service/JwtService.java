@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.function.Function;
 
 @Service
@@ -36,12 +38,18 @@ public class JwtService {
         this.expirationMs = expirationMs;
     }
 
-    public String generateToken(String email) {
+    /**
+     * Issues an access token. {@code sub} remains the email (used by JwtAuthenticationFilter);
+     * {@code userId} carries the persisted user UUID for clients that decode the JWT.
+     */
+    public String generateToken(String email, UUID userId) {
+        Objects.requireNonNull(userId, "userId is required to issue an access token");
         Date now = new Date();
         Date expiration = new Date(now.getTime() + expirationMs);
 
         return Jwts.builder()
                 .subject(email)
+                .claim("userId", userId.toString())
                 .issuedAt(now)
                 .expiration(expiration)
                 .signWith(signingKey)

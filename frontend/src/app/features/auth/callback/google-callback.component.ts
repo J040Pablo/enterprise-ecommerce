@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../../core/services/auth.service';
+import { CartService } from '../../../core/services/cart.service';
 
 @Component({
   selector: 'app-google-callback',
@@ -15,6 +16,7 @@ export class GoogleCallbackComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private authService = inject(AuthService);
+  private cartService = inject(CartService);
 
   ngOnInit(): void {
     const token = this.route.snapshot.queryParamMap.get('token');
@@ -25,7 +27,10 @@ export class GoogleCallbackComponent implements OnInit {
 
     if (token && refreshToken) {
       this.authService.handleOAuthCallback(token, refreshToken, userId);
-      this.router.navigate(['/']);
+      this.cartService.loadCart().subscribe({
+        next: () => this.router.navigate(['/']),
+        error: () => this.router.navigate(['/'])
+      });
     } else {
       this.router.navigate(['/auth/login'], {
         queryParams: { error: 'google_auth_failed' }

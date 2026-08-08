@@ -1,8 +1,8 @@
 .app-footer {
-  background: #0f172a;
-  color: #94a3b8;
-  border-top: 1px solid #1e293b;
-  padding: 3rem 1.5rem 1.5rem;
+  background: #ffffff;
+  color: #64748b;
+  border-top: 1px solid #e5e7eb;
+  padding: 2.5rem 1.5rem 1.25rem;
   margin-top: auto;
 }
 
@@ -11,25 +11,42 @@
   margin: 0 auto;
 }
 
+/* =========================
+   MAIN FOOTER
+   ========================= */
+
 .footer-grid {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr;
-  gap: 3rem;
-  margin-bottom: 2.5rem;
+  grid-template-columns: 2.2fr 1fr 1fr;
+  gap: 4rem;
+
+  padding-bottom: 2rem;
 
   @media (max-width: 768px) {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
     gap: 2rem;
+  }
+
+  @media (max-width: 520px) {
+    grid-template-columns: 1fr;
   }
 }
 
+/* =========================
+   COLUMNS
+   ========================= */
+
 .footer-col {
   h4 {
-    color: #f8fafc;
-    font-size: 1rem;
-    font-weight: 600;
-    margin-bottom: 1.25rem;
-    letter-spacing: 0.5px;
+    margin: 0 0 0.9rem;
+
+    color: #111827;
+
+    font-size: 0.8rem;
+    font-weight: 700;
+
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
   }
 
   ul {
@@ -38,66 +55,120 @@
     margin: 0;
 
     li {
-      margin-bottom: 0.6rem;
+      margin: 0;
 
       a {
-        color: #94a3b8;
+        display: inline-block;
+
+        padding: 0.25rem 0;
+
+        color: #6b7280;
+
+        font-size: 0.875rem;
+        font-weight: 400;
+
         text-decoration: none;
-        transition: color 0.2s ease;
+
+        transition: color 0.15s ease;
 
         &:hover {
-          color: #38bdf8;
+          color: #111827;
         }
       }
     }
   }
 }
 
+/* =========================
+   BRAND
+   ========================= */
+
 .brand-col {
   .logo {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    color: #ffffff;
-    font-size: 1.25rem;
+    gap: 0.4rem;
+
+    margin-bottom: 0.75rem;
+
+    color: #111827;
+
+    font-size: 1.1rem;
     font-weight: 700;
-    margin-bottom: 1rem;
 
     .icon {
-      color: #38bdf8;
+      color: #2563eb;
+
+      width: 22px;
+      height: 22px;
+
+      font-size: 22px;
     }
 
     .highlight {
-      color: #38bdf8;
+      color: #2563eb;
     }
   }
 
   .description {
-    font-size: 0.9rem;
+    max-width: 360px;
+
+    margin: 0;
+
+    color: #6b7280;
+
+    font-size: 0.85rem;
     line-height: 1.6;
-    max-width: 400px;
   }
 }
+
+/* =========================
+   TECHNOLOGIES
+   ========================= */
 
 .tech-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.35rem;
 
   .tag {
-    background: #1e293b;
-    color: #38bdf8;
-    font-size: 0.75rem;
-    padding: 0.35rem 0.75rem;
-    border-radius: 20px;
-    border: 1px solid rgba(56, 189, 248, 0.2);
+    display: inline-flex;
+    align-items: center;
+
+    padding: 0.25rem 0.5rem;
+
+    background: #f8fafc;
+
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+
+    color: #6b7280;
+
+    font-size: 0.7rem;
+    font-weight: 500;
   }
 }
 
+/* =========================
+   BOTTOM
+   ========================= */
+
 .footer-bottom {
-  border-top: 1px solid #1e293b;
-  padding-top: 1.5rem;
-  text-align: center;
-  font-size: 0.85rem;
-  color: #64748b;
+  border-top: 1px solid #e5e7eb;
+
+  padding-top: 1rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  color: #9ca3af;
+
+  font-size: 0.75rem;
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
 }

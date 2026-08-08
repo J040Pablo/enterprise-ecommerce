@@ -108,12 +108,19 @@ export class ProductListComponent implements OnInit, OnDestroy {
   }
 
   addToCart(product: Product): void {
-    this.cartService.addItem(product, 1);
-    this.snackBar.open(`"${product.name}" adicionado ao carrinho`, 'Ver Carrinho', {
-      duration: 3000,
-      panelClass: ['snack-success'],
-    }).onAction().subscribe(() => {
-      this.router.navigate(['/cart']);
+    this.cartService.addItem(product, 1).subscribe({
+      next: () => {
+        this.snackBar.open(`"${product.name}" adicionado ao carrinho`, 'Ver Carrinho', {
+          duration: 3000,
+          panelClass: ['snack-success'],
+        }).onAction().subscribe(() => {
+          this.router.navigate(['/cart']);
+        });
+      },
+      error: (err) => {
+        const msg = err?.error?.message ?? 'Não foi possível adicionar ao carrinho. Verifique o estoque.';
+        this.snackBar.open(msg, 'Fechar', { duration: 5000, panelClass: ['snack-error'] });
+      }
     });
   }
 
