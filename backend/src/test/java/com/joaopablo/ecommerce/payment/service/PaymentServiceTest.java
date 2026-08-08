@@ -1,5 +1,6 @@
 package com.joaopablo.ecommerce.payment.service;
 
+import com.joaopablo.ecommerce.common.security.ResourceOwnershipService;
 import com.joaopablo.ecommerce.inventory.service.InventoryService;
 import com.joaopablo.ecommerce.order.entity.Order;
 import com.joaopablo.ecommerce.order.entity.OrderItem;
@@ -26,6 +27,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -55,6 +57,9 @@ class PaymentServiceTest {
 
     @Mock
     private PaymentEventPublisher paymentEventPublisher;
+
+    @Mock
+    private ResourceOwnershipService resourceOwnershipService;
 
     @InjectMocks
     private PaymentService service;
@@ -236,5 +241,39 @@ class PaymentServiceTest {
         when(paymentRepository.findById(paymentId)).thenReturn(Optional.empty());
 
         assertThrows(PaymentNotFoundException.class, () -> service.findById(paymentId));
+        verify(resourceOwnershipService, never()).assertOrderOwnerOrAdmin(any());
+    }
+
+    @Test
+    void shouldReturnOwnPaymentById() {
+        when(paymentRepository.findById(paymentId)).thenReturn(Optional.of(payment));
+        doNothing().when(resourceOwnershipService).assertOrderOwnerOrAdmin(orderId);
+        when(mapper.toResponse(payment)).thenReturn(
+                PaymentResponse.builder().id(paymentId).orderId(orderId).status(PaymentStatus.PENDING).build()
+        );
+
+        PaymentResponse response = service.findById(paymentId);
+
+        assertEquals(paymentId, response.getId());
+        verify(resourceOwnershipService).assertOrderOwnerOrAdmin(orderId);
+    }
+
+    @Test
+    void shouldDenyAccessToAnotherUsersPayment() {
+        when(paymentRepository.findById(paymentId)).thenReturn(Optional.of(payment));
+        doThrow(new AccessDeniedException("Access denied to this resource"))
+                .when(resourceOwnershipService).assertOrderOwnerOrAdmin(orderId);
+
+        assertThrows(AccessDeniedException.class, () -> service.findById(paymentId));
+        verify(mapper, never()).toResponse(any());
+    }
+
+    @Test
+    void shouldDenyAccessToPaymentOfAnotherUsersOrder() {
+        doThrow(new AccessDeniedException("Access denied to this resource"))
+                .when(resourceOwnershipService).assertOrderOwnerOrAdmin(orderId);
+
+        assertThrows(AccessDeniedException.class, () -> service.findByOrderId(orderId));
+        verify(paymentRepository, never()).findByOrderId(any());
     }
 }

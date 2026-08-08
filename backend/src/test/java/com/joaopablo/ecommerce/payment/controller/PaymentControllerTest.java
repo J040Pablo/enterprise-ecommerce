@@ -26,6 +26,8 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import org.springframework.security.access.AccessDeniedException;
+
 @SpringBootTest
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
@@ -159,5 +161,31 @@ class PaymentControllerTest {
                 .andExpect(status().isForbidden());
 
         verify(service, never()).refundPayment(any());
+    }
+
+    @Test
+    @WithMockUser(roles = "CUSTOMER")
+    void customerShouldGetForbiddenWhenAccessingAnotherUsersPayment() throws Exception {
+        UUID paymentId = UUID.randomUUID();
+        when(service.findById(paymentId)).thenThrow(new AccessDeniedException("Access denied to this resource"));
+
+        mockMvc.perform(get("/api/v1/payments/{id}", paymentId))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void adminShouldFindPaymentById() throws Exception {
+        UUID paymentId = UUID.randomUUID();
+        PaymentResponse response = PaymentResponse.builder()
+                .id(paymentId)
+                .status(PaymentStatus.PENDING)
+                .build();
+
+        when(service.findById(paymentId)).thenReturn(response);
+
+        mockMvc.perform(get("/api/v1/payments/{id}", paymentId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(paymentId.toString()));
     }
 }

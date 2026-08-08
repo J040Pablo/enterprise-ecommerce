@@ -1,5 +1,6 @@
 package com.joaopablo.ecommerce.shipping.service;
 
+import com.joaopablo.ecommerce.common.security.ResourceOwnershipService;
 import com.joaopablo.ecommerce.order.entity.Order;
 import com.joaopablo.ecommerce.order.entity.OrderStatus;
 import com.joaopablo.ecommerce.order.exception.OrderNotFoundException;
@@ -24,6 +25,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -48,6 +50,9 @@ class ShippingServiceTest {
 
     @Mock
     private PaymentRepository paymentRepository;
+
+    @Mock
+    private ResourceOwnershipService resourceOwnershipService;
 
     @InjectMocks
     private ShippingService service;
@@ -124,6 +129,7 @@ class ShippingServiceTest {
     @Test
     void shouldFindShippingById() {
         when(shippingRepository.findById(shippingId)).thenReturn(Optional.of(shipping));
+        doNothing().when(resourceOwnershipService).assertOrderOwnerOrAdmin(orderId);
         when(mapper.toResponse(shipping)).thenReturn(
                 ShippingResponse.builder().id(shippingId).status(ShippingStatus.PROCESSING).build()
         );
@@ -132,10 +138,12 @@ class ShippingServiceTest {
 
         assertEquals(shippingId, response.getId());
         assertEquals(ShippingStatus.PROCESSING, response.getStatus());
+        verify(resourceOwnershipService).assertOrderOwnerOrAdmin(orderId);
     }
 
     @Test
     void shouldFindShippingByOrderId() {
+        doNothing().when(resourceOwnershipService).assertOrderOwnerOrAdmin(orderId);
         when(shippingRepository.findByOrderId(orderId)).thenReturn(Optional.of(shipping));
         when(mapper.toResponse(shipping)).thenReturn(
                 ShippingResponse.builder().id(shippingId).orderId(orderId).build()
@@ -144,6 +152,26 @@ class ShippingServiceTest {
         ShippingResponse response = service.findByOrderId(orderId).orElseThrow();
 
         assertEquals(orderId, response.getOrderId());
+        verify(resourceOwnershipService).assertOrderOwnerOrAdmin(orderId);
+    }
+
+    @Test
+    void shouldDenyAccessToAnotherUsersShippingById() {
+        when(shippingRepository.findById(shippingId)).thenReturn(Optional.of(shipping));
+        doThrow(new AccessDeniedException("Access denied to this resource"))
+                .when(resourceOwnershipService).assertOrderOwnerOrAdmin(orderId);
+
+        assertThrows(AccessDeniedException.class, () -> service.findById(shippingId));
+        verify(mapper, never()).toResponse(any());
+    }
+
+    @Test
+    void shouldDenyAccessToShippingOfAnotherUsersOrder() {
+        doThrow(new AccessDeniedException("Access denied to this resource"))
+                .when(resourceOwnershipService).assertOrderOwnerOrAdmin(orderId);
+
+        assertThrows(AccessDeniedException.class, () -> service.findByOrderId(orderId));
+        verify(shippingRepository, never()).findByOrderId(any());
     }
 
     @Test
@@ -271,6 +299,7 @@ class ShippingServiceTest {
         when(shippingRepository.findById(shippingId)).thenReturn(Optional.empty());
 
         assertThrows(ShippingNotFoundException.class, () -> service.findById(shippingId));
+        verify(resourceOwnershipService, never()).assertOrderOwnerOrAdmin(any());
     }
 
     @Test

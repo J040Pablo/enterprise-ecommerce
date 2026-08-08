@@ -1,6 +1,7 @@
 package com.joaopablo.ecommerce.payment.service;
 
 import com.joaopablo.ecommerce.inventory.service.InventoryService;
+import com.joaopablo.ecommerce.common.security.ResourceOwnershipService;
 import com.joaopablo.ecommerce.order.entity.Order;
 import com.joaopablo.ecommerce.order.entity.OrderStatus;
 import com.joaopablo.ecommerce.order.exception.OrderNotFoundException;
@@ -33,6 +34,7 @@ public class PaymentService {
     private final InventoryService inventoryService;
     private final ShippingService shippingService;
     private final PaymentEventPublisher paymentEventPublisher;
+    private final ResourceOwnershipService resourceOwnershipService;
 
     @Transactional
     public PaymentResponse createPayment(CreatePaymentRequest request) {
@@ -61,11 +63,14 @@ public class PaymentService {
 
     @Transactional(readOnly = true)
     public PaymentResponse findById(UUID id) {
-        return mapper.toResponse(findPaymentById(id));
+        Payment payment = findPaymentById(id);
+        resourceOwnershipService.assertOrderOwnerOrAdmin(payment.getOrderId());
+        return mapper.toResponse(payment);
     }
 
     @Transactional(readOnly = true)
     public Optional<PaymentResponse> findByOrderId(UUID orderId) {
+        resourceOwnershipService.assertOrderOwnerOrAdmin(orderId);
         return paymentRepository.findByOrderId(orderId).map(mapper::toResponse);
     }
 

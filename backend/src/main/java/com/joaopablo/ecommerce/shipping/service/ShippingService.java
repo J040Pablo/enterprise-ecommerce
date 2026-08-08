@@ -1,5 +1,6 @@
 package com.joaopablo.ecommerce.shipping.service;
 
+import com.joaopablo.ecommerce.common.security.ResourceOwnershipService;
 import com.joaopablo.ecommerce.order.entity.Order;
 import com.joaopablo.ecommerce.order.entity.OrderStatus;
 import com.joaopablo.ecommerce.order.exception.OrderNotFoundException;
@@ -50,6 +51,7 @@ public class ShippingService {
     private final ShippingMapper mapper;
     private final OrderRepository orderRepository;
     private final PaymentRepository paymentRepository;
+    private final ResourceOwnershipService resourceOwnershipService;
 
     @Transactional
     public ShippingResponse createShipping(CreateShippingRequest request) {
@@ -83,11 +85,14 @@ public class ShippingService {
 
     @Transactional(readOnly = true)
     public ShippingResponse findById(UUID id) {
-        return mapper.toResponse(findShippingById(id));
+        Shipping shipping = findShippingById(id);
+        resourceOwnershipService.assertOrderOwnerOrAdmin(shipping.getOrderId());
+        return mapper.toResponse(shipping);
     }
 
     @Transactional(readOnly = true)
     public Optional<ShippingResponse> findByOrderId(UUID orderId) {
+        resourceOwnershipService.assertOrderOwnerOrAdmin(orderId);
         return shippingRepository.findByOrderId(orderId)
                 .map(mapper::toResponse);
     }

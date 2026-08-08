@@ -28,6 +28,8 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import org.springframework.security.access.AccessDeniedException;
+
 @SpringBootTest
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
@@ -196,5 +198,41 @@ class ShippingControllerTest {
                 .andExpect(status().isForbidden());
 
         verify(service, never()).findAll();
+    }
+
+    @Test
+    @WithMockUser(roles = "CUSTOMER")
+    void customerShouldGetForbiddenWhenAccessingAnotherUsersShippingById() throws Exception {
+        UUID shippingId = UUID.randomUUID();
+        when(service.findById(shippingId)).thenThrow(new AccessDeniedException("Access denied to this resource"));
+
+        mockMvc.perform(get("/api/v1/shippings/{id}", shippingId))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(roles = "CUSTOMER")
+    void customerShouldGetForbiddenWhenAccessingShippingOfAnotherUsersOrder() throws Exception {
+        UUID orderId = UUID.randomUUID();
+        when(service.findByOrderId(orderId)).thenThrow(new AccessDeniedException("Access denied to this resource"));
+
+        mockMvc.perform(get("/api/v1/shippings/order/{orderId}", orderId))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void adminShouldFindShippingById() throws Exception {
+        UUID shippingId = UUID.randomUUID();
+        ShippingResponse response = ShippingResponse.builder()
+                .id(shippingId)
+                .status(ShippingStatus.PROCESSING)
+                .build();
+
+        when(service.findById(shippingId)).thenReturn(response);
+
+        mockMvc.perform(get("/api/v1/shippings/{id}", shippingId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(shippingId.toString()));
     }
 }
