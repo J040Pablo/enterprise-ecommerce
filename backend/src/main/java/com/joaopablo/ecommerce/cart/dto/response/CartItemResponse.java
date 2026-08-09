@@ -18,6 +18,9 @@ public record CartItemResponse(
         @Schema(description = "Name of the product in the cart", example = "Product 1")
         String productName,
 
+        @Schema(description = "Product image URL (from Product)", example = "https://cdn.example.com/laptop.jpg")
+        String imageUrl,
+
         @Schema(description = "Unit price of the product", example = "49.99")
         BigDecimal productPrice,
 

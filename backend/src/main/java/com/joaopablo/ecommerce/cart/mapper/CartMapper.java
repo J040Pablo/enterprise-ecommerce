@@ -16,6 +16,7 @@ public interface CartMapper {
 
     @Mapping(target = "productId", source = "product.id")
     @Mapping(target = "productName", source = "product.name")
+    @Mapping(target = "imageUrl", source = "product.imageUrl")
     @Mapping(target = "productPrice", source = "product.price")
     @Mapping(target = "subtotal", source = "subtotal")
     CartItemResponse toItemResponse(CartItem item);

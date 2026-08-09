@@ -1,45 +1,79 @@
 <div class="cart-container">
-  <header class="cart-header">
-    <h1>
-      <mat-icon>shopping_cart</mat-icon>
-      Meu Carrinho
-    </h1>
-    @if (cartService.cartCount() > 0) {
-      <span class="item-count">{{ cartService.cartCount() }} {{ cartService.cartCount() === 1 ? 'item' : 'itens' }}</span>
-    }
-  </header>
 
-  <!-- Empty State -->
   @if (cartService.items().length === 0) {
+
+    <!-- Empty Cart -->
     <div class="empty-cart">
       <mat-icon class="empty-icon">shopping_cart_checkout</mat-icon>
+
       <h2>Seu carrinho está vazio</h2>
+
       <p>Explore nosso catálogo e adicione produtos.</p>
-      <a mat-flat-button color="primary" routerLink="/products" id="btn-browse-products">
+
+      <a
+        mat-flat-button
+        color="primary"
+        routerLink="/products"
+        id="btn-browse-products"
+      >
         <mat-icon>storefront</mat-icon>
         Ver Produtos
       </a>
     </div>
-  }
 
-  <!-- Cart with items -->
-  @if (cartService.items().length > 0) {
+  } @else {
+
+    <!-- Cart Header -->
+    <div class="cart-header">
+      <h1>
+        <mat-icon>shopping_cart</mat-icon>
+        Carrinho
+      </h1>
+
+      <span class="item-count">
+        {{ cartService.items().length }} itens
+      </span>
+    </div>
+
+    <!-- Cart Layout -->
     <div class="cart-layout">
-      <!-- Items List -->
-      <div class="items-list">
+
+      <!-- Cart Items -->
+      <div class="cart-items">
+
         @for (item of cartService.items(); track item.productId) {
+
           <mat-card class="cart-item-card">
+
+            <!-- Product Image -->
             <div class="item-image">
-              <mat-icon>inventory_2</mat-icon>
+              @if (item.imageUrl) {
+                <img
+                  [src]="item.imageUrl"
+                  [alt]="item.productName"
+                  class="cart-item-image"
+                />
+              } @else {
+                <mat-icon>inventory_2</mat-icon>
+              }
             </div>
 
+            <!-- Product Information -->
             <div class="item-info">
-              <h3 class="item-name">{{ item.productName }}</h3>
-              <span class="item-unit-price">{{ formatPrice(item.price) }} / un.</span>
+              <h3 class="item-name">
+                {{ item.productName }}
+              </h3>
+
+              <span class="item-unit-price">
+                {{ formatPrice(item.price) }} / un.
+              </span>
             </div>
 
+            <!-- Item Controls -->
             <div class="item-controls">
+
               <div class="qty-controls">
+
                 <button
                   mat-icon-button
                   id="btn-decrement-{{ item.productId }}"
@@ -49,7 +83,14 @@
                 >
                   <mat-icon>remove</mat-icon>
                 </button>
-                <span class="qty-display" id="qty-{{ item.productId }}">{{ item.quantity }}</span>
+
+                <span
+                  class="qty-display"
+                  id="qty-{{ item.productId }}"
+                >
+                  {{ item.quantity }}
+                </span>
+
                 <button
                   mat-icon-button
                   id="btn-increment-{{ item.productId }}"
@@ -58,8 +99,13 @@
                 >
                   <mat-icon>add</mat-icon>
                 </button>
+
               </div>
-              <span class="item-subtotal">{{ formatPrice(item.price * item.quantity) }}</span>
+
+              <span class="item-subtotal">
+                {{ formatPrice(item.price * item.quantity) }}
+              </span>
+
               <button
                 mat-icon-button
                 color="warn"
@@ -69,43 +115,77 @@
               >
                 <mat-icon>delete_outline</mat-icon>
               </button>
+
             </div>
+
           </mat-card>
+
         }
 
+        <!-- Clear Cart -->
         <div class="clear-cart-row">
-          <button mat-button color="warn" id="btn-clear-cart" (click)="clearCart()">
+          <button
+            mat-button
+            color="warn"
+            id="btn-clear-cart"
+            (click)="clearCart()"
+          >
             <mat-icon>remove_shopping_cart</mat-icon>
             Limpar carrinho
           </button>
         </div>
+
       </div>
 
       <!-- Order Summary -->
       <mat-card class="summary-card">
+
         <mat-card-header>
-          <mat-card-title>Resumo do Pedido</mat-card-title>
+          <mat-card-title>
+            Resumo do Pedido
+          </mat-card-title>
         </mat-card-header>
 
         <mat-card-content>
+
           <div class="summary-rows">
+
             @for (item of cartService.items(); track item.productId) {
+
               <div class="summary-row">
-                <span class="summary-item-name">{{ item.productName }} × {{ item.quantity }}</span>
-                <span>{{ formatPrice(item.price * item.quantity) }}</span>
+
+                <span class="summary-item-name">
+                  {{ item.productName }} × {{ item.quantity }}
+                </span>
+
+                <span>
+                  {{ formatPrice(item.price * item.quantity) }}
+                </span>
+
               </div>
+
             }
+
           </div>
 
-          <mat-divider class="summary-divider" />
+          <mat-divider class="summary-divider"></mat-divider>
 
           <div class="total-row">
-            <span class="total-label">Total</span>
-            <span class="total-value">{{ formatPrice(cartService.cartTotal()) }}</span>
+
+            <span class="total-label">
+              Total
+            </span>
+
+            <span class="total-value">
+              {{ formatPrice(cartService.cartTotal()) }}
+            </span>
+
           </div>
+
         </mat-card-content>
 
         <mat-card-actions class="summary-actions">
+
           <button
             mat-flat-button
             color="primary"
@@ -116,12 +196,23 @@
             <mat-icon>payment</mat-icon>
             Finalizar Pedido
           </button>
-          <a mat-stroked-button routerLink="/products" class="continue-btn">
+
+          <a
+            mat-stroked-button
+            routerLink="/products"
+            class="continue-btn"
+          >
             <mat-icon>arrow_back</mat-icon>
             Continuar comprando
           </a>
+
         </mat-card-actions>
+
       </mat-card>
+
     </div>
+
   }
+
 </div>
+```

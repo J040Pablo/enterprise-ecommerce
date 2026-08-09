@@ -50,9 +50,12 @@ public class CorsConfig {
     }
 
     private List<String> parseOrigins(String origins) {
-        if (origins == null || origins.trim().isEmpty()) {
+        if (origins == null || origins.isBlank()) {
             return List.of("http://localhost:4200");
         }
-        return Arrays.asList(origins.split(","));
+        return Arrays.stream(origins.split(","))
+                .map(String::trim)
+                .filter(origin -> !origin.isEmpty())
+                .toList();
     }
 }

@@ -62,7 +62,8 @@ export class CartService {
           productId: product.id,
           productName: product.name,
           price: product.price,
-          quantity
+          quantity,
+          imageUrl: product.imageUrl ?? null
         }];
       }
 
@@ -155,7 +156,16 @@ export class CartService {
     try {
       const raw = localStorage.getItem(CART_STORAGE_KEY);
       if (raw) {
-        return JSON.parse(raw) as Cart;
+        const parsed = JSON.parse(raw) as Cart;
+        return {
+          items: (parsed.items ?? []).map(item => ({
+            productId: item.productId,
+            productName: item.productName,
+            price: item.price,
+            quantity: item.quantity,
+            imageUrl: item.imageUrl ?? null
+          }))
+        };
       }
     } catch {
       // JSON inválido ou localStorage bloqueado
@@ -169,7 +179,8 @@ export class CartService {
         productId: item.productId,
         productName: item.productName,
         price: item.productPrice,
-        quantity: item.quantity
+        quantity: item.quantity,
+        imageUrl: item.imageUrl ?? null
       }))
     };
   }
