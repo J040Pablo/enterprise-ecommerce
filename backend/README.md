@@ -90,7 +90,7 @@ curl -s http://localhost:8080/api/v1/products
 
 ---
 
-##   Destaques
+## Destaques
 
 - **Java 21** + **Spring Boot 3.5** com arquitetura modular
 - **Spring Security** com JWT e Google OAuth2
@@ -104,23 +104,23 @@ curl -s http://localhost:8080/api/v1/products
 
 ---
 
-##   Sumário
+## Sumário
 
-- [Destaques](#-destaques)
+- [Destaques](#destaques)
 - [Stack](#stack)
-- [Arquitetura](#-arquitetura)
-- [Módulos](#-módulos)
-- [Estrutura](#-estrutura)
-- [Fluxo de Dados](#-fluxo-de-dados)
-- [Como Executar](#-como-executar)
-- [API Documentation](#-api-documentation)
-- [Configuração](#-configuração)
-- [Docker](#-docker)
-- [Screenshots](#-screenshots)
-- [Deploy AWS](#-deploy-aws)
-- [Testes](#-testes)
-- [Links](#-links)
-- [Autor](#-autor)
+- [Arquitetura](#arquitetura)
+- [Módulos](#módulos)
+- [Estrutura](#estrutura)
+- [Fluxo de Dados](#fluxo-de-dados)
+- [Como Executar](#como-executar)
+- [API Documentation](#api-documentation)
+- [Configuração](#configuração)
+- [Docker](#docker)
+- [Screenshots](#screenshots)
+- [Deploy AWS](#deploy-aws)
+- [Testes](#testes)
+- [Links](#links)
+- [Autor](#autor)
 
 ---
 
@@ -454,7 +454,7 @@ docker compose up -d
 | Spring Boot API | Local Build | 8080 |
 | PostgreSQL | `postgres:17` | 5432 |
 | PgAdmin | `dpage/pgadmin4` | 5050 |
-| Redis | `redis:7-alpine` | 6379 |
+| Redis | `redis:7` | 6379 |
 | RabbitMQ | `rabbitmq:3.13-management` | 5672 / 15672 |
 
 ### Parar a infraestrutura
@@ -523,7 +523,7 @@ A API é executada em uma instância **Amazon EC2**, enquanto o banco de dados u
 
 ### Amazon EC2
 
-![Amazon EC2](../docs/images/rds.png)
+![Amazon EC2](../docs/images/ec2.png)
 
 Instância Linux responsável pela execução da aplicação Spring Boot containerizada com Docker.
 
@@ -531,17 +531,17 @@ Instância Linux responsável pela execução da aplicação Spring Boot contain
 
 ### Amazon RDS PostgreSQL
 
-![Amazon RDS](../docs/images/ec2Console.png)
+![Amazon RDS](../docs/images/rds.png)
 
 Banco de dados PostgreSQL gerenciado pela AWS, oferecendo persistência, backups automáticos e snapshots.
 
 ---
 
-### AWS Console
+### Sessão na EC2 (containers)
 
-![AWS Console](../docs/images/dockerPs-a.png)
+![Sessão EC2 com Docker](../docs/images/ec2Console.png)
 
-Visão geral da infraestrutura provisionada no ambiente AWS.
+Sessão na instância EC2 listando os containers em execução (API, RabbitMQ e Redis).
 
 ---
 
@@ -609,6 +609,7 @@ O relatório JaCoCo permite identificar áreas críticas da aplicação e acompa
 ## 🔗 Links
 
 - **GitHub:** [J040Pablo/enterprise-ecommerce](https://github.com/J040Pablo/enterprise-ecommerce)
+- **Frontend:** [frontend/README.md](../frontend/README.md)
 - **Swagger Produção:** [http://13.59.197.68:8080/swagger-ui/index.html](http://13.59.197.68:8080/swagger-ui/index.html)
 - **Swagger Local:** `http://localhost:8080/swagger-ui/index.html`
 - **RabbitMQ Management:** `http://localhost:15672`
