@@ -1,5 +1,6 @@
 package com.joaopablo.ecommerce.auth.service;
 
+import com.joaopablo.ecommerce.common.util.ActiveProfiles;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -13,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.Objects;
 import java.util.UUID;
@@ -32,12 +32,12 @@ public class JwtService {
             @Value("${jwt.expiration-ms:86400000}") long expirationMs,
             Environment environment
     ) {
-        boolean production = isProductionProfile(environment);
+        boolean strictSecrets = ActiveProfiles.requiresStrictSecrets(environment);
 
         if (secret == null || secret.isBlank()) {
-            if (production) {
+            if (strictSecrets) {
                 throw new IllegalStateException(
-                        "JWT_SECRET environment variable must be set in production. "
+                        "JWT_SECRET environment variable must be set outside the dev profile. "
                                 + "Refusing to start with an ephemeral signing key."
                 );
             }
@@ -47,11 +47,6 @@ public class JwtService {
             this.signingKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         }
         this.expirationMs = expirationMs;
-    }
-
-    private static boolean isProductionProfile(Environment environment) {
-        return Arrays.stream(environment.getActiveProfiles())
-                .anyMatch(profile -> "prod".equalsIgnoreCase(profile) || "production".equalsIgnoreCase(profile));
     }
 
     /**

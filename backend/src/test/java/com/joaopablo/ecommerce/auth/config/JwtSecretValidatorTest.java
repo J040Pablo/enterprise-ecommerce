@@ -11,22 +11,12 @@ import static org.mockito.Mockito.when;
 class JwtSecretValidatorTest {
 
     @Test
-    void productionWithoutSecretShouldFail() {
-        Environment environment = mock(Environment.class);
-        when(environment.getActiveProfiles()).thenReturn(new String[]{"prod"});
-
-        JwtSecretValidator validator = new JwtSecretValidator(environment);
-        ReflectionTestUtils.setField(validator, "jwtSecret", "");
-
-        IllegalStateException ex = assertThrows(
-                IllegalStateException.class,
-                validator::validateJwtSecret
-        );
-        assertTrue(ex.getMessage().contains("JWT_SECRET"));
+    void prodWithoutSecretShouldFail() {
+        assertFailsWith("prod", "");
     }
 
     @Test
-    void productionWithShortSecretShouldFail() {
+    void productionAliasWithShortSecretShouldFail() {
         Environment environment = mock(Environment.class);
         when(environment.getActiveProfiles()).thenReturn(new String[]{"production"});
 
@@ -41,7 +31,17 @@ class JwtSecretValidatorTest {
     }
 
     @Test
-    void productionWithValidSecretShouldPass() {
+    void dockerWithoutSecretShouldFail() {
+        assertFailsWith("docker", "");
+    }
+
+    @Test
+    void testProfileWithoutSecretShouldFail() {
+        assertFailsWith("test", "   ");
+    }
+
+    @Test
+    void prodWithValidSecretShouldPass() {
         Environment environment = mock(Environment.class);
         when(environment.getActiveProfiles()).thenReturn(new String[]{"prod"});
 
@@ -56,13 +56,27 @@ class JwtSecretValidatorTest {
     }
 
     @Test
-    void nonProductionWithoutSecretShouldPass() {
+    void devWithoutSecretShouldPass() {
         Environment environment = mock(Environment.class);
-        when(environment.getActiveProfiles()).thenReturn(new String[]{"test"});
+        when(environment.getActiveProfiles()).thenReturn(new String[]{"dev"});
 
         JwtSecretValidator validator = new JwtSecretValidator(environment);
         ReflectionTestUtils.setField(validator, "jwtSecret", "");
 
         assertDoesNotThrow(validator::validateJwtSecret);
+    }
+
+    private static void assertFailsWith(String profile, String secret) {
+        Environment environment = mock(Environment.class);
+        when(environment.getActiveProfiles()).thenReturn(new String[]{profile});
+
+        JwtSecretValidator validator = new JwtSecretValidator(environment);
+        ReflectionTestUtils.setField(validator, "jwtSecret", secret);
+
+        IllegalStateException ex = assertThrows(
+                IllegalStateException.class,
+                validator::validateJwtSecret
+        );
+        assertTrue(ex.getMessage().contains("JWT_SECRET"));
     }
 }

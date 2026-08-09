@@ -4,6 +4,7 @@ import com.joaopablo.ecommerce.auth.config.SecurityConfig;
 import com.joaopablo.ecommerce.auth.security.OAuth2SuccessHandler;
 import com.joaopablo.ecommerce.auth.service.AuthService;
 import com.joaopablo.ecommerce.auth.service.JwtService;
+import com.joaopablo.ecommerce.auth.service.OAuthLoginCodeService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -33,6 +34,9 @@ class AuthControllerEndpointsTest {
 
     @MockitoBean
     private AuthService authService;
+
+    @MockitoBean
+    private OAuthLoginCodeService oAuthLoginCodeService;
 
     @MockitoBean
     private JwtService jwtService;

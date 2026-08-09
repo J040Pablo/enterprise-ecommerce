@@ -1,5 +1,6 @@
 package com.joaopablo.ecommerce.auth.config;
 
+import com.joaopablo.ecommerce.common.util.ActiveProfiles;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,26 +18,21 @@ public class JwtSecretValidator {
 
     @PostConstruct
     public void validateJwtSecret() {
-        String[] activeProfiles = environment.getActiveProfiles();
-        
-        // In production profile, JWT secret must be set
-        for (String profile : activeProfiles) {
-            if ("prod".equalsIgnoreCase(profile) || "production".equalsIgnoreCase(profile)) {
-                if (jwtSecret == null || jwtSecret.trim().isEmpty()) {
-                    throw new IllegalStateException(
-                        "JWT_SECRET environment variable must be set in production. " +
-                        "Please provide a secure JWT secret before deploying to production."
-                    );
-                }
-                // Minimum length validation for security
-                if (jwtSecret.length() < 32) {
-                    throw new IllegalStateException(
-                        "JWT_SECRET must be at least 32 characters long for production security. " +
-                        "Current length: " + jwtSecret.length()
-                    );
-                }
-                break;
-            }
+        if (!ActiveProfiles.requiresStrictSecrets(environment)) {
+            return;
+        }
+
+        if (jwtSecret == null || jwtSecret.trim().isEmpty()) {
+            throw new IllegalStateException(
+                    "JWT_SECRET environment variable must be set outside the dev profile. "
+                            + "Please provide a secure JWT secret before starting the application."
+            );
+        }
+        if (jwtSecret.length() < 32) {
+            throw new IllegalStateException(
+                    "JWT_SECRET must be at least 32 characters long. "
+                            + "Current length: " + jwtSecret.length()
+            );
         }
     }
 }

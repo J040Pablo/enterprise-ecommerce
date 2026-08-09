@@ -82,52 +82,17 @@ export class AuthService {
   }
 
   /**
-   * Chamado pelo GoogleCallbackComponent após redirect OAuth2.
-   * @param userId UUID real do usuário devolvido pelo OAuth2SuccessHandler no redirect.
-   *               Garante que user.id seja um UUID válido e não o e-mail do JWT sub.
+   * Exchanges the one-time OAuth login code for tokens (POST /auth/oauth/exchange).
+   * Tokens never travel in the redirect URL.
    */
-  handleOAuthCallback(token: string, refreshToken: string, userId?: string): void {
-    const user = this.decodeUserFromToken(token);
-    // Sobrescreve o id apenas se o UUID real foi fornecido pelo backend no redirect
-    if (userId) {
-      user.id = userId;
-    }
-    this.saveAuthData(token, refreshToken, user);
-  }
-
-  /**
-   * Extrai dados básicos do JWT para preencher o objeto User.
-   * ATENÇÃO: o claim `sub` contém o e-mail, NÃO o UUID do usuário.
-   * O UUID vem do claim `userId` (emitido por JwtService) e/ou do query param
-   * `userId` no redirect OAuth (preferido em handleOAuthCallback).
-   */
-  private decodeUserFromToken(token: string): User {
-    try {
-      const payloadBase64 = token.split('.')[1];
-      const decodedJson = atob(payloadBase64.replace(/-/g, '+').replace(/_/g, '/'));
-      const payload = JSON.parse(decodedJson);
-
-      const roles = Array.isArray(payload.roles)
-        ? payload.roles
-        : (payload.roles ? [payload.roles] : ['CUSTOMER']);
-
-      // payload.sub = e-mail (não UUID) — NÃO usar como id
-      return {
-        id: payload.userId || '',
-        email: payload.sub || payload.email || '',
-        firstName: payload.firstName || payload.given_name || payload.name || 'Usuário',
-        lastName: payload.lastName || payload.family_name || '',
-        roles: roles
-      };
-    } catch {
-      return {
-        id: '',
-        email: '',
-        firstName: 'Usuário',
-        lastName: '',
-        roles: ['CUSTOMER']
-      };
-    }
+  exchangeOAuthCode(code: string): Observable<LoginResponse> {
+    return this.http
+      .post<LoginResponse>(`${this.API_URL}/oauth/exchange`, { code })
+      .pipe(
+        tap((response) => {
+          this.saveAuthData(response.token, response.refreshToken, response.user);
+        })
+      );
   }
 
   getToken(): string | null {

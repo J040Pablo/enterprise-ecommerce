@@ -1,0 +1,6 @@
+# Enabled only when SPRING_PROFILE=dev (see SecurityConfig + OpenApiConfig).
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true

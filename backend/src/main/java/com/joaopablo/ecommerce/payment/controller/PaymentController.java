@@ -46,6 +46,9 @@ public class PaymentController {
             @ApiResponse(responseCode = "401", description = "Unauthorized — JWT token missing or invalid",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ApiErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden — order belongs to another user",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ApiErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "Order not found",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ApiErrorResponse.class)))

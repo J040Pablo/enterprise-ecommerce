@@ -67,6 +67,7 @@ class PaymentServiceTest {
     private UUID orderId;
     private UUID paymentId;
     private UUID productId;
+    private UUID userId;
     private Order order;
     private Payment payment;
 
@@ -75,6 +76,7 @@ class PaymentServiceTest {
         orderId = UUID.randomUUID();
         paymentId = UUID.randomUUID();
         productId = UUID.randomUUID();
+        userId = UUID.randomUUID();
 
         OrderItem item = new OrderItem();
         item.setProductId(productId);
@@ -85,6 +87,7 @@ class PaymentServiceTest {
 
         order = new Order();
         order.setId(orderId);
+        order.setUserId(userId);
         order.setStatus(OrderStatus.PENDING);
         order.setTotalAmount(BigDecimal.valueOf(100));
         order.addItem(item);
@@ -103,6 +106,7 @@ class PaymentServiceTest {
         CreatePaymentRequest request = new CreatePaymentRequest(orderId, "CREDIT_CARD");
 
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        doNothing().when(resourceOwnershipService).assertOwnerOrAdmin(userId);
         when(paymentRepository.findByOrderId(orderId)).thenReturn(Optional.empty());
         when(paymentRepository.save(any(Payment.class))).thenAnswer(invocation -> {
             Payment saved = invocation.getArgument(0);
@@ -129,6 +133,19 @@ class PaymentServiceTest {
         assertEquals(orderId, captor.getValue().getOrderId());
         assertEquals(PaymentStatus.PENDING, captor.getValue().getStatus());
         assertEquals("CREDIT_CARD", captor.getValue().getPaymentMethod());
+        verify(resourceOwnershipService).assertOwnerOrAdmin(userId);
+    }
+
+    @Test
+    void shouldDenyCreatePaymentForAnotherUsersOrder() {
+        CreatePaymentRequest request = new CreatePaymentRequest(orderId, "PIX");
+
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        doThrow(new AccessDeniedException("Access denied to this resource"))
+                .when(resourceOwnershipService).assertOwnerOrAdmin(userId);
+
+        assertThrows(AccessDeniedException.class, () -> service.createPayment(request));
+        verify(paymentRepository, never()).save(any());
     }
 
     @Test
@@ -156,12 +173,14 @@ class PaymentServiceTest {
 
         assertThrows(OrderNotFoundException.class, () -> service.createPayment(request));
         verify(paymentRepository, never()).save(any());
+        verify(resourceOwnershipService, never()).assertOwnerOrAdmin(any());
     }
 
     @Test
     void shouldThrowWhenPaymentAlreadyExists() {
         CreatePaymentRequest request = new CreatePaymentRequest(orderId, "PIX");
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        doNothing().when(resourceOwnershipService).assertOwnerOrAdmin(userId);
         when(paymentRepository.findByOrderId(orderId)).thenReturn(Optional.of(payment));
 
         assertThrows(PaymentAlreadyExistsException.class, () -> service.createPayment(request));

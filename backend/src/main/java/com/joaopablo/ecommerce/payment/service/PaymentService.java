@@ -39,6 +39,7 @@ public class PaymentService {
     @Transactional
     public PaymentResponse createPayment(CreatePaymentRequest request) {
         Order order = findOrderById(request.getOrderId());
+        resourceOwnershipService.assertOwnerOrAdmin(order.getUserId());
         return createPayment(order, request.getPaymentMethod());
     }
 

@@ -1,0 +1,107 @@
+#
+# PRODUCTION stack
+# Usage (from backend/):
+#   export JWT_SECRET=... DB_PASSWORD=... RABBITMQ_PASSWORD=... \
+#          CORS_ALLOWED_ORIGINS=https://your.domain \
+#          OAUTH2_REDIRECT_URI=https://your.domain/auth/callback \
+#          ADMIN_EMAIL=... ADMIN_PASSWORD=...
+#   docker compose -f docker-compose.prod.yml up -d --build
+#
+# - Infra ports (5432/6379/5672/15672/5050) are NOT published
+# - No PgAdmin
+# - SPRING_PROFILE=prod (JWT_SECRET required, Swagger denied)
+# - Frontend served by nginx on :80 with /api reverse-proxy to backend
+#
+
+services:
+
+  postgres:
+    image: postgres:17
+    container_name: ecommerce-postgres
+    environment:
+      POSTGRES_DB: ${DB_NAME:-ecommerce}
+      POSTGRES_USER: ${DB_USERNAME:?DB_USERNAME is required}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - ecommerce
+    restart: unless-stopped
+
+  redis:
+    image: redis:7
+    container_name: ecommerce-redis
+    volumes:
+      - redis_data:/data
+    networks:
+      - ecommerce
+    restart: unless-stopped
+
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: ecommerce-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME:?RABBITMQ_USERNAME is required}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:?RABBITMQ_PASSWORD is required}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - ecommerce
+    restart: unless-stopped
+
+  backend:
+    build: .
+    image: ecommerce-backend:latest
+    depends_on:
+      - postgres
+      - redis
+      - rabbitmq
+    environment:
+      SPRING_PROFILE: prod
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-ecommerce}
+      DB_USERNAME: ${DB_USERNAME:?DB_USERNAME is required}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME:?RABBITMQ_USERNAME is required}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:?RABBITMQ_PASSWORD is required}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      OAUTH2_REDIRECT_URI: ${OAUTH2_REDIRECT_URI:?OAUTH2_REDIRECT_URI is required}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:?CORS_ALLOWED_ORIGINS is required}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+    networks:
+      - ecommerce
+    restart: unless-stopped
+    # Backend is reached via the frontend nginx proxy (same origin).
+    # Uncomment only if you need a direct API bind behind a private load balancer:
+    # ports:
+    #   - "8080:8080"
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    image: ecommerce-frontend:latest
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+    networks:
+      - ecommerce
+    restart: unless-stopped
+
+networks:
+  ecommerce:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  rabbitmq_data:
+  redis_data:

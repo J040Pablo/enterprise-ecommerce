@@ -19,22 +19,27 @@ export class GoogleCallbackComponent implements OnInit {
   private cartService = inject(CartService);
 
   ngOnInit(): void {
-    const token = this.route.snapshot.queryParamMap.get('token');
-    const refreshToken = this.route.snapshot.queryParamMap.get('refreshToken');
-    // userId adicionado ao redirect pelo OAuth2SuccessHandler para garantir que
-    // user.id seja o UUID real do banco, não o e-mail lido do JWT sub
-    const userId = this.route.snapshot.queryParamMap.get('userId') ?? undefined;
+    const code = this.route.snapshot.queryParamMap.get('code');
 
-    if (token && refreshToken) {
-      this.authService.handleOAuthCallback(token, refreshToken, userId);
-      this.cartService.loadCart().subscribe({
-        next: () => this.router.navigate(['/']),
-        error: () => this.router.navigate(['/'])
-      });
-    } else {
+    if (!code) {
       this.router.navigate(['/auth/login'], {
         queryParams: { error: 'google_auth_failed' }
       });
+      return;
     }
+
+    this.authService.exchangeOAuthCode(code).subscribe({
+      next: () => {
+        this.cartService.loadCart().subscribe({
+          next: () => this.router.navigate(['/']),
+          error: () => this.router.navigate(['/'])
+        });
+      },
+      error: () => {
+        this.router.navigate(['/auth/login'], {
+          queryParams: { error: 'google_auth_failed' }
+        });
+      }
+    });
   }
 }

@@ -61,3 +61,13 @@ app:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:4200}
   oauth2:
     redirect-uri: ${OAUTH2_REDIRECT_URI:http://localhost:4200/auth/callback}
+    login-code-ttl-seconds: ${OAUTH2_LOGIN_CODE_TTL_SECONDS:90}
+  admin:
+    email: ${ADMIN_EMAIL:}
+    password: ${ADMIN_PASSWORD:}
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false

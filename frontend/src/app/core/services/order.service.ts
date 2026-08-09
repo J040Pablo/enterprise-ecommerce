@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap, catchError, throwError } from 'rxjs';
+import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { CreateOrderRequest, OrderResponse, OrderStatus } from '../models/order.model';
 
@@ -14,18 +14,7 @@ export class OrderService {
    * Retorna 201 Created com OrderResponse.
    */
   createOrder(request: CreateOrderRequest): Observable<OrderResponse> {
-    console.info('[ORDER-DEBUG] OrderService.createOrder() — URL:', this.API_URL);
-    console.info('[ORDER-DEBUG] OrderService.createOrder() — body:', JSON.stringify(request));
-    return this.http.post<OrderResponse>(this.API_URL, request).pipe(
-      tap((res) => console.info('[ORDER-DEBUG] OrderService.createOrder() — 201 OK, orderId:', res.id)),
-      catchError((err) => {
-        console.error(
-          '[ORDER-DEBUG] OrderService.createOrder() — HTTP error:',
-          err.status, err.error
-        );
-        return throwError(() => err);
-      })
-    );
+    return this.http.post<OrderResponse>(this.API_URL, request);
   }
 
   /**

@@ -55,11 +55,9 @@ export class CheckoutComponent implements OnInit {
       return;
     }
 
-    // [DEBUG] Valida que user.id é um UUID real antes de enviar ao backend
-    // Se não for UUID válido (e.g.: e-mail salvo de sessão OAuth antiga), bloqueia
+    // Bloqueia sessão antiga onde user.id não é UUID (ex.: e-mail salvo após OAuth)
     const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     if (!UUID_REGEX.test(user.id)) {
-      console.error('[ORDER-DEBUG] user.id inválido (não é UUID):', user.id);
       this.error.set(
         'Sessão inválida: faça logout e login novamente para continuar.'
       );
@@ -76,15 +74,11 @@ export class CheckoutComponent implements OnInit {
       items,
     };
 
-    // [DEBUG] Log do payload exato enviado ao backend — compare com CreateOrderRequest.java
-    console.info('[ORDER-DEBUG] POST /api/v1/orders — payload enviado:', JSON.stringify(payload, null, 2));
-
     this.submitting.set(true);
     this.error.set(null);
 
     this.orderService.createOrder(payload).subscribe({
       next: (order) => {
-        console.info('[ORDER-DEBUG] Pedido criado com sucesso:', order.id);
         this.cartService.clearCart().subscribe({
           next: () => {
             this.router.navigate(['/checkout/confirmation', order.id]);
@@ -96,7 +90,6 @@ export class CheckoutComponent implements OnInit {
         });
       },
       error: (err) => {
-        console.error('[ORDER-DEBUG] Erro na criação do pedido:', err);
         const msg =
           err?.error?.message ??
           'Não foi possível processar o pedido. Tente novamente.';

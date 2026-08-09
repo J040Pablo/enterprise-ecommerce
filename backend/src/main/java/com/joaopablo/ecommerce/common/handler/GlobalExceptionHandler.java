@@ -86,9 +86,7 @@ public class GlobalExceptionHandler {
                 ))
                 .collect(Collectors.toList());
 
-        // [DEBUG] Log de campos que falharam no @Valid
-        log.warn("[ORDER-DEBUG] Falha de validação @Valid em [{}]: {}",
-                request.getRequestURI(), errors);
+        log.warn("Validation failed on {}: {}", request.getRequestURI(), errors);
 
         ApiErrorResponse body = ApiErrorResponse.builder()
                 .timestamp(Instant.now())
@@ -108,11 +106,9 @@ public class GlobalExceptionHandler {
             HttpMessageNotReadableException ex,
             HttpServletRequest request) {
 
-        // [DEBUG] Log da causa real — indispensável para rastrear o campo rejeitado pelo Jackson
-        log.error("[ORDER-DEBUG] Falha na desserialização do corpo da requisição em [{}]: {}",
-                request.getRequestURI(), ex.getMessage());
+        log.error("Failed to read request body on {}: {}", request.getRequestURI(), ex.getMessage());
         if (ex.getCause() != null) {
-            log.error("[ORDER-DEBUG] Causa raiz: {}", ex.getCause().getMessage());
+            log.error("Request body parse root cause: {}", ex.getCause().getMessage());
         }
 
         ApiErrorResponse body = ApiErrorResponse.builder()

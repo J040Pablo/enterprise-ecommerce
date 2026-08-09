@@ -3,11 +3,13 @@ package com.joaopablo.ecommerce.auth.controller;
 import com.joaopablo.ecommerce.auth.dto.request.CreateUserRequest;
 import com.joaopablo.ecommerce.auth.dto.request.LoginRequestDTO;
 import com.joaopablo.ecommerce.auth.dto.request.LogoutRequestDTO;
+import com.joaopablo.ecommerce.auth.dto.request.OAuthCodeExchangeRequest;
 import com.joaopablo.ecommerce.auth.dto.request.RefreshTokenRequestDTO;
 import com.joaopablo.ecommerce.auth.dto.response.LoginResponseDTO;
 import com.joaopablo.ecommerce.auth.dto.response.TokenRefreshResponseDTO;
 import com.joaopablo.ecommerce.auth.dto.response.UserResponse;
 import com.joaopablo.ecommerce.auth.service.AuthService;
+import com.joaopablo.ecommerce.auth.service.OAuthLoginCodeService;
 import com.joaopablo.ecommerce.common.exception.ApiErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -39,6 +41,7 @@ import java.io.IOException;
 public class AuthController {
 
     private final AuthService authService;
+    private final OAuthLoginCodeService oAuthLoginCodeService;
 
     @PostMapping("/register")
     @Operation(
@@ -210,6 +213,41 @@ public class AuthController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/oauth/exchange")
+    @Operation(
+            summary = "Exchange OAuth login code for tokens",
+            description = """
+                    Exchanges a one-time opaque code (from the Google OAuth frontend callback)
+                    for access and refresh tokens. The code is single-use and short-lived.
+                    Tokens are never returned via redirect URL.
+                    """
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Tokens issued successfully",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = LoginResponseDTO.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Validation error — code is blank or missing",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ApiErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized — code is invalid, expired, or already used",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ApiErrorResponse.class))
+            )
+    })
+    public ResponseEntity<LoginResponseDTO> exchangeOAuthCode(
+            @Valid @RequestBody OAuthCodeExchangeRequest request
+    ) {
+        return ResponseEntity.ok(oAuthLoginCodeService.exchange(request.getCode()));
+    }
+
     @GetMapping("/google")
     @Operation(
             summary = "Initiate Google OAuth2 Login",
@@ -221,8 +259,9 @@ public class AuthController {
                     2. Server redirects to Google's OAuth2 authorization page (HTTP 302)
                     3. User authenticates with Google
                     4. Google redirects back to the backend callback
-                    5. Backend processes the callback: creates or retrieves the user account
-                    6. JWT access and refresh tokens are generated and returned
+                    5. Backend creates/links the user and issues a one-time login code
+                    6. Browser is redirected to the frontend with `?code=...` only (no tokens)
+                    7. Frontend exchanges the code via POST /api/v1/auth/oauth/exchange
 
                     **Note:** This endpoint performs an HTTP 302 redirect and cannot be tested
                     directly in Swagger UI. Use a browser to initiate the OAuth2 flow.

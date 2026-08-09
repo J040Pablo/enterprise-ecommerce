@@ -68,6 +68,44 @@ class PaymentControllerTest {
 
     @Test
     @WithMockUser(roles = "CUSTOMER")
+    void customerShouldGetForbiddenWhenCreatingPaymentForAnotherUsersOrder() throws Exception {
+        UUID orderId = UUID.randomUUID();
+        CreatePaymentRequest request = new CreatePaymentRequest(orderId, "PIX");
+
+        when(service.createPayment(any(CreatePaymentRequest.class)))
+                .thenThrow(new AccessDeniedException("Access denied to this resource"));
+
+        mockMvc.perform(post("/api/v1/payments")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void adminShouldCreatePayment() throws Exception {
+        UUID orderId = UUID.randomUUID();
+        CreatePaymentRequest request = new CreatePaymentRequest(orderId, "PIX");
+
+        PaymentResponse response = PaymentResponse.builder()
+                .id(UUID.randomUUID())
+                .orderId(orderId)
+                .amount(BigDecimal.valueOf(150.00))
+                .status(PaymentStatus.PENDING)
+                .paymentMethod("PIX")
+                .build();
+
+        when(service.createPayment(any(CreatePaymentRequest.class))).thenReturn(response);
+
+        mockMvc.perform(post("/api/v1/payments")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.status").value("PENDING"));
+    }
+
+    @Test
+    @WithMockUser(roles = "CUSTOMER")
     void shouldFindPaymentById() throws Exception {
         UUID paymentId = UUID.randomUUID();
         PaymentResponse response = PaymentResponse.builder()

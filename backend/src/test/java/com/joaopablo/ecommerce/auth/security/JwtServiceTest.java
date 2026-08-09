@@ -105,8 +105,20 @@ class JwtServiceTest {
     }
 
     @Test
-    void blankSecretInProductionAliasShouldFailFast() {
-        when(environment.getActiveProfiles()).thenReturn(new String[]{"production"});
+    void blankSecretInNonDevShouldFailFast() {
+        when(environment.getActiveProfiles()).thenReturn(new String[]{"docker"});
+
+        IllegalStateException ex = assertThrows(
+                IllegalStateException.class,
+                () -> new JwtService("", EXPIRATION_MS, environment)
+        );
+
+        assertTrue(ex.getMessage().contains("JWT_SECRET"));
+    }
+
+    @Test
+    void blankSecretInTestProfileShouldFailFast() {
+        when(environment.getActiveProfiles()).thenReturn(new String[]{"test"});
 
         assertThrows(
                 IllegalStateException.class,
