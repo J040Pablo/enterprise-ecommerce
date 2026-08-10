@@ -1,5 +1,8 @@
 # Enterprise E-commerce
 
+[![Backend CI](https://github.com/J040Pablo/enterprise-ecommerce/actions/workflows/ci.yml/badge.svg)](https://github.com/J040Pablo/enterprise-ecommerce/actions/workflows/ci.yml)
+[![Frontend CI](https://github.com/J040Pablo/enterprise-ecommerce/actions/workflows/frontend-ci.yml/badge.svg)](https://github.com/J040Pablo/enterprise-ecommerce/actions/workflows/frontend-ci.yml)
+
 Monorepo de e-commerce full-stack: API REST com **Java 21 / Spring Boot** e SPA com **Angular 19**.
 
 ## Documentação
