@@ -353,7 +353,31 @@ npm test
 
 ## Build / CI
 
-O workflow em [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) executa **apenas** o backend (`mvn clean verify`). Não há pipeline de CI para o frontend neste repositório.
+O projeto utiliza GitHub Actions para validação contínua do frontend.
+
+O workflow `.github/workflows/frontend-ci.yml` é executado em alterações no frontend na branch `main` e em Pull Requests.
+
+O pipeline:
+
+- Instala as dependências com `npm ci`
+- Executa o build de produção com `npm run build`
+- Executa os testes unitários com Karma/Jasmine em modo headless
+
+```text
+Git Push / Pull Request
+        ↓
+GitHub Actions
+        ↓
+Node.js 22
+        ↓
+npm ci
+        ↓
+Build Angular
+        ↓
+Testes Karma/Jasmine
+        ↓
+Build aprovado
+```
 
 ## Related Projects
 
